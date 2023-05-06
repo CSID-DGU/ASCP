@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.kie.api.definition.rule.ActivationListener;
+import org.optaplanner.core.api.domain.entity.PlanningEntity;
+import org.optaplanner.core.api.domain.variable.NextElementShadowVariable;
+import org.optaplanner.core.api.domain.variable.PreviousElementShadowVariable;
 
 import java.time.LocalDateTime;
 
@@ -20,5 +23,11 @@ public class Flight {
     private LocalDateTime destTime;
     private Aircraft aircraft;
     private double cost;
+//     Shadow variables
+//
+//    @PreviousElementShadowVariable(sourceVariableName = "pair")
+//    private Flight previousFlight;
+//    @NextElementShadowVariable(sourceVariableName = "pair")
+//    private Flight nextFlight;
 
 }
