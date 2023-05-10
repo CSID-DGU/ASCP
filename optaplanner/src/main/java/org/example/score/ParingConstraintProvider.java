@@ -20,19 +20,12 @@ public class ParingConstraintProvider implements ConstraintProvider {
     @Override
     public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
         return new Constraint[] {
-            flightConflict(constraintFactory)
+                aircraftType(constraintFactory),
+                flightConflict(constraintFactory),
+                pairLength(constraintFactory),
+                baseDiff(constraintFactory)
         };
     }
-
-    // 시공간 제약조건
-    // pair의 모든 비행편을 검사해야하는데 아직 안됨...
-    private Constraint timeOverlapConstraint(ConstraintFactory factory) {
-        return factory.forEach(Pairing.class)
-                .filter(pairing -> pairing.getPair().get(0).getDestTime().isBefore(pairing.getPair().get(1).getOriginTime()))
-                .penalize("timeOverlapConstraint",
-                        HardSoftLongScore.ofHard(1L));
-    }
-
 
     //같은 기종
     private Constraint aircraftType(ConstraintFactory constraintFactory){

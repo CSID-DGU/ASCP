@@ -22,7 +22,6 @@ public class Flight {
     private LocalDateTime originTime;
     private LocalDateTime destTime;
     private Aircraft aircraft;
-    private double cost;
 //     Shadow variables
 //
 //    @PreviousElementShadowVariable(sourceVariableName = "pair")
