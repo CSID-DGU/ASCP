@@ -1,6 +1,5 @@
 package org.example.domain;
 
-import jdk.vm.ci.meta.Local;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,15 +13,43 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class Flight {
     private String flightNumber;
     private Airport originAirport;
-    private Airport destAirport;
     private LocalDateTime originTime;
+    private Airport destAirport;
     private LocalDateTime destTime;
     private Aircraft aircraft;
-//     Shadow variables
+
+    public Flight(String flightNumber,Airport originAirport, LocalDateTime originTime, Airport destAirport, LocalDateTime destTime, Aircraft aircraft){
+
+    }
+
+    public LocalDateTime getOriginTime() {
+        return originTime;
+    }
+
+    public Airport getDestAirport() {
+        return destAirport;
+    }
+
+    public Airport getOriginAirport() {
+        return originAirport;
+    }
+
+    public LocalDateTime getDestTime() {
+        return destTime;
+    }
+
+    public Aircraft getAircraft() {
+        return aircraft;
+    }
+
+    public String getFlightNumber() {
+        return flightNumber;
+    }
+
+    //     Shadow variables
 //
 //    @PreviousElementShadowVariable(sourceVariableName = "pair")
 //    private Flight previousFlight;

@@ -27,10 +27,14 @@ public class PairingSoultion {
     @ProblemFactCollectionProperty
     private List<Flight> flightList;
 
+    @ValueRangeProvider
     @PlanningEntityCollectionProperty
     private List<Pairing> pairingList;
 
     @PlanningScore
     private HardSoftScore score = null;
+
+    public PairingSoultion(List<Aircraft> aircraftList, List<Airport> airports, List<Flight> flightList) {
+    }
 }
 

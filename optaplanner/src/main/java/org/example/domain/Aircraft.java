@@ -6,7 +6,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class Aircraft {
     private String name;
     private int crewNum;
@@ -14,4 +13,25 @@ public class Aircraft {
     private int baseSalary;
     private int layoverCost;
 
+    public Aircraft(String name,int crewNum, int flightSalary, int baseSalary, int layoverCost){}
+
+    public String getName() {
+        return name;
+    }
+
+    public int getCrewNum() {
+        return crewNum;
+    }
+
+    public int getFlightSalary() {
+        return flightSalary;
+    }
+
+    public int getBaseSalary() {
+        return baseSalary;
+    }
+
+    public int getLayoverCost() {
+        return layoverCost;
+    }
 }

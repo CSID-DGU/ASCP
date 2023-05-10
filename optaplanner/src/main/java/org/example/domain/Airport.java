@@ -8,9 +8,17 @@ import java.util.Map;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class Airport {
     private String name;
-    private Map<Airport,Integer> deadheadCost;
+    private Map<String,Integer> deadheadCost;
 
+    public Airport(String name,Map<String,Integer> deadheadCost){}
+
+    public String getName() {
+        return name;
+    }
+
+    public Map<String, Integer> getDeadheadCost() {
+        return deadheadCost;
+    }
 }
