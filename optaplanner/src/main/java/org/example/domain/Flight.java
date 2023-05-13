@@ -11,8 +11,7 @@ import org.optaplanner.core.api.domain.variable.PreviousElementShadowVariable;
 import java.time.LocalDateTime;
 
 
-@Getter
-@Setter
+
 public class Flight {
     private String flightNumber;
     private Airport originAirport;

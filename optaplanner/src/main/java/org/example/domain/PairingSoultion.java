@@ -14,8 +14,6 @@ import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import java.util.List;
 
 @PlanningSolution
-@Getter
-@Setter
 public class PairingSoultion {
 
     @ProblemFactCollectionProperty
@@ -27,7 +25,7 @@ public class PairingSoultion {
     @ProblemFactCollectionProperty
     private List<Flight> flightList;
 
-    @ValueRangeProvider
+    @ValueRangeProvider(id = "pairing")
     @PlanningEntityCollectionProperty
     private List<Pairing> pairingList;
 

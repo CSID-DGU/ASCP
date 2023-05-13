@@ -6,8 +6,7 @@ import lombok.Setter;
 
 import java.util.Map;
 
-@Getter
-@Setter
+
 public class Airport {
     private String name;
     private Map<String,Integer> deadheadCost;

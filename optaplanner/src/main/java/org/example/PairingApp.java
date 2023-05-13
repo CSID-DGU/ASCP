@@ -21,8 +21,7 @@ public class PairingApp {
         SolverFactory<PairingSoultion> solverFactory = SolverFactory.create(new SolverConfig()
                 .withSolutionClass(PairingSoultion.class)
                 .withEntityClasses(Pairing.class)
-                .withConstraintProviderClass(ParingConstraintProvider.class)
-                .withTerminationSpentLimit(Duration.ofMinutes(5)));
+                .withConstraintProviderClass(ParingConstraintProvider.class));
 
         // Load the problem
         PairingSoultion problem = generateDemoData();

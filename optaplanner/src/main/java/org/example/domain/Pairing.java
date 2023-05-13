@@ -7,18 +7,18 @@ import org.example.domain.Flight;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.domain.variable.PlanningListVariable;
+import org.optaplanner.core.api.domain.variable.PlanningVariable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
+
 @PlanningEntity
 public class Pairing {
 
-    @PlanningListVariable
+
+    @PlanningVariable(valueRangeProviderRefs = {"pairing"})
     private List<Flight> pair = new ArrayList<>();
     private double totalCost;
     public Pairing(List<Flight> pair, int totalCost){
