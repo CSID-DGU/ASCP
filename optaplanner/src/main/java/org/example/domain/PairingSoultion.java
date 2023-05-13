@@ -16,6 +16,10 @@ import java.util.List;
 @PlanningSolution
 public class PairingSoultion {
 
+    public PairingSoultion() {
+        // 인자가 없는 생성자의 내용을 필요에 따라 추가
+    }
+
     @ProblemFactCollectionProperty
     private List<Aircraft> aircraftList;
 
@@ -27,12 +31,12 @@ public class PairingSoultion {
 
     @ValueRangeProvider(id = "pairing")
     @PlanningEntityCollectionProperty
-    private List<Pairing> pairingList;
+    private List<List<Pairing>> pairingList;
 
     @PlanningScore
     private HardSoftScore score = null;
 
-    public PairingSoultion(List<Aircraft> aircraftList, List<Airport> airports, List<Flight> flightList, List<Pairing> pairingList) {
+    public PairingSoultion(List<Aircraft> aircraftList, List<Airport> airports, List<Flight> flightList, List<List<Pairing>> pairingList) {
         this.aircraftList =aircraftList;
         this.airportList = airports;
         this.flightList = flightList;

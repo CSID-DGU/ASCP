@@ -17,6 +17,9 @@ import java.util.List;
 @PlanningEntity
 public class Pairing {
 
+    public Pairing() {
+        // 인자가 없는 생성자의 내용을 필요에 따라 추가
+    }
 
     @PlanningVariable(valueRangeProviderRefs = {"pairing"})
     private List<Flight> pair = new ArrayList<>();
