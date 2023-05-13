@@ -22,8 +22,6 @@ public class PairingApp {
                 .withSolutionClass(PairingSoultion.class)
                 .withEntityClasses(Pairing.class)
                 .withConstraintProviderClass(ParingConstraintProvider.class)
-                // The solver runs only for 5 seconds on this small dataset.
-                // It's recommended to run for at least 5 minutes ("5m") otherwise.
                 .withTerminationSpentLimit(Duration.ofMinutes(5)));
 
         // Load the problem
@@ -91,8 +89,11 @@ public class PairingApp {
         flightList.add(new Flight("F1",airports.get(4),LocalDateTime.parse("2020-01-03 17:30:00", formatter),airports.get(0),LocalDateTime.parse("2020-01-03 17:30:00", formatter),aircraftList.get(2)));
         flightList.add(new Flight("F2",airports.get(0),LocalDateTime.parse("2020-01-05 11:25:00", formatter),airports.get(2),LocalDateTime.parse("2020-01-05 13:21:00", formatter),aircraftList.get(1)));
 
-
-
-        return new PairingSoultion(aircraftList,airports,flightList);
+        List<Pairing> pairingList = new ArrayList<>();
+        List<Flight> pair1 = new ArrayList<>();
+        pair1.add(flightList.get(0));
+        pair1.add(flightList.get(1));
+        pairingList.add(new Pairing(pair1,10000));
+        return new PairingSoultion(aircraftList,airports,flightList,pairingList);
     }
 }

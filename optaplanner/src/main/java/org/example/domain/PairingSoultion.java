@@ -34,7 +34,11 @@ public class PairingSoultion {
     @PlanningScore
     private HardSoftScore score = null;
 
-    public PairingSoultion(List<Aircraft> aircraftList, List<Airport> airports, List<Flight> flightList) {
+    public PairingSoultion(List<Aircraft> aircraftList, List<Airport> airports, List<Flight> flightList, List<Pairing> pairingList) {
+        this.aircraftList =aircraftList;
+        this.airportList = airports;
+        this.flightList = flightList;
+        this.pairingList = pairingList;
     }
 }
 

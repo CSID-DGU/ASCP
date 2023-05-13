@@ -12,7 +12,10 @@ public class Airport {
     private String name;
     private Map<String,Integer> deadheadCost;
 
-    public Airport(String name,Map<String,Integer> deadheadCost){}
+    public Airport(String name,Map<String,Integer> deadheadCost){
+        this.name = name;
+        this.deadheadCost = deadheadCost;
+    }
 
     public String getName() {
         return name;

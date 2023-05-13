@@ -21,6 +21,12 @@ public class Pairing {
     @PlanningListVariable
     private List<Flight> pair = new ArrayList<>();
     private double totalCost;
+    public Pairing(List<Flight> pair, int totalCost){
+        this.pair=pair;
+        this.totalCost = totalCost;
+    }
+
+
 
     public List<Flight> getPair() {
         return pair;

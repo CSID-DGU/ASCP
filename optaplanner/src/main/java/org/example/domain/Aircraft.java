@@ -13,7 +13,13 @@ public class Aircraft {
     private int baseSalary;
     private int layoverCost;
 
-    public Aircraft(String name,int crewNum, int flightSalary, int baseSalary, int layoverCost){}
+    public Aircraft(String name,int crewNum, int flightSalary, int baseSalary, int layoverCost){
+        this.name = name;
+        this.crewNum = crewNum;
+        this.flightSalary = flightSalary;
+        this.baseSalary = baseSalary;
+        this.layoverCost = layoverCost;
+    }
 
     public String getName() {
         return name;

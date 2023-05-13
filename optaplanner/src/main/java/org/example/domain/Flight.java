@@ -22,7 +22,12 @@ public class Flight {
     private Aircraft aircraft;
 
     public Flight(String flightNumber,Airport originAirport, LocalDateTime originTime, Airport destAirport, LocalDateTime destTime, Aircraft aircraft){
-
+        this.flightNumber = flightNumber;
+        this.originAirport = originAirport;
+        this.originTime = originTime;
+        this.destAirport = destAirport;
+        this.destTime =destTime;
+        this.aircraft = aircraft;
     }
 
     public LocalDateTime getOriginTime() {
