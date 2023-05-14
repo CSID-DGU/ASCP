@@ -25,22 +25,53 @@ public class PairingSoultion {
 
     @ProblemFactCollectionProperty
     private List<Airport> airportList;
-
+    @ValueRangeProvider(id = "pairing")
     @ProblemFactCollectionProperty
     private List<Flight> flightList;
 
-    @ValueRangeProvider(id = "pairing")
     @PlanningEntityCollectionProperty
-    private List<List<Pairing>> pairingList;
+    private List<Pairing> pairingList;
 
     @PlanningScore
     private HardSoftScore score = null;
 
-    public PairingSoultion(List<Aircraft> aircraftList, List<Airport> airports, List<Flight> flightList, List<List<Pairing>> pairingList) {
+    public PairingSoultion(List<Aircraft> aircraftList, List<Airport> airports, List<Flight> flightList, List<Pairing> pairingList) {
         this.aircraftList =aircraftList;
         this.airportList = airports;
         this.flightList = flightList;
         this.pairingList = pairingList;
+    }
+
+    public List<Aircraft> getAircraftList(){
+        return aircraftList;
+    }
+
+    public List<Airport> getAirportList(){
+        return airportList;
+    }
+
+    public List<Flight> getFlightList(){
+        return flightList;
+    }
+
+    public List<Pairing> getPairingList() {
+        return pairingList;
+    }
+
+
+    public HardSoftScore getScore() {
+        return score;
+    }
+
+    @Override
+    public String toString() {
+        return "PairingSoultion{" +
+                "aircraftList=" + aircraftList +
+                ", airportList=" + airportList +
+                ", flightList=" + flightList +
+                ", pairingList=" + pairingList +
+                ", score=" + score +
+                '}';
     }
 }
 

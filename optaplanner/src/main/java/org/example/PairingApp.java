@@ -1,24 +1,27 @@
 package org.example;
 
-import io.vertx.core.impl.logging.LoggerFactory;
 import org.example.domain.*;
 import org.example.score.ParingConstraintProvider;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
 import org.optaplanner.core.config.solver.SolverConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.logging.Logger;
 
 public class PairingApp {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PairingApp.class);
     public static void main(String[] args) {
         SolverFactory<PairingSoultion> solverFactory = SolverFactory.create(new SolverConfig()
                 .withSolutionClass(PairingSoultion.class)
                 .withEntityClasses(Pairing.class)
-                .withConstraintProviderClass(ParingConstraintProvider.class));
+                .withConstraintProviderClass(ParingConstraintProvider.class)
+                .withTerminationSpentLimit(Duration.ofSeconds(5)));
 
         // Load the problem
         PairingSoultion problem = generateDemoData();
@@ -26,9 +29,18 @@ public class PairingApp {
         // Solve the problem
         Solver<PairingSoultion> solver = solverFactory.buildSolver();
         PairingSoultion solution = solver.solve(problem);
-
         // Visualize the solution
-        //printTimetable(solution);
+        printPairing(solution);
+
+        System.exit(0);
+    }
+
+    private static void printPairing(PairingSoultion pairingSoultion){
+
+        List<Aircraft> aircraftList = pairingSoultion.getAircraftList();
+        System.out.println(aircraftList.toString());
+        System.out.println(pairingSoultion.getScore());
+
     }
 
     public static PairingSoultion generateDemoData() {
@@ -85,11 +97,11 @@ public class PairingApp {
         flightList.add(new Flight("F1",airports.get(4),LocalDateTime.parse("2020-01-03 17:30:00", formatter),airports.get(0),LocalDateTime.parse("2020-01-03 17:30:00", formatter),aircraftList.get(2)));
         flightList.add(new Flight("F2",airports.get(0),LocalDateTime.parse("2020-01-05 11:25:00", formatter),airports.get(2),LocalDateTime.parse("2020-01-05 13:21:00", formatter),aircraftList.get(1)));
 
-        List<List<Pairing>> pairingList = new ArrayList<>();
+        List<Pairing> pairingList = new ArrayList<>();
         List<Flight> pair1 = new ArrayList<>();
         pair1.add(flightList.get(0));
         pair1.add(flightList.get(1));
-        pairingList.add(Collections.singletonList(new Pairing(pair1, 10000)));
+        pairingList.add(new Pairing(pair1,1000));
         return new PairingSoultion(aircraftList,airports,flightList,pairingList);
     }
 }

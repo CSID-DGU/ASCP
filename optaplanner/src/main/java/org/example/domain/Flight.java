@@ -60,4 +60,16 @@ public class Flight {
 //    @NextElementShadowVariable(sourceVariableName = "pair")
 //    private Flight nextFlight;
 
+
+    @Override
+    public String toString() {
+        return "Flight{" +
+                "flightNumber='" + flightNumber + '\'' +
+                ", originAirport=" + originAirport +
+                ", originTime=" + originTime +
+                ", destAirport=" + destAirport +
+                ", destTime=" + destTime +
+                ", aircraft=" + aircraft +
+                '}';
+    }
 }

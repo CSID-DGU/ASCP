@@ -23,4 +23,12 @@ public class Airport {
     public Map<String, Integer> getDeadheadCost() {
         return deadheadCost;
     }
+
+    @Override
+    public String toString() {
+        return "Airport{" +
+                "name='" + name + '\'' +
+                ", deadheadCost=" + deadheadCost +
+                '}';
+    }
 }

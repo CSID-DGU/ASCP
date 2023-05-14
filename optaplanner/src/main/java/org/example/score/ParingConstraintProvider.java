@@ -20,10 +20,10 @@ public class ParingConstraintProvider implements ConstraintProvider {
     @Override
     public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
         return new Constraint[] {
-                aircraftType(constraintFactory),
-                flightConflict(constraintFactory),
-                pairLength(constraintFactory),
-                baseDiff(constraintFactory)
+                  aircraftType(constraintFactory),
+                  flightConflict(constraintFactory),
+//                pairLength(constraintFactory),
+//                baseDiff(constraintFactory)
         };
     }
 
@@ -39,7 +39,7 @@ public class ParingConstraintProvider implements ConstraintProvider {
     //최대 랜딩 횟수
     private Constraint flightConflict(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
-                .filter(pairing -> pairing.getPair().size()<4)
+                .filter(pairing -> pairing.getPair().size()>4)
                 .penalize(HardSoftScore.ofHard(10))
                 .asConstraint("Landing conflict");
     }

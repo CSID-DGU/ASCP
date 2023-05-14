@@ -39,4 +39,15 @@ public class Aircraft {
     public int getLayoverCost() {
         return layoverCost;
     }
+
+    @Override
+    public String toString() {
+        return "Aircraft{" +
+                "name='" + name + '\'' +
+                ", crewNum=" + crewNum +
+                ", flightSalary=" + flightSalary +
+                ", baseSalary=" + baseSalary +
+                ", layoverCost=" + layoverCost +
+                '}';
+    }
 }
