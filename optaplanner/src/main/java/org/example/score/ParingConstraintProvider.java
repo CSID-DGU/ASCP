@@ -20,11 +20,20 @@ public class ParingConstraintProvider implements ConstraintProvider {
     @Override
     public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
         return new Constraint[] {
-                  aircraftType(constraintFactory),
-                  flightConflict(constraintFactory),
-//                pairLength(constraintFactory),
-//                baseDiff(constraintFactory)
+                timePossible(constraintFactory),
+                aircraftType(constraintFactory),
+                flightConflict(constraintFactory),
+                //pairLength(constraintFactory),
+                baseDiff(constraintFactory)
         };
+    }
+
+    //flight 1개 이상
+    private Constraint timePossible(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Flight.class)
+                .filter(flight -> flight.getOriginTime().isAfter(flight.getDestTime()))
+                .penalize(HardSoftScore.ofHard(50))
+                .asConstraint("flight possible");
     }
 
     //같은 기종
@@ -47,7 +56,7 @@ public class ParingConstraintProvider implements ConstraintProvider {
     //페어링 최대 길이
     private Constraint pairLength(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
-                .filter(pairing -> ChronoUnit.DAYS.between(pairing.getPair().get(0).getOriginTime(),pairing.getPair().get(-1).getDestTime()) < 7)
+                .filter(pairing -> ChronoUnit.DAYS.between(pairing.getPair().get(0).getOriginTime(),pairing.getPair().get(pairing.getPair().size()-1).getDestTime()) > 7)
                 .penalize(HardSoftScore.ofHard(10))
                 .asConstraint("Max Length");
     }
@@ -55,8 +64,8 @@ public class ParingConstraintProvider implements ConstraintProvider {
     //base 같아야 함 (soft)
     private Constraint baseDiff(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
-                .filter(pairing -> pairing.getPair().get(0).getOriginAirport() == pairing.getPair().get(-1).getDestAirport())
-                .penalize(HardSoftScore.ofSoft(10))
+                .filter(pairing -> pairing.getPair().get(0).getOriginAirport() != pairing.getPair().get(pairing.getPair().size()-1).getDestAirport())
+                .penalize(HardSoftScore.ofSoft(100))
                 .asConstraint("base Diff");
     }
 

@@ -1,9 +1,7 @@
 package org.example.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 
+import java.util.List;
 
 public class Aircraft {
     private String name;
@@ -50,4 +48,15 @@ public class Aircraft {
                 ", layoverCost=" + layoverCost +
                 '}';
     }
+
+    public static Aircraft findAircraftName(List<Aircraft> aircrafts, String name) {
+        for (Aircraft aircraft : aircrafts) {
+            if (aircraft.getName().equals(name)) {
+                return aircraft;
+            }
+        }
+        return null;
+    }
+
+
 }

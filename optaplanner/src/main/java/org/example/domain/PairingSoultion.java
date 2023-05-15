@@ -67,11 +67,17 @@ public class PairingSoultion {
     public String toString() {
         return "PairingSoultion{" +
                 "aircraftList=" + aircraftList +
-                ", airportList=" + airportList +
-                ", flightList=" + flightList +
-                ", pairingList=" + pairingList +
-                ", score=" + score +
+                ", \nairportList=" + airportList +
+                ",\nflightList=" + flightList +
+                ", \npairingList=" + pairingList +
+                ", \nscore=" + score +
                 '}';
+    }
+
+    public void printParingList(){
+        for(Pairing pair : pairingList){
+            System.out.println(pair);
+        }
     }
 }
 
