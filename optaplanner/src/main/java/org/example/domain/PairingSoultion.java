@@ -76,7 +76,10 @@ public class PairingSoultion {
 
     public void printParingList(){
         for(Pairing pair : pairingList){
-            System.out.println(pair);
+            for (Flight flight: pair.getPair()){
+                System.out.print(flight.getFlightNumber()+" ");
+            }
+            System.out.println();
         }
     }
 }

@@ -30,9 +30,9 @@ public class ParingConstraintProvider implements ConstraintProvider {
 
     //flight 1개 이상
     private Constraint timePossible(ConstraintFactory constraintFactory) {
-        return constraintFactory.forEach(Flight.class)
-                .filter(flight -> flight.getOriginTime().isAfter(flight.getDestTime()))
-                .penalize(HardSoftScore.ofHard(50))
+        return constraintFactory.forEach(Pairing.class)
+                .filter(pairing -> pairing.getTimeImpossbile())
+                .penalize(HardSoftScore.ofHard(100))
                 .asConstraint("flight possible");
     }
 

@@ -25,7 +25,15 @@ public class Pairing {
     @PlanningListVariable(valueRangeProviderRefs = {"pairing"})
     private List<Flight> pair = new ArrayList<>();
 
-
+    //pair가 시간상 불가능하면 true를 반환
+    public boolean getTimeImpossbile(){
+        for(int i=0;i<pair.size()-1;i++){
+            if(pair.get(i).getDestTime().isAfter(pair.get(i+1).getOriginTime())){
+                return true;
+            }
+        }
+        return false;
+    }
 
     public List<Flight> getPair() {
         return pair;
