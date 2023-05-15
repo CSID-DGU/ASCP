@@ -19,8 +19,8 @@ public class Airport {
         return name;
     }
 
-    public Map<String, Integer> getDeadheadCost() {
-        return deadheadCost;
+    public int getDeadheadCost(String s) {
+        return deadheadCost.get(s);
     }
 
     @Override

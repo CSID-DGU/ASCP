@@ -10,8 +10,7 @@ import org.example.score.ParingConstraintProvider;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
 import org.optaplanner.core.config.solver.SolverConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,19 +18,19 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.time.LocalDateTime;
 
 public class PairingApp {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PairingApp.class);
     public static void main(String[] args) {
         SolverFactory<PairingSoultion> solverFactory = SolverFactory.create(new SolverConfig()
                 .withSolutionClass(PairingSoultion.class)
                 .withEntityClasses(Pairing.class)
                 .withConstraintProviderClass(ParingConstraintProvider.class)
-                .withTerminationSpentLimit(Duration.ofSeconds(5)));
+                //sovler가 얼마나 풀게 할 것인가
+                .withTerminationSpentLimit(Duration.ofSeconds(180)));
+                
 
         // Load the problem
         PairingSoultion problem = generateDemoData();
@@ -179,10 +178,11 @@ public class PairingApp {
         List<Airport> airportList = readAirport();
         List<Aircraft> aircraftList = readAircraft();
         List<Flight> flightList = readFlight(aircraftList,airportList);
-        //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+        // 총 페어 개수 정의 해주기.
+        final int TOTALPAIR = 48;
         List<Pairing> pairingList = new ArrayList<>();
-        for (int i=0;i<5;i++){
+        for (int i=0;i<TOTALPAIR;i++){
             List<Flight> pair = new ArrayList<>();
             pair.add(flightList.get(i));
             pairingList.add(new Pairing(pair,0));
