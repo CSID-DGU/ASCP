@@ -6,11 +6,17 @@ import java.time.LocalDateTime;
 
 
 public class Flight {
+    //비행편 인덱스
     private String flightNumber;
+    //출발 공항
     private Airport originAirport;
+    //출발 시간
     private LocalDateTime originTime;
+    //도착 공항
     private Airport destAirport;
+    //도착 시간
     private LocalDateTime destTime;
+    //기종
     private Aircraft aircraft;
 
     public Flight(String flightNumber,Airport originAirport, LocalDateTime originTime, Airport destAirport, LocalDateTime destTime, Aircraft aircraft){

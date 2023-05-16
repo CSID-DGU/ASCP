@@ -22,7 +22,7 @@ public class Pairing {
         this.pair=pair;
         this.totalCost = totalCost;
     }
-
+    //변수로서 작동 된다. pair는 Flight들의 연속이므로 ListVariable로 작동된다.
     @PlanningListVariable(valueRangeProviderRefs = {"pairing"})
     private List<Flight> pair = new ArrayList<>();
 
@@ -45,7 +45,7 @@ public class Pairing {
         }
         return false;
     }
-
+    //기종이 다 같은지 다 같지 않으면 true 반환
     public boolean getAircraftImpossible(){
         for(int i=0;i<pair.size()-1;i++){
             if(!pair.get(i).getAircraft().getName().equals(pair.get(i+1).getAircraft().getName())){
@@ -60,6 +60,7 @@ public class Pairing {
         return ChronoUnit.DAYS.between(pair.get(0).getOriginTime(),pair.get(pair.size()-1).getDestTime());
     }
 
+    //첫번쨰 비행과 마지막 비행 Base 비교
     public boolean isBaseSame(){
         return pair.get(0).getOriginAirport().getName().equals(pair.get(pair.size()-1).getDestAirport().getName());
     }
@@ -68,10 +69,11 @@ public class Pairing {
         return pair;
     }
     private double totalCost;
+    // 여기서 Cost계산 해야할 것
     public double getTotalCost() {
         return totalCost;
     }
-
+    //마지막 비행 반환
     public Flight getLastFlight(){
         return pair.get(pair.size()-1);
     }

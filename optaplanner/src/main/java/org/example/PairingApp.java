@@ -29,15 +29,16 @@ public class PairingApp {
                 .withEntityClasses(Pairing.class)
                 .withConstraintProviderClass(ParingConstraintProvider.class)
                 //sovler가 얼마나 풀게 할 것인가
-                .withTerminationSpentLimit(Duration.ofSeconds(180)));
+                .withTerminationSpentLimit(Duration.ofSeconds(3600)));
                 
 
         // Load the problem
-        PairingSoultion problem = generateDemoData();
+        PairingSoultion problem = generateDemoData(40);
 
         // Solve the problem
         Solver<PairingSoultion> solver = solverFactory.buildSolver();
         PairingSoultion solution = solver.solve(problem);
+
         // Visualize the solution
         printPairing(solution);
 
@@ -45,14 +46,14 @@ public class PairingApp {
     }
 
     private static void printPairing(PairingSoultion pairingSoultion){
-
-
+        //결과 출력
         System.out.println(pairingSoultion);
         pairingSoultion.printParingList();
 
     }
 
     public static List<Airport> readAirport(){
+        //Airport class 정보 읽기
         FileInputStream fileInputStream;
 
         {
@@ -97,6 +98,7 @@ public class PairingApp {
     }
 
     public static List<Aircraft> readAircraft(){
+        //Aircraft class 정보 읽기
         FileInputStream fileInputStream;
 
         {
@@ -134,6 +136,7 @@ public class PairingApp {
     }
 
     public static List<Flight> readFlight(List<Aircraft> aircraftList, List<Airport> airportList){
+        //Flight class 정보 읽기
         FileInputStream fileInputStream;
 
         {
@@ -172,17 +175,17 @@ public class PairingApp {
         return flightList;
     }
 
-    public static PairingSoultion generateDemoData() {
+    public static PairingSoultion generateDemoData(int totalpair) {
 
 
         List<Airport> airportList = readAirport();
         List<Aircraft> aircraftList = readAircraft();
         List<Flight> flightList = readFlight(aircraftList,airportList);
 
-        // 총 페어 개수 정의 해주기.
-        final int TOTALPAIR = 48;
+
         List<Pairing> pairingList = new ArrayList<>();
-        for (int i=0;i<TOTALPAIR;i++){
+        //초기 페어링 Set 구성 어차피 solver가 바꿔버려서 의미 없음 아무것도 안넣으면 오류나서 넣는 것
+        for (int i=0;i<totalpair;i++){
             List<Flight> pair = new ArrayList<>();
             pair.add(flightList.get(i));
             pairingList.add(new Pairing(pair,0));

@@ -7,7 +7,9 @@ import java.util.Map;
 
 
 public class Airport {
+    //공항 이름
     private String name;
+    //공항에 따른 deadhead비용 맵 ex) deadheadCost.get("ATL") -> 200
     private Map<String, Integer> deadheadCost;
 
     public Airport(String name, Map<String, Integer> deadheadCost) {
