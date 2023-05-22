@@ -29,7 +29,7 @@ public class PairingApp {
                 .withEntityClasses(Pairing.class)
                 .withConstraintProviderClass(ParingConstraintProvider.class)
                 //sovler가 얼마나 풀게 할 것인가
-                .withTerminationSpentLimit(Duration.ofSeconds(3600)));
+                .withTerminationSpentLimit(Duration.ofSeconds(10)));
                 
 
         // Load the problem
