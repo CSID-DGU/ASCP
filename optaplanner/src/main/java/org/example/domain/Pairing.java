@@ -82,10 +82,10 @@ public class Pairing {
 
     public void setTotalCost() {
         this.totalCost = 0;
-        for (int i = 0; i < pair.size() - 1; i++) {
-            this.totalCost += pair.get(i).getAircraft().getFlightSalary();
-            //cost+=pair.get(i).getAircraft().getLayoverCost();
-            //cost+=pair.get(i).getAircraft().getBaseSalary();
+        for (int i = 0; i < pair.size(); i++) {
+            //this.totalCost += pair.get(i).getAircraft().getFlightSalary(); //시간 곱해줘야 함
+            //cost+=pair.get(i).getAircraft().getLayoverCost(); //조건 필요
+            this.totalCost+=pair.get(i).getAircraft().getBaseSalary();
         }
     }
 

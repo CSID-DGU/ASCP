@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.domain.*;
+import org.example.optional.score.PairingEasyScoreCalculator;
 import org.example.score.ParingConstraintProvider;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
@@ -30,6 +31,7 @@ public class PairingApp {
                 .withConstraintProviderClass(ParingConstraintProvider.class)
                 //sovler가 얼마나 풀게 할 것인가
                 .withTerminationSpentLimit(Duration.ofSeconds(10)));
+                //.withEasyScoreCalculatorClass(PairingEasyScoreCalculator.class));
                 
 
         // Load the problem

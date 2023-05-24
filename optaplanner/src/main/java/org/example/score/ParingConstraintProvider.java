@@ -17,7 +17,6 @@ import static org.optaplanner.core.api.score.stream.ConstraintCollectors.countDi
 import static org.optaplanner.core.api.score.stream.Joiners.*;
 
 public class ParingConstraintProvider implements ConstraintProvider {
-    PairingSoultion pairingSoultion;
 
     @Override
     public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
@@ -74,12 +73,14 @@ public class ParingConstraintProvider implements ConstraintProvider {
     }
 
     //페어링 코스트 평균과의 차이
-    /*
+/*
     private Constraint differenceCost(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
-                .filter(pairing -> pairing.getTotalCost() > pairingSoultion.getCostAverage() * 2)
-                .penalize(HardSoftScore.ofHard(100))
-                .asConstraint("Difference Cost");
+                .join(PairingSoultion.class)
+                .filter((pairing,pairingSoultion) -> pairing.getTotalCost() > pairingSoultion.getCostAverage() * 2)
+                .penalize(HardSoftScore.ONE_HARD)
+                .asConstraint("DifferenceCost");
+
     }
 */
     //페어링 최소 길이

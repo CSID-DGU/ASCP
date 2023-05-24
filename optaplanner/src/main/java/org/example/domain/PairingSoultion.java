@@ -73,14 +73,20 @@ public class PairingSoultion {
     //총 코스트
     public double getTotalPairingCost() {
         double total = 0;
-        for (int i = 0; i < pairingList.size() - 1; i++) {
+        for (int i = 0; i < pairingList.size(); i++) {
             total += pairingList.get(i).getTotalCost();
         }
+        System.out.println("Size : " + pairingList.size());
+        System.out.println("Total PairingCost : " + total);
         return total;
     }
+
     //코스트 평균
     public double getCostAverage() {
-        return getTotalPairingCost() / pairingList.size();
+        double average;
+        average = getTotalPairingCost() / pairingList.size();
+        System.out.println("CostAverage : " + average);
+        return average;
     }
 
     @Override
@@ -99,8 +105,11 @@ public class PairingSoultion {
             for (Flight flight : pair.getPair()) {
                 System.out.print(flight.getFlightNumber() + " ");
             }
-            System.out.println();
+
+            System.out.println("Pairing Cost : " + pair.getTotalCost());
         }
+        getCostAverage();
+        //getTotalPairingCost();
     }
 }
 
