@@ -5,22 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a88b6d1d-10dd-4d72-a834-002091493c7f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingApp.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/score/ParingConstraintProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/Real_Input_data.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/deadhead.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/flight.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/output.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/salary.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/Main.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/Aircraft.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/Aircraft.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/Airport.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/Airport.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/Flight.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/Flight.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/Pairing.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/Pairing.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/PairingSolution.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/PairingSolution.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,7 +88,7 @@
       <option name="presentableId" value="Default" />
       <updated>1688347948136</updated>
       <workItem from="1688347949412" duration="287000" />
-      <workItem from="1688348502202" duration="7381000" />
+      <workItem from="1688348502202" duration="7615000" />
     </task>
     <servers />
   </component>

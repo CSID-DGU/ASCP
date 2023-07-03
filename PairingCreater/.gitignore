@@ -27,7 +27,7 @@ out/
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
-.xlsx
+*.xlsx
 
 ### NetBeans ###
 /nbproject/private/
