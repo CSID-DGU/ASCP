@@ -1,9 +1,6 @@
 package org.dongguk.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 import java.util.Map;
@@ -12,6 +9,7 @@ import java.util.Map;
 @Setter
 @Builder
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class Airport {
     //공항 이름
     private String name;

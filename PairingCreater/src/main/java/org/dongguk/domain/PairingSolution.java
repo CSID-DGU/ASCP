@@ -1,9 +1,6 @@
 package org.dongguk.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningScore;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
@@ -15,6 +12,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
 @PlanningSolution
@@ -54,8 +52,10 @@ public class PairingSolution {
     public void printParingList() {
         pairingList.forEach(pairing -> {
             pairing.getPair().forEach(flight -> {
-                System.out.println(flight.getFlightNumber() + " ");
+                System.out.print(flight.getIndex() + " ");
             });
+//            System.out.println(pairing.getTotalCost());
+            System.out.println("");
         });
     }
 }

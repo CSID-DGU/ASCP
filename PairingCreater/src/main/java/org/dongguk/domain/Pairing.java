@@ -1,18 +1,17 @@
 package org.dongguk.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.variable.PlanningListVariable;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
 @PlanningEntity
@@ -72,10 +71,18 @@ public class Pairing {
     }
 
     //마지막 비행 반환
-    public Flight getLastFlight() {
-        return pair.get(pair.size() - 1);
-    }
+    public Integer getDeadHeadCost() {
+        Map<String, Integer> deadheads = pair.get(pair.size() - 1).getOriginAirport().getDeadheadCost();
 
+        String dest = pair.get(pair.size() - 1).getOriginAirport().getName();
+        String origin = pair.get(0).getOriginAirport().getName();
+
+        if (!dest.equals(origin)) {
+            return deadheads.get(origin);
+        } else {
+            return 0;
+        }
+    }
 
     @Override
     public String toString() {
