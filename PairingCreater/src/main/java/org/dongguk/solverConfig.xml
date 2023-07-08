@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<solver xmlns="https://www.optaplanner.org/xsd/solver" xmlns:xsi=
+        "http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://www.optaplanner.org/xsd/solver
+https://www.optaplanner.org/xsd/solver/solver.xsd">
+    <!-- Domain model configuration -->
+    <solutionClass>
+        org.dongguk.domain.PairingSolution</solutionClass>
+    <entityClass>
+        org.dongguk.domain.Pairing</entityClass>
+    <!-- Score configuration -->
+    <scoreDirectorFactory>
+        <!--
+        <easyScoreCalculatorClass>
+            org.optaplanner.examples.cloudbalancing.optional.score.CloudBalancingEasyScoreCalculator</easyScoreCalculatorClass> -->
+
+        <constraintProviderClass>
+            org.dongguk.score.ParingConstraintProvider</constraintProviderClass>
+    </scoreDirectorFactory>
+    <termination>
+        <secondsSpentLimit>30</secondsSpentLimit>
+    </termination>
+
+    <constructionHeuristic/>
+    <localSearch>
+        <localSearchType>TABU_SEARCH</localSearchType>
+    </localSearch>
+    <!--
+    <exhaustiveSearch>
+        <exhaustiveSearchType>BRUTE_FORCE</exhaustiveSearchType>
+    </exhaustiveSearch>-->
+</solver>

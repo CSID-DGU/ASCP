@@ -21,17 +21,19 @@ import java.util.Map;
 
 public class PairingApp {
     public static void main(String[] args) {
-        SolverFactory<PairingSolution> solverFactory = SolverFactory.create(new SolverConfig()
+        /*
+                SolverFactory<PairingSolution> solverFactory = SolverFactory.create(new SolverConfig()
                 .withSolutionClass(PairingSolution.class)
                 .withEntityClasses(Pairing.class)
                 .withConstraintProviderClass(ParingConstraintProvider.class)
-                //sovler가 얼마나 풀게 할 것인가
-                .withTerminationSpentLimit(Duration.ofSeconds(10)));
-        //.withEasyScoreCalculatorClass(PairingEasyScoreCalculator.class));
+                .withTerminationSpentLimit(Duration.ofSeconds(60)));
+         */
 
+        SolverFactory<PairingSolution> solverFactory = SolverFactory.createFromXmlFile(
+                new File("src/main/java/org/dongguk/solverConfig.xml"));
 
         // Load the problem
-        PairingSolution problem = generateDemoData(40);
+        PairingSolution problem = generateDemoData(60);
 
         // Solve the problem
         Solver<PairingSolution> solver = solverFactory.buildSolver();
