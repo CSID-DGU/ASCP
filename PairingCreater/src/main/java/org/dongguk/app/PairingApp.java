@@ -21,13 +21,6 @@ import java.util.Map;
 
 public class PairingApp {
     public static void main(String[] args) {
-        /*
-                SolverFactory<PairingSolution> solverFactory = SolverFactory.create(new SolverConfig()
-                .withSolutionClass(PairingSolution.class)
-                .withEntityClasses(Pairing.class)
-                .withConstraintProviderClass(ParingConstraintProvider.class)
-                .withTerminationSpentLimit(Duration.ofSeconds(60)));
-         */
 
         SolverFactory<PairingSolution> solverFactory = SolverFactory.createFromXmlFile(
                 new File("src/main/java/org/dongguk/solverConfig.xml"));
@@ -41,6 +34,8 @@ public class PairingApp {
 
         // Visualize the solution
         printPairing(solution);
+        PairingVisualize pv = new PairingVisualize(solution.getPairingList());
+        pv.visualize();
 
         System.exit(0);
     }

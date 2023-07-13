@@ -23,6 +23,8 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.apache.poi:poi:5.0.0'
+    implementation 'org.apache.poi:poi-ooxml:5.0.0'
     api 'org.optaplanner:optaplanner-core:9.38.0.Final'
     api 'org.optaplanner:optaplanner-persistence-common:9.38.0.Final'
     api 'org.optaplanner:optaplanner-persistence-jackson:9.38.0.Final'
