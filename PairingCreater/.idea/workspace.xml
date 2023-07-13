@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a88b6d1d-10dd-4d72-a834-002091493c7f" name="Changes" comment="" />
+    <list default="true" id="a88b6d1d-10dd-4d72-a834-002091493c7f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingVisualize.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingVisualize.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/visualized-data.csv" beforeDir="false" afterPath="$PROJECT_DIR$/visualized-data.csv" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -131,6 +135,7 @@
       <workItem from="1689145416018" duration="32520000" />
       <workItem from="1689215495925" duration="1400000" />
       <workItem from="1689217248275" duration="2483000" />
+      <workItem from="1689238380578" duration="2037000" />
     </task>
     <servers />
   </component>

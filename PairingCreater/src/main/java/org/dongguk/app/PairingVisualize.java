@@ -26,7 +26,7 @@ public class PairingVisualize{
         //첫 항공기의 출발시간~마지막 항공기의 도착 시간까지 타임 테이블 생성
         StringBuilder text = new StringBuilder();
         LocalDateTime f = pairingList.get(0).getPair().get(0).getOriginTime();
-        LocalDateTime firstTime = LocalDateTime.of(f.getYear(),f.getMonth(),f.getDayOfMonth(),f.getHour(),0);
+        LocalDateTime firstTime = stripMinutes(f);
         LocalDateTime l = firstTime;
         for (Pairing pairing : pairingList) {
             System.out.print("Set" + pairingList.indexOf(pairing) + " ] ");
@@ -36,7 +36,7 @@ public class PairingVisualize{
             }
             System.out.println();
         }
-        LocalDateTime lastTime = LocalDateTime.of(l.getYear(), l.getMonth(), l.getDayOfMonth(), l.getHour()+2, 0);
+        LocalDateTime lastTime = stripMinutes(l);
 
         //첫 줄에 날짜 단위 입력
         f = firstTime;
@@ -82,19 +82,24 @@ public class PairingVisualize{
     public String buildTable(List<Flight> pairing, LocalDateTime firstTime){
         StringBuilder sb = new StringBuilder();
         for(Flight flight : pairing){
-            int a = (int) ChronoUnit.HOURS.between(firstTime, flight.getOriginTime());
+            int a = (int) ChronoUnit.HOURS.between(firstTime, stripMinutes(flight.getOriginTime()));
             sb.append(",".repeat(a));
             sb.append(flight.getOriginAirport().getName());
             sb.append(",");
-            int b = (int) ChronoUnit.HOURS.between(flight.getOriginTime(), flight.getDestTime());
+            int b = (int) ChronoUnit.HOURS.between(flight.getOriginTime(), stripMinutes(flight.getDestTime()));
             sb.append("#######,".repeat(Math.max(0,b-1)));
             sb.append(flight.getDestAirport().getName());
             sb.append(",");
 
-            firstTime = flight.getDestTime();
+            firstTime = stripMinutes(flight.getDestTime());
         }
         sb.append("\n");
 
         return valueOf(sb);
+    }
+
+    //분 단위를 버림함
+    public LocalDateTime stripMinutes(LocalDateTime l){
+        return LocalDateTime.of(l.getYear(), l.getMonth(), l.getDayOfMonth(), l.getHour(), 0);
     }
 }
