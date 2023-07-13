@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a88b6d1d-10dd-4d72-a834-002091493c7f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingVisualize.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingApp.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -135,7 +132,7 @@
       <workItem from="1688818361606" duration="953000" />
       <workItem from="1689145416018" duration="32520000" />
       <workItem from="1689215495925" duration="1400000" />
-      <workItem from="1689217248275" duration="454000" />
+      <workItem from="1689217248275" duration="2483000" />
     </task>
     <servers />
   </component>
