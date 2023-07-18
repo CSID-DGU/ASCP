@@ -83,7 +83,7 @@ public class PairingVisualize{
         StringBuilder sb = new StringBuilder();
         for(Flight flight : pairing){
             int a = (int) ChronoUnit.HOURS.between(firstTime, stripMinutes(flight.getOriginTime()));
-            sb.append(",".repeat(a));
+            sb.append(",".repeat(Math.max(0,a)));
             sb.append(flight.getOriginAirport().getName());
             sb.append(",");
             int b = (int) ChronoUnit.HOURS.between(flight.getOriginTime(), stripMinutes(flight.getDestTime()));

@@ -26,7 +26,7 @@ public class PairingApp {
                 new File("src/main/java/org/dongguk/solverConfig.xml"));
 
         // Load the problem
-        PairingSolution problem = generateDemoData(60);
+        PairingSolution problem = generateDemoData(100);
 
         // Solve the problem
         Solver<PairingSolution> solver = solverFactory.buildSolver();
@@ -66,7 +66,7 @@ public class PairingApp {
         }
 
         List<Airport> airports = new ArrayList<>();
-        Map<String, Integer>[] map = new Map[10];
+        Map<String, Integer>[] map = new Map[54];
         map[0] = new HashMap<>();
         int cnt = 0;
         // 데이터를 변환합니다.
