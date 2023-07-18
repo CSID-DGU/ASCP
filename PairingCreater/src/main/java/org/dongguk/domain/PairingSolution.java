@@ -55,7 +55,7 @@ public class PairingSolution {
                 System.out.print(flight.getIndex() + " ");
             });
 //            System.out.println(pairing.getTotalCost());
-            System.out.println("");
+            System.out.println();
         });
     }
 }
