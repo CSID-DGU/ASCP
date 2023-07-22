@@ -24,13 +24,7 @@ public class Aircraft {
 
     @Override
     public String toString() {
-        return "Aircraft{" +
-                "name='" + name + '\'' +
-                ", crewNum=" + crewNum +
-                ", flightSalary=" + flightSalary +
-                ", baseSalary=" + baseSalary +
-                ", layoverCost=" + layoverCost +
-                '}';
+        return "Aircraft - " + name;
     }
 
     public static Aircraft findInAircraftName(List<Aircraft> aircrafts, String name) {

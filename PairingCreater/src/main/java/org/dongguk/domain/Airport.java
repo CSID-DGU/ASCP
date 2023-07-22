@@ -18,10 +18,7 @@ public class Airport {
 
     @Override
     public String toString() {
-        return "Airport{" +
-                "name='" + name + '\'' +
-                ", deadheadCost=" + deadheadCost +
-                '}';
+        return "Airport - " + name;
     }
 
     public static Airport findAirportByName(List<Airport> airports, String name) {
