@@ -1,8 +1,8 @@
-package org.dongguk.domain;
+package org.dongguk.crewpairing.domain;
 
-import com.github.javaparser.utils.Pair;
 import lombok.*;
-import org.dongguk.app.PairingVisualize;
+import org.dongguk.common.domain.AbstractPersistable;
+import org.dongguk.crewpairing.util.PairingVisualize;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningScore;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
@@ -14,11 +14,10 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
 @PlanningSolution
-public class PairingSolution {
+public class PairingSolution extends AbstractPersistable {
     //Aircraft 에 대한 모든 정보
     @ProblemFactCollectionProperty
     private List<Aircraft> aircraftList;
@@ -38,7 +37,7 @@ public class PairingSolution {
 
     //score 변수
     @PlanningScore
-    private HardSoftScore score = null;
+    private HardSoftScore score;
 
     @Override
     public String toString() {
@@ -46,9 +45,20 @@ public class PairingSolution {
 
         builder.append("\n").append("Score = ").append(score).append("\n");
         for (Pairing pairing : pairingList) {
-            builder.append(pairing.toString()).append("\n\t\t").append(PairingVisualize.date2String(pairing)).append("\n");
+            builder.append(pairing.toString()).append(pairing.getPair().size() >= 1 && pairing.isBaseSame() ? "" : " ---------------- !! Deadhead!!")
+                    .append("\n\t\t").append(PairingVisualize.date2String(pairing)).append("\n");
         }
 
         return builder.toString();
+    }
+
+    @Builder
+    public PairingSolution(long id, List<Aircraft> aircraftList, List<Airport> airportList, List<Flight> flightList, List<Pairing> pairingList) {
+        super(id);
+        this.aircraftList = aircraftList;
+        this.airportList = airportList;
+        this.flightList = flightList;
+        this.pairingList = pairingList;
+        this.score = null;
     }
 }

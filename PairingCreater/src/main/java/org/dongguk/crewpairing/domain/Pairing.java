@@ -1,6 +1,7 @@
-package org.dongguk.domain;
+package org.dongguk.crewpairing.domain;
 
 import lombok.*;
+import org.dongguk.common.domain.AbstractPersistable;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.variable.PlanningListVariable;
 
@@ -11,16 +12,22 @@ import java.util.Map;
 
 @Getter
 @Setter
-@Builder
+
 @AllArgsConstructor
 @RequiredArgsConstructor
 @PlanningEntity
-public class Pairing {
-    private Integer id;
+public class Pairing extends AbstractPersistable {
     //변수로서 작동 된다. Pair 는 Flight 들의 연속이므로 ListVariable 로 작동된다.
     @PlanningListVariable(valueRangeProviderRefs = {"pairing"})
     private List<Flight> pair = new ArrayList<>();
     private Integer totalCost;
+
+    @Builder
+    public Pairing(long id, List<Flight> pair, Integer totalCost) {
+        super(id);
+        this.pair = pair;
+        this.totalCost = totalCost;
+    }
 
     //pair가 시간상 불가능하면 true를 반환
     public boolean getTimeImpossible() {
@@ -61,16 +68,7 @@ public class Pairing {
     public boolean isBaseSame() {
         return pair.get(0).getOriginAirport().getName().equals(pair.get(pair.size() - 1).getDestAirport().getName());
     }
-/*
-    private void calculateTotalCost() {
-        this.totalCost = 0;
-        for (int i = 0; i < pair.size(); i++) {
-            // this.totalCost += pair.get(i).getAircraft().getFlightSalary(); //시간 곱해줘야 함
-            // cost+=pair.get(i).getAircraft().getLayoverCost(); //조건 필요
-            this.totalCost+=pair.get(i).getAircraft().getBaseSalary();
-        }
-    }
-*/
+
     //마지막 비행 반환
     public Integer getDeadHeadCost() {
         Map<String, Integer> deadheads = pair.get(pair.size() - 1).getDestAirport().getDeadheadCost();
@@ -78,11 +76,7 @@ public class Pairing {
         String dest = pair.get(pair.size() - 1).getDestAirport().getName();
         String origin = pair.get(0).getOriginAirport().getName();
 
-        if (!dest.equals(origin)) {
-            return deadheads.get(origin);
-        } else {
-            return 0;
-        }
+        return deadheads.getOrDefault(origin, 0) * 60;
     }
 
     public Integer getLayoverCost(){
@@ -96,7 +90,7 @@ public class Pairing {
         }
         //(총 페어링 시간)이 (비행 시간의 합)보다 작으면 유효하지 않은 해로 간주함(이 경우 하드 조건에서 배제됨);
         if(totalFlight<flightTime) return 0;
-        return (int) (totalFlight-flightTime)*pair.get(0).getAircraft().getLayoverCost()/60;
+        return (int) (totalFlight-flightTime)*pair.get(0).getAircraft().getLayoverCost() / 600;
     }
 
     @Override

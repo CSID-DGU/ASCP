@@ -1,16 +1,15 @@
-package org.dongguk.domain;
+package org.dongguk.crewpairing.domain;
 
 import lombok.*;
+import org.dongguk.common.domain.AbstractPersistable;
 
 import java.util.List;
-import java.util.Optional;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class Aircraft {
+public class Aircraft extends AbstractPersistable {
     //기종 이름
     private String name;
     //기종 크루원 수
@@ -32,5 +31,15 @@ public class Aircraft {
                 .filter(temp -> temp.getName().equals(name))
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Builder
+    public Aircraft(long id, String name, int crewNum, int flightSalary, int baseSalary, int layoverCost) {
+        super(id);
+        this.name = name;
+        this.crewNum = crewNum;
+        this.flightSalary = flightSalary;
+        this.baseSalary = baseSalary;
+        this.layoverCost = layoverCost;
     }
 }

@@ -1,7 +1,5 @@
-package org.dongguk.domain;
+package org.dongguk.common.domain;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.optaplanner.core.api.domain.lookup.PlanningId;
 
 public abstract class AbstractPersistable {
@@ -15,7 +13,6 @@ public abstract class AbstractPersistable {
     protected AbstractPersistable(long id) {
         this.id = id;
     }
-
 
     public long getId() {
         return id;
