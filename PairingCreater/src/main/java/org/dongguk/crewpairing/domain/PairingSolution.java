@@ -45,7 +45,8 @@ public class PairingSolution extends AbstractPersistable {
 
         builder.append("\n").append("Score = ").append(score).append("\n");
         for (Pairing pairing : pairingList) {
-            builder.append(pairing.toString()).append("\n\t\t").append(PairingVisualize.date2String(pairing)).append("\n");
+            builder.append(pairing.toString()).append(pairing.getPair().size() >= 1 && pairing.isBaseSame() ? "" : " ---------------- !! Deadhead!!")
+                    .append("\n\t\t").append(PairingVisualize.date2String(pairing)).append("\n");
         }
 
         return builder.toString();

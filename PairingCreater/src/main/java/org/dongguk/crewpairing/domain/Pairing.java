@@ -68,16 +68,7 @@ public class Pairing extends AbstractPersistable {
     public boolean isBaseSame() {
         return pair.get(0).getOriginAirport().getName().equals(pair.get(pair.size() - 1).getDestAirport().getName());
     }
-/*
-    private void calculateTotalCost() {
-        this.totalCost = 0;
-        for (int i = 0; i < pair.size(); i++) {
-            // this.totalCost += pair.get(i).getAircraft().getFlightSalary(); //시간 곱해줘야 함
-            // cost+=pair.get(i).getAircraft().getLayoverCost(); //조건 필요
-            this.totalCost+=pair.get(i).getAircraft().getBaseSalary();
-        }
-    }
-*/
+
     //마지막 비행 반환
     public Integer getDeadHeadCost() {
         Map<String, Integer> deadheads = pair.get(pair.size() - 1).getDestAirport().getDeadheadCost();
@@ -85,11 +76,7 @@ public class Pairing extends AbstractPersistable {
         String dest = pair.get(pair.size() - 1).getDestAirport().getName();
         String origin = pair.get(0).getOriginAirport().getName();
 
-        if (!dest.equals(origin)) {
-            return deadheads.get(origin);
-        } else {
-            return 0;
-        }
+        return deadheads.getOrDefault(origin, 0) * 60;
     }
 
     public Integer getLayoverCost(){
@@ -103,7 +90,7 @@ public class Pairing extends AbstractPersistable {
         }
         //(총 페어링 시간)이 (비행 시간의 합)보다 작으면 유효하지 않은 해로 간주함(이 경우 하드 조건에서 배제됨);
         if(totalFlight<flightTime) return 0;
-        return (int) (totalFlight-flightTime)*pair.get(0).getAircraft().getLayoverCost()/60;
+        return (int) (totalFlight-flightTime)*pair.get(0).getAircraft().getLayoverCost() / 600;
     }
 
     @Override
