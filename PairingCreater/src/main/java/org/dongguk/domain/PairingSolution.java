@@ -1,6 +1,8 @@
 package org.dongguk.domain;
 
+import com.github.javaparser.utils.Pair;
 import lombok.*;
+import org.dongguk.app.PairingVisualize;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningScore;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
@@ -40,22 +42,13 @@ public class PairingSolution {
 
     @Override
     public String toString() {
-        return "PairingSolution{" +
-                "aircraftList=" + aircraftList +
-                ", \nairportList=" + airportList +
-                ",\nflightList=" + flightList +
-                ", \npairingList=" + pairingList +
-                ", \nscore=" + score +
-                '}';
-    }
+        StringBuilder builder = new StringBuilder();
 
-    public void printParingList() {
-        pairingList.forEach(pairing -> {
-            pairing.getPair().forEach(flight -> {
-                System.out.print(flight.getIndex() + " ");
-            });
-//            System.out.println(pairing.getTotalCost());
-            System.out.println();
-        });
+        builder.append("Score = ").append(score).append("\n");
+        for (Pairing pairing : pairingList) {
+            builder.append(pairing.toString()).append(PairingVisualize.date2String(pairing)).append("\n");
+        }
+
+        return builder.toString();
     }
 }

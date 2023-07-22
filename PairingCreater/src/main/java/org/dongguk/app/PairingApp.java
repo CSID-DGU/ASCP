@@ -25,7 +25,7 @@ public class PairingApp {
         SolverFactory<PairingSolution> solverFactory = SolverFactory.createFromXmlResource("solverConfig.xml");
 
         // Load the problem
-        PairingSolution problem = generateDemoData(100);
+        PairingSolution problem = generateDemoData(35);
 
         // Solve the problem
         Solver<PairingSolution> solver = solverFactory.buildSolver();
@@ -33,8 +33,9 @@ public class PairingApp {
 
         // Visualize the solution
         printPairing(solution);
-        PairingVisualize pv = new PairingVisualize(solution.getPairingList());
-        pv.visualize();
+        
+        // OutPut Excel
+        PairingVisualize.visualize(solution.getPairingList());
 
         System.exit(0);
     }
@@ -42,7 +43,6 @@ public class PairingApp {
     private static void printPairing(PairingSolution pairingSoultion){
         //결과 출력
         System.out.println(pairingSoultion);
-        pairingSoultion.printParingList();
 
     }
 

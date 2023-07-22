@@ -16,7 +16,7 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 landingTimes(constraintFactory),
                 pairLength(constraintFactory),
 //                pairMinLength(constraintFactory),
-//                baseDiff(constraintFactory)
+                baseDiff(constraintFactory)
         };
     }
 
@@ -69,13 +69,10 @@ public class ParingConstraintProvider implements ConstraintProvider {
 //    }
 
     //base 같아야 함 (soft) == Deadhead
-    /*
     private Constraint baseDiff(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
                 .filter(pairing -> (pairing.getPair().size() >= 1 && !pairing.isBaseSame()))
-                .penalize(HardSoftScore.ONE_SOFT, pairing -> pairing.getDeadHeadCost())
+                .penalize(HardSoftScore.ONE_SOFT, Pairing::getDeadHeadCost)
                 .asConstraint("base Diff");
     }
-
-     */
 }
