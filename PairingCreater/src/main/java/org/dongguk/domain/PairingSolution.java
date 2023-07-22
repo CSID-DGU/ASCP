@@ -44,9 +44,9 @@ public class PairingSolution {
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("Score = ").append(score).append("\n");
+        builder.append("\n").append("Score = ").append(score).append("\n");
         for (Pairing pairing : pairingList) {
-            builder.append(pairing.toString()).append(PairingVisualize.date2String(pairing)).append("\n");
+            builder.append(pairing.toString()).append("\n\t\t").append(PairingVisualize.date2String(pairing)).append("\n");
         }
 
         return builder.toString();
