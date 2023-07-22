@@ -5,11 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a88b6d1d-10dd-4d72-a834-002091493c7f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/ASCP.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/vcs.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingApp.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingVisualize.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingVisualize.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/PairingSolution.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/PairingSolution.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/score/ParingConstraintProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/score/ParingConstraintProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/solverConfig.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/solverConfig.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/solverConfig.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/solverConfig.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/visualized-data.csv" beforeDir="false" afterPath="$PROJECT_DIR$/visualized-data.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -77,7 +83,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.574977&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;vcs.Git&quot;,
@@ -89,6 +95,7 @@
       <recent name="C:\Users\HyungJoon\Documents\0_ASCP\PairingCreater\src\main\resources" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\HyungJoon\Development\1_ASCP\PairingCreater\src\main\resources" />
       <recent name="C:\Users\user\IdeaProjects\ASCP\PairingCreater\src\main\java\org\dongguk" />
       <recent name="C:\Users\user\IdeaProjects\ASCP\PairingCreater\src\main" />
       <recent name="C:\Users\user\IdeaProjects\ASCP\PairingCreater\src" />
@@ -142,6 +149,7 @@
       <workItem from="1689241047817" duration="496000" />
       <workItem from="1689581183815" duration="1358000" />
       <workItem from="1689601535373" duration="2339000" />
+      <workItem from="1690018645225" duration="1656000" />
     </task>
     <servers />
   </component>
@@ -155,11 +163,6 @@
           <properties class="java.lang.IllegalArgumentException" package="java.lang" />
           <option name="timeStamp" value="5" />
         </breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingApp.java</url>
-          <line>158</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

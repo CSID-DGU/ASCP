@@ -16,6 +16,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @PlanningEntity
 public class Pairing {
+    private Integer id;
     //변수로서 작동 된다. Pair 는 Flight 들의 연속이므로 ListVariable 로 작동된다.
     @PlanningListVariable(valueRangeProviderRefs = {"pairing"})
     private List<Flight> pair = new ArrayList<>();
@@ -72,9 +73,9 @@ public class Pairing {
 
     //마지막 비행 반환
     public Integer getDeadHeadCost() {
-        Map<String, Integer> deadheads = pair.get(pair.size() - 1).getOriginAirport().getDeadheadCost();
+        Map<String, Integer> deadheads = pair.get(pair.size() - 1).getDestAirport().getDeadheadCost();
 
-        String dest = pair.get(pair.size() - 1).getOriginAirport().getName();
+        String dest = pair.get(pair.size() - 1).getDestAirport().getName();
         String origin = pair.get(0).getOriginAirport().getName();
 
         if (!dest.equals(origin)) {
@@ -86,9 +87,7 @@ public class Pairing {
 
     @Override
     public String toString() {
-        return "Pairing{" +
-                "pair=" + pair +
-                ", totalCost=" + totalCost +
-                '}';
+        return "Pairing - " + id +
+                " { pair=" + pair + " }";
     }
 }
