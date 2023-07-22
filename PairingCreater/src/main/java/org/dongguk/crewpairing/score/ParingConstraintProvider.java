@@ -1,6 +1,6 @@
-package org.dongguk.score;
+package org.dongguk.crewpairing.score;
 
-import org.dongguk.domain.Pairing;
+import org.dongguk.crewpairing.domain.Pairing;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.score.stream.Constraint;
 import org.optaplanner.core.api.score.stream.ConstraintFactory;

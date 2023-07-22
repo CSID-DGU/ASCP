@@ -1,16 +1,16 @@
-package org.dongguk.domain;
+package org.dongguk.crewpairing.domain;
 
 import lombok.*;
+import org.dongguk.common.domain.AbstractPersistable;
 
 import java.util.List;
 import java.util.Map;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class Airport {
+public class Airport extends AbstractPersistable {
     //공항 이름
     private String name;
     //공항에 따른 Deadhead Cost 맵 ex) deadheadCost.get("ATL") -> 200
@@ -26,5 +26,12 @@ public class Airport {
                 .filter(airport -> airport.getName().equals(name))
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Builder
+    public Airport(long id, String name, Map<String, Integer> deadheadCost) {
+        super(id);
+        this.name = name;
+        this.deadheadCost = deadheadCost;
     }
 }

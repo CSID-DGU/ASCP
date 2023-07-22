@@ -1,8 +1,8 @@
-package org.dongguk.app;
+package org.dongguk.crewpairing.util;
 
 import lombok.RequiredArgsConstructor;
-import org.dongguk.domain.Flight;
-import org.dongguk.domain.Pairing;
+import org.dongguk.crewpairing.domain.Flight;
+import org.dongguk.crewpairing.domain.Pairing;
 
 import java.io.*;
 import java.time.LocalDateTime;
