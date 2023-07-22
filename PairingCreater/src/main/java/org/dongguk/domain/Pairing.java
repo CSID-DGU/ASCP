@@ -61,7 +61,7 @@ public class Pairing {
     public boolean isBaseSame() {
         return pair.get(0).getOriginAirport().getName().equals(pair.get(pair.size() - 1).getDestAirport().getName());
     }
-
+/*
     private void calculateTotalCost() {
         this.totalCost = 0;
         for (int i = 0; i < pair.size(); i++) {
@@ -70,7 +70,7 @@ public class Pairing {
             this.totalCost+=pair.get(i).getAircraft().getBaseSalary();
         }
     }
-
+*/
     //마지막 비행 반환
     public Integer getDeadHeadCost() {
         Map<String, Integer> deadheads = pair.get(pair.size() - 1).getDestAirport().getDeadheadCost();
@@ -83,6 +83,20 @@ public class Pairing {
         } else {
             return 0;
         }
+    }
+
+    public Integer getLayoverCost(){
+        if(pair.size() == 0) return 0;
+
+        long flightTime = 0;
+        long totalFlight = ChronoUnit.MINUTES.between(pair.get(0).getOriginTime(), pair.get(pair.size()-1).getDestTime());
+
+        for(Flight flight : pair){
+            flightTime += ChronoUnit.MINUTES.between(flight.getOriginTime(), flight.getDestTime());
+        }
+        //(총 페어링 시간)이 (비행 시간의 합)보다 작으면 유효하지 않은 해로 간주함(이 경우 하드 조건에서 배제됨);
+        if(totalFlight<flightTime) return 0;
+        return (int) (totalFlight-flightTime)*pair.get(0).getAircraft().getLayoverCost()/60;
     }
 
     @Override

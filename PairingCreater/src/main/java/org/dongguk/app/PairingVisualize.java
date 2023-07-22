@@ -25,6 +25,12 @@ public class PairingVisualize {
         LocalDateTime f = pairingList.get(0).getPair().get(0).getOriginTime();
         LocalDateTime firstTime = stripMinutes(f);
         LocalDateTime l = firstTime;
+
+        for (Pairing pair: pairingList){
+            for(Flight flight : pair.getPair()){
+                l = l.isAfter(flight.getDestTime()) ? l : flight.getDestTime();
+            }
+        }
         LocalDateTime lastTime = stripMinutes(l);
 
         //첫 줄에 날짜 단위 입력
@@ -68,23 +74,14 @@ public class PairingVisualize {
     }
 
     public static String date2String(Pairing pairing) {
-
-        //첫 항공기의 출발시간~마지막 항공기의 도착 시간까지 타임 테이블 생성
-        StringBuilder builder = new StringBuilder();
-        LocalDateTime f = pairing.getPair().get(0).getOriginTime();
-        LocalDateTime firstTime = stripMinutes(f);
-        LocalDateTime l = firstTime;
-        LocalDateTime lastTime = stripMinutes(l);
-
+        StringBuilder sb = new StringBuilder();
+        sb.append("[ ");
         for(Flight flight : pairing.getPair()){
-            if(flight.getDestTime().isAfter(l)) {
-                l = flight.getDestTime();
-            }
-
-            builder.append(" / ").append(flight.getOriginTime()).append(" ~ ").append(flight.getDestTime());
+            sb.append(" -> ").append(flight.getOriginTime()).append(" ~ ").append(flight.getDestTime());
         }
+        sb.append(" ]");
 
-        return builder.toString();
+        return sb.toString();
     }
 
     //출발시간과 도착 시간의 차이를 구하며 csv format 에 맞는 text 생성.
@@ -98,7 +95,6 @@ public class PairingVisualize {
             int b = (int) ChronoUnit.HOURS.between(flight.getOriginTime(), stripMinutes(flight.getDestTime()));
             sb.append("#######,".repeat(Math.max(0,b-1)));
             sb.append(flight.getDestAirport().getName());
-            sb.append(",");
 
             firstTime = stripMinutes(flight.getDestTime());
         }

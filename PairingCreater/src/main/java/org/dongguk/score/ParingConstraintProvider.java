@@ -16,14 +16,15 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 landingTimes(constraintFactory),
                 pairLength(constraintFactory),
 //                pairMinLength(constraintFactory),
-                baseDiff(constraintFactory)
+                baseDiff(constraintFactory),
+                layoverCost(constraintFactory)
         };
     }
 
     //시간 제약조건
     private Constraint timePossible(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
-                .filter(pairing -> pairing.getTimeImpossible())
+                .filter(Pairing::getTimeImpossible)
                 .penalize(HardSoftScore.ofHard(1000))
                 .asConstraint("Flight possible");
     }
@@ -31,7 +32,7 @@ public class ParingConstraintProvider implements ConstraintProvider {
     //공간 제약 조건
     private Constraint airportPossible(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
-                .filter(pairing -> pairing.getAirportImpossible())
+                .filter(Pairing::getAirportImpossible)
                 .penalize(HardSoftScore.ofHard(1000))
                 .asConstraint("Airport possible");
     }
@@ -39,7 +40,7 @@ public class ParingConstraintProvider implements ConstraintProvider {
     //같은 기종
     private Constraint aircraftType(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
-                .filter((paring -> paring.getAircraftImpossible()))
+                .filter((Pairing::getAircraftImpossible))
                 .penalize(HardSoftScore.ofHard(100))
                 .asConstraint("Same aircraft");
     }
@@ -73,6 +74,13 @@ public class ParingConstraintProvider implements ConstraintProvider {
         return constraintFactory.forEach(Pairing.class)
                 .filter(pairing -> (pairing.getPair().size() >= 1 && !pairing.isBaseSame()))
                 .penalize(HardSoftScore.ONE_SOFT, Pairing::getDeadHeadCost)
-                .asConstraint("base Diff");
+                .asConstraint("Base Diff");
+    }
+
+    private Constraint layoverCost(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Pairing.class)
+                .filter(pairing -> (pairing.getPair().size() >= 1))
+                .penalize(HardSoftScore.ONE_SOFT, Pairing::getLayoverCost)
+                .asConstraint("Layover Cost");
     }
 }
