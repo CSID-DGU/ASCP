@@ -22,8 +22,7 @@ import java.util.Map;
 public class PairingApp {
     public static void main(String[] args) {
 
-        SolverFactory<PairingSolution> solverFactory = SolverFactory.createFromXmlFile(
-                new File("src/main/java/org/dongguk/solverConfig.xml"));
+        SolverFactory<PairingSolution> solverFactory = SolverFactory.createFromXmlResource("solverConfig.xml");
 
         // Load the problem
         PairingSolution problem = generateDemoData(100);
@@ -176,7 +175,7 @@ public class PairingApp {
         for (int i=0;i<totalpair;i++){
             List<Flight> pair = new ArrayList<>();
             pair.add(flightList.get(i));
-            pairingList.add(new Pairing(pair,0));
+            pairingList.add(new Pairing(i, pair,0));
         }
 
         return PairingSolution.builder()

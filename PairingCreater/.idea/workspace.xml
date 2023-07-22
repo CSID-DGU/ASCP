@@ -5,12 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a88b6d1d-10dd-4d72-a834-002091493c7f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingApp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingVisualize.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingVisualize.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/score/ParingConstraintProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/score/ParingConstraintProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/solverConfig.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/solverConfig.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/visualized-data.csv" beforeDir="false" afterPath="$PROJECT_DIR$/visualized-data.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/Flight.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/Flight.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/Pairing.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dongguk/domain/Pairing.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dongguk/solverConfig.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/solverConfig.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,30 +65,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/user/IdeaProjects/ASCP_2/PairingCreater&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.574977&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;vcs.Git&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "C:/Users/user/IdeaProjects/ASCP_2/PairingCreater",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.574977",
+    "settings.editor.selected.configurable": "vcs.Git",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\HyungJoon\Documents\0_ASCP\PairingCreater\src\main\resources" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\HyungJoon\Development\1_ASCP\PairingCreater\src\main\resources" />
       <recent name="C:\Users\user\IdeaProjects\ASCP\PairingCreater\src\main\java\org\dongguk" />
       <recent name="C:\Users\user\IdeaProjects\ASCP\PairingCreater\src\main" />
       <recent name="C:\Users\user\IdeaProjects\ASCP\PairingCreater\src" />
@@ -157,7 +158,7 @@
         </breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/dongguk/app/PairingApp.java</url>
-          <line>158</line>
+          <line>157</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
       </breakpoints>
