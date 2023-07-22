@@ -1,18 +1,16 @@
-package org.dongguk.app;
+package org.dongguk.crewpairing.app;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.dongguk.domain.*;
-import org.dongguk.score.ParingConstraintProvider;
+import org.dongguk.crewpairing.domain.*;
+import org.dongguk.crewpairing.util.PairingVisualize;
 import org.drools.io.ClassPathResource;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
-import org.optaplanner.core.config.solver.SolverConfig;
 
 import java.io.*;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,6 +62,7 @@ public class PairingApp {
             throw new RuntimeException(e);
         }
 
+        int cnt_index = 0;
         List<Airport> airports = new ArrayList<>();
         Map<String, Integer>[] map = new Map[54];
         map[0] = new HashMap<>();
@@ -77,9 +76,12 @@ public class PairingApp {
             String dest = row.getCell(1).getStringCellValue();
             int deadhead = (int)(row.getCell(2).getNumericCellValue());
             map[cnt].put(dest,deadhead);
-            if(sheet.getRow(i+1)== null || origin!= sheet.getRow(i+1).getCell(0).getStringCellValue()){
-                airports.add(new Airport(row.getCell(0).getStringCellValue(),map[cnt]));
-                cnt++;
+            if(sheet.getRow(i+1)== null || origin != sheet.getRow(i+1).getCell(0).getStringCellValue()){
+                airports.add(Airport.builder()
+                        .id(cnt_index++)
+                        .name(row.getCell(0).getStringCellValue())
+                        .deadheadCost(map[cnt++]).build());
+
                 map[cnt] = new HashMap<>();
             }
 
@@ -107,6 +109,7 @@ public class PairingApp {
 
         List<Aircraft> aircraftList = new ArrayList<>();
 
+        int cnt = 0;
         Sheet sheet = workbook.getSheetAt(0);
         for (int i = 1; i <= sheet.getLastRowNum(); i++) {
             Row row = sheet.getRow(i);
@@ -115,8 +118,15 @@ public class PairingApp {
             int flightSalary = (int)(row.getCell(2).getNumericCellValue());
             int baseSalary = (int)(row.getCell(3).getNumericCellValue());
             int layoverSalary = (int)(row.getCell(4).getNumericCellValue());
-            aircraftList.add(new Aircraft(aircraft,crewNum,flightSalary,baseSalary,layoverSalary));
 
+            aircraftList.add(Aircraft.builder()
+                    .id(cnt++)
+                    .name(aircraft)
+                    .crewNum(crewNum)
+                    .flightSalary(flightSalary)
+                    .baseSalary(baseSalary)
+                    .layoverCost(layoverSalary)
+                    .build());
         }
         return aircraftList;
     }
@@ -142,6 +152,7 @@ public class PairingApp {
         List<Flight> flightList = new ArrayList<>();
 
         Sheet sheet = workbook.getSheetAt(0);
+        int cnt = 0;
         for (int i = 1; i <= sheet.getLastRowNum(); i++) {
             Row row = sheet.getRow(i);
             String index = row.getCell(0).getStringCellValue();
@@ -152,6 +163,7 @@ public class PairingApp {
             String aircraft = row.getCell(6).getStringCellValue();
 
             flightList.add(Flight.builder()
+                            .id(cnt++)
                             .index(index)
                             .originAirport(Airport.findAirportByName(airportList, origin))
                             .originTime(originDate)
@@ -179,6 +191,7 @@ public class PairingApp {
         }
 
         return PairingSolution.builder()
+                .id(0)
                 .aircraftList(aircraftList)
                 .airportList(airportList)
                 .flightList(flightList)

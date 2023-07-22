@@ -5,9 +5,9 @@
 https://www.optaplanner.org/xsd/solver/solver.xsd">
     <!-- Domain model configuration -->
     <solutionClass>
-        org.dongguk.domain.PairingSolution</solutionClass>
+        org.dongguk.crewpairing.domain.PairingSolution</solutionClass>
     <entityClass>
-        org.dongguk.domain.Pairing</entityClass>
+        org.dongguk.crewpairing.domain.Pairing</entityClass>
     <!-- Score configuration -->
     <scoreDirectorFactory>
         <!--
@@ -15,7 +15,7 @@ https://www.optaplanner.org/xsd/solver/solver.xsd">
             org.optaplanner.examples.cloudbalancing.optional.score.CloudBalancingEasyScoreCalculator</easyScoreCalculatorClass> -->
 
         <constraintProviderClass>
-            org.dongguk.score.ParingConstraintProvider</constraintProviderClass>
+            org.dongguk.crewpairing.score.ParingConstraintProvider</constraintProviderClass>
     </scoreDirectorFactory>
     <termination>
         <secondsSpentLimit>60</secondsSpentLimit>

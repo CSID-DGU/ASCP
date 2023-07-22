@@ -1,6 +1,7 @@
-package org.dongguk.domain;
+package org.dongguk.crewpairing.domain;
 
 import lombok.*;
+import org.dongguk.common.domain.AbstractPersistable;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.variable.PlanningListVariable;
 
@@ -11,16 +12,22 @@ import java.util.Map;
 
 @Getter
 @Setter
-@Builder
+
 @AllArgsConstructor
 @RequiredArgsConstructor
 @PlanningEntity
-public class Pairing {
-    private Integer id;
+public class Pairing extends AbstractPersistable {
     //변수로서 작동 된다. Pair 는 Flight 들의 연속이므로 ListVariable 로 작동된다.
     @PlanningListVariable(valueRangeProviderRefs = {"pairing"})
     private List<Flight> pair = new ArrayList<>();
     private Integer totalCost;
+
+    @Builder
+    public Pairing(long id, List<Flight> pair, Integer totalCost) {
+        super(id);
+        this.pair = pair;
+        this.totalCost = totalCost;
+    }
 
     //pair가 시간상 불가능하면 true를 반환
     public boolean getTimeImpossible() {
