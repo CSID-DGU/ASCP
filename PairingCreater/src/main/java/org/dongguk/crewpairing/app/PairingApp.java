@@ -7,7 +7,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dongguk.crewpairing.domain.*;
 import org.dongguk.crewpairing.persistence.FlightCrewPairingGenerator;
 import org.dongguk.crewpairing.util.PairingVisualize;
+import org.dongguk.crewpairing.util.ViewAllConstraint;
 import org.drools.io.ClassPathResource;
+import org.optaplanner.core.api.score.ScoreExplanation;
+import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
+import org.optaplanner.core.api.score.constraint.ConstraintMatchTotal;
+import org.optaplanner.core.api.solver.SolutionManager;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
 
@@ -39,6 +44,12 @@ public class PairingApp {
         
         // OutPut Excel
         PairingVisualize.visualize(solution.getPairingList());
+
+        // Check score detail
+        SolutionManager<PairingSolution, HardSoftScore> scoreManager = SolutionManager.create(solverFactory);
+        ScoreExplanation<PairingSolution, HardSoftScore> explain = scoreManager.explain(solution);
+        Map<String, ConstraintMatchTotal<HardSoftScore>> constraintMatchTotalMap = explain.getConstraintMatchTotalMap();
+        ViewAllConstraint.viewAll(constraintMatchTotalMap, solution);
 
         System.exit(0);
     }
