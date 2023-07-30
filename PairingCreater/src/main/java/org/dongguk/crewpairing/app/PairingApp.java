@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dongguk.crewpairing.domain.*;
 import org.dongguk.crewpairing.persistence.FlightCrewPairingGenerator;
+import org.dongguk.crewpairing.persistence.FlightCrewPairingXlsxFileIO;
 import org.dongguk.crewpairing.util.PairingVisualize;
 import org.dongguk.crewpairing.util.ViewAllConstraint;
 import org.drools.io.ClassPathResource;
@@ -33,7 +34,7 @@ public class PairingApp {
         FlightCrewPairingGenerator generator = new FlightCrewPairingGenerator();
 
         // Load the problem
-        PairingSolution problem = generator.create(pairingSetSize);
+        PairingSolution problem = generator.createInput(pairingSetSize);
 
         // Solve the problem
         Solver<PairingSolution> solver = solverFactory.buildSolver();
@@ -43,7 +44,8 @@ public class PairingApp {
         System.out.println(solution);
         
         // OutPut Excel
-        PairingVisualize.visualize(solution.getPairingList());
+        generator.createOutput(solution);
+//        PairingVisualize.visualize(solution.getPairingList());
 
         // Check score detail
         SolutionManager<PairingSolution, HardSoftScore> scoreManager = SolutionManager.create(solverFactory);

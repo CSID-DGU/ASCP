@@ -2,6 +2,7 @@ package org.dongguk.common.persistence;
 
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.optaplanner.core.api.score.Score;
 import org.optaplanner.core.api.solver.SolverFactory;
@@ -32,5 +33,14 @@ public abstract class AbstractXlsxSolutionFileIO<Solution_> implements SolutionF
         }
 
         public abstract Solution_ read();
+    }
+
+    public static abstract class AbstractXlsxWriter<Solution_, Score_ extends Score<Score_>> {
+        protected Solution_ solution;
+        public AbstractXlsxWriter(Solution_ solution, String solverConfigResource) {
+            this.solution = solution;
+        }
+
+        public abstract void write();
     }
 }
