@@ -14,10 +14,9 @@ public class FlightCrewPairingGenerator extends LoggingMain {
         this.solutionFileIO = new FlightCrewPairingXlsxFileIO();
     }
 
-    public PairingSolution create(int pairingSetSize) {
+    public PairingSolution createInput(int pairingSetSize) {
         // 엑셀 파일 통합 시 바꿔야 합니다.
         PairingSolution pairingSolution = solutionFileIO.read(null);
-
 
         List<Flight> flightList = pairingSolution.getFlightList();
 
@@ -33,5 +32,8 @@ public class FlightCrewPairingGenerator extends LoggingMain {
 
         // 만들어진 pairingSolution 반환
         return pairingSolution;
+    }
+    public void createOutput(PairingSolution solution) {
+        solutionFileIO.write(solution, null);
     }
 }

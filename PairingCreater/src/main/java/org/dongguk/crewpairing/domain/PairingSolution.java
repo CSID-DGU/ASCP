@@ -46,7 +46,7 @@ public class PairingSolution extends AbstractPersistable {
         builder.append("\n").append("Score = ").append(score).append("\n");
         for (Pairing pairing : pairingList) {
             builder.append(pairing.toString()).append(pairing.getPair().size() >= 1 && pairing.isBaseSame() ? "" : " ---------------- !! Deadhead!!")
-                    .append("\n\t\t").append(PairingVisualize.date2String(pairing)).append("\n");
+                    .append("\n\t\t").append(date2String(pairing)).append("\n");
         }
 
         return builder.toString();
@@ -60,5 +60,16 @@ public class PairingSolution extends AbstractPersistable {
         this.flightList = flightList;
         this.pairingList = pairingList;
         this.score = null;
+    }
+
+    private String date2String(Pairing pairing) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[ ");
+        for(Flight flight : pairing.getPair()){
+            sb.append(" -> ").append(flight.getOriginTime()).append(" ~ ").append(flight.getDestTime());
+        }
+        sb.append(" ]");
+
+        return sb.toString();
     }
 }

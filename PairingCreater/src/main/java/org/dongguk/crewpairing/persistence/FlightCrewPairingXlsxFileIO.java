@@ -8,19 +8,16 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dongguk.common.persistence.AbstractXlsxSolutionFileIO;
 import org.dongguk.crewpairing.app.PairingApp;
-import org.dongguk.crewpairing.domain.Aircraft;
-import org.dongguk.crewpairing.domain.Airport;
-import org.dongguk.crewpairing.domain.Flight;
-import org.dongguk.crewpairing.domain.PairingSolution;
+import org.dongguk.crewpairing.domain.*;
 import org.drools.io.ClassPathResource;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 
 import java.io.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+
+import static java.lang.String.valueOf;
 
 public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<PairingSolution> {
     @Override
@@ -35,7 +32,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
 
     @Override
     public void write(PairingSolution pairingSolution, File file) {
-
+        new FlightCrewPairingXlsxWriter(pairingSolution).write();
     }
 
     @Getter
@@ -185,5 +182,98 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
         }
 
 
+    }
+
+    @Getter
+    @Setter
+    private static class FlightCrewPairingXlsxWriter extends AbstractXlsxWriter<PairingSolution, HardSoftScore> {
+
+        public FlightCrewPairingXlsxWriter(PairingSolution pairingSolution) {
+            super(pairingSolution, PairingApp.SOVLER_CONFIG);
+        }
+
+        @Override
+        public void write() {
+            List<Pairing> pairingList = solution.getPairingList();
+            //첫 항공기의 출발시간을 기준으로 정렬
+            pairingList.removeIf(pairing -> pairing.getPair().isEmpty());
+            pairingList.sort(Comparator.comparing(a -> a.getPair().get(0).getOriginTime()));
+
+            //첫 항공기의 출발시간~마지막 항공기의 도착 시간까지 타임 테이블 생성
+            StringBuilder text = new StringBuilder();
+            LocalDateTime f = pairingList.get(0).getPair().get(0).getOriginTime();
+            LocalDateTime firstTime = stripMinutes(f);
+            LocalDateTime l = firstTime;
+
+            for (Pairing pair: pairingList){
+                for(Flight flight : pair.getPair()){
+                    l = l.isAfter(flight.getDestTime()) ? l : flight.getDestTime();
+                }
+            }
+            LocalDateTime lastTime = stripMinutes(l);
+
+            //첫 줄에 날짜 단위 입력
+            f = firstTime;
+            text.append(",").append(f).append(",");
+            f = f.plusHours(1);
+            do {
+                if(f.getHour()==0) text.append(f);
+                text.append(",");
+
+                f = f.plusHours(1);
+            } while (!f.equals(lastTime));
+            text.append("\n");
+
+            //두번째 줄에 시간 단위 입력
+            text.append(",");
+            f = firstTime;
+            do {
+                text.append(f.getHour());
+                text.append(":00,");
+
+                f = f.plusHours(1);
+            } while (!f.equals(lastTime));
+            text.append("\n");
+
+            //타임 테이블의 내용 작성
+            for(Pairing pairing : pairingList){
+                text.append("SET");
+                text.append(pairingList.indexOf(pairing));
+                text.append(",");
+                String s = buildTable(pairing.getPair(), firstTime);
+                text.append(s);
+            }
+
+            //csv 파일로 출력
+            try (FileWriter fw = new FileWriter("visualized-data.csv")) {
+                fw.write(text.toString());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        //출발시간과 도착 시간의 차이를 구하며 csv format 에 맞는 text 생성.
+        private static String buildTable(List<Flight> pairing, LocalDateTime firstTime){
+            StringBuilder sb = new StringBuilder();
+            for(Flight flight : pairing){
+                int a = (int) ChronoUnit.HOURS.between(firstTime, stripMinutes(flight.getOriginTime()));
+                sb.append(",".repeat(Math.max(0,a)));
+                sb.append(flight.getOriginAirport().getName());
+                sb.append(",");
+                int b = (int) ChronoUnit.HOURS.between(flight.getOriginTime(), stripMinutes(flight.getDestTime()));
+                sb.append("#######,".repeat(Math.max(0,b-1)));
+                sb.append(flight.getDestAirport().getName());
+
+                firstTime = stripMinutes(flight.getDestTime());
+            }
+            sb.append("\n");
+
+            return valueOf(sb);
+        }
+
+        //분 단위를 버림함
+        private static LocalDateTime stripMinutes(LocalDateTime l){
+            return LocalDateTime.of(l.getYear(), l.getMonth(), l.getDayOfMonth(), l.getHour(), 0);
+        }
     }
 }
