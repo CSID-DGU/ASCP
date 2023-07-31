@@ -7,6 +7,8 @@ import org.optaplanner.core.api.score.stream.ConstraintFactory;
 import org.optaplanner.core.api.score.stream.ConstraintProvider;
 
 public class ParingConstraintProvider implements ConstraintProvider {
+
+    //시간 최소시간
     @Override
     public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
         return new Constraint[]{
