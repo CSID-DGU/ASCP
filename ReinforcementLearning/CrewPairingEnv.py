@@ -5,8 +5,10 @@ from gym import spaces
 class CrewPairingEnv(gym.Env):
     def __init__(self, initial_pairing_set, cost_threshold):
         super(CrewPairingEnv, self).__init__()
-
+        
+        self.initial_pairing_set=initial_pairing_set
         self.pairing_set = initial_pairing_set
+        self.current_cost=self.calculate_cost(self.pairing_set)
         self.cost_threshold = cost_threshold
 
         # Define action and observation space
@@ -39,14 +41,6 @@ class CrewPairingEnv(gym.Env):
         # Return new state, reward, done, and additional info
         return self.pairing_set, reward, done, {}
 
-    def update_pairing_set(self, pairing_set, action):
-        """
-        Update the pairing set based on the action.
-        This should be implemented according to the specifics of the problem.
-        """
-        # Implement this method
-        return pairing_set
-
     def calculate_cost(self, pairing_set):
         """
         Calculate the cost of the given pairing set.
@@ -60,4 +54,5 @@ class CrewPairingEnv(gym.Env):
         Reset the state of the environment to an initial state.
         """
         self.pairing_set = self.initial_pairing_set
-        return self.pairing_set
+        self.current_cost=self.calculate_cost(self.pairing_set)
+        return self.pairing_set, self.current_cost
