@@ -18,7 +18,7 @@ https://www.optaplanner.org/xsd/solver/solver.xsd">
             org.dongguk.crewpairing.score.ParingConstraintProvider</constraintProviderClass>
     </scoreDirectorFactory>
     <termination>
-        <secondsSpentLimit>20</secondsSpentLimit>
+        <unimprovedSecondsSpentLimit>20</unimprovedSecondsSpentLimit>
     </termination>
 
     <constructionHeuristic/>

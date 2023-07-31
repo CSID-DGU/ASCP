@@ -43,7 +43,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
         private List<Flight> flightList;
 
         public FlightCrewPairingXlsxReader() {
-            super(PairingApp.SOVLER_CONFIG);
+            super(PairingApp.SOLVER_CONFIG);
         }
 
         @Override
@@ -189,7 +189,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
     private static class FlightCrewPairingXlsxWriter extends AbstractXlsxWriter<PairingSolution, HardSoftScore> {
 
         public FlightCrewPairingXlsxWriter(PairingSolution pairingSolution) {
-            super(pairingSolution, PairingApp.SOVLER_CONFIG);
+            super(pairingSolution, PairingApp.SOLVER_CONFIG);
         }
 
         @Override
@@ -214,7 +214,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
 
             //첫 줄에 날짜 단위 입력
             f = firstTime;
-            text.append(",").append(f).append(",");
+            text.append(",,").append(f).append(",");
             f = f.plusHours(1);
             do {
                 if(f.getHour()==0) text.append(f);
@@ -225,7 +225,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             text.append("\n");
 
             //두번째 줄에 시간 단위 입력
-            text.append(",");
+            text.append("INDEX,TYPE,");
             f = firstTime;
             do {
                 text.append(f.getHour());
@@ -237,9 +237,8 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
 
             //타임 테이블의 내용 작성
             for(Pairing pairing : pairingList){
-                text.append("SET");
-                text.append(pairingList.indexOf(pairing));
-                text.append(",");
+                text.append("SET").append(pairingList.indexOf(pairing)).append(",");
+                text.append(pairing.getPair().get(0).getAircraft().getName()).append(",");
                 String s = buildTable(pairing.getPair(), firstTime);
                 text.append(s);
             }
