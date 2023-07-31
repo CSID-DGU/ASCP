@@ -2,7 +2,6 @@ package org.dongguk.crewpairing.domain;
 
 import lombok.*;
 import org.dongguk.common.domain.AbstractPersistable;
-import org.dongguk.crewpairing.util.PairingVisualize;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningScore;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
