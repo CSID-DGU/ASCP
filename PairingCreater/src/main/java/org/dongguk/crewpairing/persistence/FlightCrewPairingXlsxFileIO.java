@@ -13,6 +13,7 @@ import org.drools.io.ClassPathResource;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 
 import java.io.*;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -192,8 +193,29 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             super(pairingSolution, PairingApp.SOLVER_CONFIG);
         }
 
+        public void output(){
+            List<Pairing> pairingList = solution.getPairingList();
+            StringBuilder text = new StringBuilder();
+
+            for(Pairing pairing : pairingList){
+                text.append(pairingList.indexOf(pairing)).append(",");
+                for(Flight flight : pairing.getPair()){
+                    text.append(flight.getIndex()).append(",");
+                }
+                text.append("\n");
+            }
+
+            try (FileWriter fw = new FileWriter("src/main/output/output-data.csv")) {
+                fw.write(text.toString());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         @Override
         public void write() {
+            output();
+
             List<Pairing> pairingList = solution.getPairingList();
             //첫 항공기의 출발시간을 기준으로 정렬
             pairingList.removeIf(pairing -> pairing.getPair().isEmpty());
@@ -205,8 +227,8 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             LocalDateTime firstTime = stripMinutes(f);
             LocalDateTime l = firstTime;
 
-            for (Pairing pair: pairingList){
-                for(Flight flight : pair.getPair()){
+            for (Pairing pairing: pairingList){
+                for(Flight flight : pairing.getPair()){
                     l = l.isAfter(flight.getDestTime()) ? l : flight.getDestTime();
                 }
             }
@@ -244,7 +266,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             }
 
             //csv 파일로 출력
-            try (FileWriter fw = new FileWriter("visualized-data.csv")) {
+            try (FileWriter fw = new FileWriter("src/main/output/visualized-data.csv")) {
                 fw.write(text.toString());
             } catch (IOException e) {
                 throw new RuntimeException(e);
