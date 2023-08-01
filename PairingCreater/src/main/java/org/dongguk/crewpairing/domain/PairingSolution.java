@@ -2,7 +2,6 @@ package org.dongguk.crewpairing.domain;
 
 import lombok.*;
 import org.dongguk.common.domain.AbstractPersistable;
-import org.dongguk.crewpairing.util.PairingVisualize;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningScore;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
@@ -45,7 +44,15 @@ public class PairingSolution extends AbstractPersistable {
 
         builder.append("\n").append("Score = ").append(score).append("\n");
         for (Pairing pairing : pairingList) {
-            builder.append(pairing.toString()).append(pairing.getPair().size() >= 1 && pairing.isBaseSame() ? "" : " ---------------- !! Deadhead!!")
+            String str = "";
+
+            if (pairing.getPair().size() == 0) {
+                str = " ---------------- !! Not Using";
+            } else if (!pairing.isBaseSame()) {
+                str = " ---------------- !! DeadHead";
+            }
+
+            builder.append(pairing.toString()).append(str)
                     .append("\n\t\t").append(date2String(pairing)).append("\n");
         }
 

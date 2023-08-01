@@ -1,15 +1,8 @@
 package org.dongguk.crewpairing.app;
 
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dongguk.crewpairing.domain.*;
 import org.dongguk.crewpairing.persistence.FlightCrewPairingGenerator;
-import org.dongguk.crewpairing.persistence.FlightCrewPairingXlsxFileIO;
-import org.dongguk.crewpairing.util.PairingVisualize;
 import org.dongguk.crewpairing.util.ViewAllConstraint;
-import org.drools.io.ClassPathResource;
 import org.optaplanner.core.api.score.ScoreExplanation;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.score.constraint.ConstraintMatchTotal;
@@ -17,8 +10,6 @@ import org.optaplanner.core.api.solver.SolutionManager;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
 
-import java.io.*;
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class PairingApp {
