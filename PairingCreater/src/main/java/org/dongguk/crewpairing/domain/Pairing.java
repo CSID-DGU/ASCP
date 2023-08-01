@@ -39,6 +39,34 @@ public class Pairing extends AbstractPersistable {
         return false;
     }
 
+    public int checkBreakTime(int index){
+        long breakTime = ChronoUnit.MINUTES.between(pair.get(index).getDestTime(), pair.get(index+1).getOriginTime());
+
+        return (int) Math.max(0,breakTime);
+    }
+
+    public boolean minBreakTime(){
+        for(int i=0; i<pair.size()-1; i++){
+            if(checkBreakTime(i) <= 60) return true;
+        }
+        return false;
+    }
+
+    public Integer getSatisCost(){
+        int satisScore = 0;
+        for(int i=0; i<pair.size()-1; i++){
+            if(checkBreakTime(i) <= 180) satisScore += 1000 * (180-checkBreakTime(i));
+        }
+        return satisScore;
+    }
+    public Integer getLayoverCost(){
+        int layoverCost = 0;
+        for(int i=0; i<pair.size()-1; i++){
+            if(checkBreakTime(i) >= 600) layoverCost += checkBreakTime(i) * pair.get(0).getAircraft().getLayoverCost()/100;
+        }
+        return layoverCost;
+    }
+
     //pair가 공간상 불가능하면 true를 반환
     public boolean getAirportImpossible() {
         for (int i = 0; i < pair.size() - 1; i++) {
@@ -78,7 +106,7 @@ public class Pairing extends AbstractPersistable {
 
         return deadheads.getOrDefault(origin, 0) * 60;
     }
-
+    /*
     public Integer getLayoverCost(){
         if(pair.size() == 0) return 0;
 
@@ -92,7 +120,7 @@ public class Pairing extends AbstractPersistable {
         if(totalFlight<flightTime) return 0;
         return (int) (totalFlight-flightTime)*pair.get(0).getAircraft().getLayoverCost() / 600;
     }
-
+    */
     @Override
     public String toString() {
         return "Pairing - " + id +
