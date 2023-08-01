@@ -21,10 +21,17 @@ public abstract class AbstractXlsxSolutionFileIO<Solution_> implements SolutionF
     }
 
     public static abstract class AbstractXlsxReader<Solution_, Score_ extends Score<Score_>> {
+
+        /**
+         * 엑셀을 읽고 쓰기 위한 멤버 변수
+         */
         // protected final XSSFWorkbook workbook;
-        // [ScoreDirector]는 최적화 문제를 해결하는 데 사용되는 중요한 객체로서, 해를 탐색하고 성능 점수를 계산하며,
-        // 이를 통해 탐색 과정에서 최적의 해를 찾기 위한 지침을 제공합니다.
-//        protected final ScoreDefinition<Score_> scoreDefinition;
+
+        /**
+         * [ScoreDirector]는 최적화 문제를 해결하는 데 사용되는 중요한 객체로서, 해를 탐색하고 성능 점수를 계산하며,
+         * 이를 통해 탐색 과정에서 최적의 해를 찾기 위한 지침을 제공합니다.
+         */
+        // protected final ScoreDefinition<Score_> scoreDefinition;
 
         public AbstractXlsxReader(String solverConfigResource) {
 //            SolverFactory<Solution_> solverFactory = SolverFactory.createFromXmlResource(solverConfigResource);
