@@ -14,25 +14,18 @@ public class FlightCrewPairingGenerator extends LoggingMain {
         this.solutionFileIO = new FlightCrewPairingXlsxFileIO();
     }
 
-    public PairingSolution createInput(int pairingSetSize) {
-        // 엑셀 파일 통합 시 바꿔야 합니다.
-        PairingSolution pairingSolution = solutionFileIO.read(null);
-
-        List<Flight> flightList = pairingSolution.getFlightList();
-
+    public List<Pairing> createEntities(List<Flight> flightList) {
         //초기 페어링 Set 구성 어차피 [solver]가 바꿔버려서 의미 없음 아무것도 안넣으면 오류나서 넣는 것
         List<Pairing> pairingList = new ArrayList<>();
-        for (int i=0; i < pairingSetSize; i++){
+        for (int i = 0; i < flightList.size(); i++){
             List<Flight> pair = new ArrayList<>();
             pair.add(flightList.get(i));
             pairingList.add(new Pairing(i, pair,0));
         }
-        // set 시용시 Unit 이 반환 되기 때문에 위에서 설정 
-        pairingSolution.setPairingList(pairingList);
 
-        // 만들어진 pairingSolution 반환
-        return pairingSolution;
+        return pairingList;
     }
+
     public void createOutput(PairingSolution solution) {
         solutionFileIO.write(solution, null);
     }
