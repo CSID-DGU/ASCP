@@ -13,7 +13,6 @@ import org.drools.io.ClassPathResource;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 
 import java.io.*;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -52,10 +51,24 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             readAircraft();
             readAirport();
             readFlight();
+            createEntities();
             return PairingSolution.builder()
                     .aircraftList(aircraftList)
                     .airportList(airportList)
-                    .flightList(flightList).build();
+                    .flightList(flightList)
+                    .pairingList(createEntities()).build();
+        }
+
+        private List<Pairing> createEntities() {
+            //초기 페어링 Set 구성 어차피 [solver]가 바꿔버려서 의미 없음 아무것도 안넣으면 오류나서 넣는 것
+            List<Pairing> pairingList = new ArrayList<>();
+            for (int i = 0; i < flightList.size(); i++){
+                List<Flight> pair = new ArrayList<>();
+                pair.add(flightList.get(i));
+                pairingList.add(new Pairing(i, pair,0));
+            }
+
+            return pairingList;
         }
 
         private void readAircraft() {
@@ -64,7 +77,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             InputStream inputStream = null;
 
             try {
-                inputStream = new ClassPathResource("salary.xlsx").getInputStream();
+                inputStream = new ClassPathResource("data/salary.xlsx").getInputStream();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -105,7 +118,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             InputStream inputStream = null;
 
             try {
-                inputStream = new ClassPathResource("deadhead.xlsx").getInputStream();
+                inputStream = new ClassPathResource("data/deadhead.xlsx").getInputStream();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -147,7 +160,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             InputStream inputStream = null;
 
             try {
-                inputStream = new ClassPathResource("flight.xlsx").getInputStream();
+                inputStream = new ClassPathResource("data/flight.xlsx").getInputStream();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
