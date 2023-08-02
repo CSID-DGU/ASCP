@@ -17,9 +17,11 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 aircraftType(constraintFactory),
                 landingTimes(constraintFactory),
                 pairLength(constraintFactory),
+                minBreakTime(constraintFactory),
 //                pairMinLength(constraintFactory),
                 baseDiff(constraintFactory),
-                layoverCost(constraintFactory)
+                layoverCost(constraintFactory),
+                satisCost(constraintFactory)
         };
     }
 
@@ -43,7 +45,7 @@ public class ParingConstraintProvider implements ConstraintProvider {
     private Constraint aircraftType(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
                 .filter((Pairing::getAircraftImpossible))
-                .penalize(HardSoftScore.ofHard(100))
+                .penalize(HardSoftScore.ofHard(500))
                 .asConstraint("Same aircraft");
     }
 
@@ -61,6 +63,14 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 .filter(pairing -> pairing.getPair().size() >= 2 && pairing.getTotalLength() > 7)
                 .penalize(HardSoftScore.ONE_HARD, pairing -> (int) (Math.floor(((double) pairing.getTotalLength() - 7)) * 100))
                 .asConstraint("Max Length");
+    }
+
+    private Constraint minBreakTime(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Pairing.class)
+                .filter(pairing -> (pairing.getPair().size() >= 2))
+                .filter((Pairing::minBreakTime))
+                .penalize(HardSoftScore.ofHard(500))
+                .asConstraint("Break Time");
     }
 
     //페어링 최소 길이
@@ -81,8 +91,15 @@ public class ParingConstraintProvider implements ConstraintProvider {
 
     private Constraint layoverCost(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
-                .filter(pairing -> (pairing.getPair().size() >= 1))
+                .filter(pairing -> (pairing.getPair().size() >= 2))
                 .penalize(HardSoftScore.ONE_SOFT, Pairing::getLayoverCost)
                 .asConstraint("Layover Cost");
+    }
+
+    private Constraint satisCost(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Pairing.class)
+                .filter(pairing -> (pairing.getPair().size() >= 2))
+                .penalize(HardSoftScore.ONE_SOFT, Pairing::getSatisCost)
+                .asConstraint("Satis Cost");
     }
 }
