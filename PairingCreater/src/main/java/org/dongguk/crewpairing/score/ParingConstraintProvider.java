@@ -17,7 +17,7 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 aircraftType(constraintFactory),
                 landingTimes(constraintFactory),
                 pairLength(constraintFactory),
-                minBreakTime(constraintFactory),
+//                minBreakTime(constraintFactory),
 //                pairMinLength(constraintFactory),
                 baseDiff(constraintFactory),
                 layoverCost(constraintFactory),
@@ -64,7 +64,7 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 .penalize(HardSoftScore.ONE_HARD, pairing -> (int) (Math.floor(((double) pairing.getTotalLength() - 7)) * 100))
                 .asConstraint("Max Length");
     }
-
+/*
     private Constraint minBreakTime(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
                 .filter(pairing -> (pairing.getPair().size() >= 2))
@@ -72,6 +72,7 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 .penalize(HardSoftScore.ofHard(500))
                 .asConstraint("Break Time");
     }
+ */
 
     //페어링 최소 길이
 //    private Constraint pairMinLength(ConstraintFactory constraintFactory) {

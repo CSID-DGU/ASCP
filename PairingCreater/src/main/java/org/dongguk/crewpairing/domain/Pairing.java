@@ -44,13 +44,14 @@ public class Pairing extends AbstractPersistable {
 
         return (int) Math.max(0,breakTime);
     }
-
+    /*
     public boolean minBreakTime(){
         for(int i=0; i<pair.size()-1; i++){
             if(checkBreakTime(i) <= 60) return true;
         }
         return false;
     }
+    */
 
     public Integer getSatisCost(){
         int satisScore = 0;
@@ -62,9 +63,13 @@ public class Pairing extends AbstractPersistable {
     public Integer getLayoverCost(){
         int layoverCost = 0;
         for(int i=0; i<pair.size()-1; i++){
-            if(checkBreakTime(i) >= 600) layoverCost += checkBreakTime(i) * pair.get(0).getAircraft().getLayoverCost()/100;
+            if(checkBreakTime(i) >= 360) layoverCost += checkBreakTime(i) * pair.get(0).getAircraft().getLayoverCost()/100;
         }
         return layoverCost;
+    }
+
+    public void getlawImpossible(){
+
     }
 
     //pair가 공간상 불가능하면 true를 반환
@@ -104,7 +109,7 @@ public class Pairing extends AbstractPersistable {
         String dest = pair.get(pair.size() - 1).getDestAirport().getName();
         String origin = pair.get(0).getOriginAirport().getName();
 
-        return deadheads.getOrDefault(origin, 0) * 60;
+        return deadheads.getOrDefault(origin, 0) * 10000;
     }
     /*
     public Integer getLayoverCost(){
