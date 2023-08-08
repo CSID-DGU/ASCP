@@ -3,7 +3,6 @@ package org.dongguk.common.app;
 import lombok.Getter;
 import lombok.Setter;
 import org.dongguk.common.business.SolutionBusiness;
-import org.dongguk.crewpairing.app.PairingApp;
 import org.optaplanner.core.api.solver.SolverFactory;
 import org.optaplanner.persistence.common.api.domain.solution.SolutionFileIO;
 
