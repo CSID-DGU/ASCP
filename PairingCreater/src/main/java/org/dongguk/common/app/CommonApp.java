@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.dongguk.common.business.SolutionBusiness;
 import org.optaplanner.core.api.solver.SolverFactory;
+import org.optaplanner.core.config.solver.SolverConfig;
+import org.optaplanner.core.config.solver.termination.TerminationConfig;
 import org.optaplanner.persistence.common.api.domain.solution.SolutionFileIO;
 
 import java.awt.*;
@@ -55,8 +57,12 @@ public abstract class CommonApp<Solution_> extends LoggingMain {
     }
 
     private SolutionBusiness<Solution_, ?> createSolutionBusiness() {
+        SolverConfig solverConfig = SolverConfig.createFromXmlResource(solverConfigResource);
+        solverConfig.withTerminationConfig(
+                new TerminationConfig().withUnimprovedSecondsSpentLimit(100L).withSecondsSpentLimit(100L));
+
         SolutionBusiness<Solution_, ?> solutionBusiness = new SolutionBusiness<>(this,
-                SolverFactory.createFromXmlResource(solverConfigResource));
+                SolverFactory.create(solverConfig));
         solutionBusiness.setDataDir(determineDataDir(dataDirName));
         solutionBusiness.setSolutionFileIO(createSolutionFileIO());
         solutionBusiness.updateDataDirs();

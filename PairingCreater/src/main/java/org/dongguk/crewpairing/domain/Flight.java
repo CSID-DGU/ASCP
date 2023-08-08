@@ -4,6 +4,7 @@ import lombok.*;
 import org.dongguk.common.domain.AbstractPersistable;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Getter
 @Setter
@@ -23,6 +24,8 @@ public class Flight extends AbstractPersistable {
     private LocalDateTime destTime;
     //기종
     private Aircraft aircraft;
+    //운항시간
+    private int flightTime;
 
     @Override
     public String toString() {
@@ -38,5 +41,6 @@ public class Flight extends AbstractPersistable {
         this.destAirport = destAirport;
         this.destTime = destTime;
         this.aircraft = aircraft;
+        this.flightTime = (int) ChronoUnit.MINUTES.between(originTime, destTime);
     }
 }
