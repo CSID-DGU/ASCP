@@ -17,7 +17,7 @@ import org.optaplanner.persistence.common.api.domain.solution.SolutionFileIO;
 import java.util.*;
 
 public class PairingApp extends CommonApp<PairingSolution> {
-    public static final String SOLVER_CONFIG = "airlineCrewSchedulingSolverConfig.xml";
+    public static final String SOLVER_CONFIG = "solverConfig.xml";
     public static final String DATA_DIR_NAME = "crewpairing";
 
     public static void main(String[] args) {
