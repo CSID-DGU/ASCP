@@ -69,8 +69,8 @@ public final class SolutionBusiness<Solution_, Score_ extends Score<Score_>> imp
 
     private File dataDir;
     private SolutionFileIO<Solution_> solutionFileIO;
-    private File unsolvedDataDir;
-    private File solvedDataDir;
+    private File inputDataDir;
+    private File outputDataDir;
 
     private String solutionFileName = null;
 
@@ -82,23 +82,23 @@ public final class SolutionBusiness<Solution_, Score_ extends Score<Score_>> imp
     }
 
     public void updateDataDirs() {
-        this.unsolvedDataDir = new File(dataDir, "unsolved");
-        if (!unsolvedDataDir.exists()) {
-            throw new IllegalStateException(String.format("해당 Path [%s]에 Unsolved Data Directory는 존재하지 않습니다.", unsolvedDataDir.getAbsolutePath()));
+        this.inputDataDir = new File(dataDir, "input");
+        if (!inputDataDir.exists()) {
+            throw new IllegalStateException(String.format("해당 Path [%s]에 Unsolved Data Directory는 존재하지 않습니다.", inputDataDir.getAbsolutePath()));
         }
 
-        this.solvedDataDir = new File(dataDir, "solved");
-        if (!solvedDataDir.exists()) {
-            throw new IllegalStateException(String.format("해당 Path [%s]에 Solved Data Directory는 존재하지 않습니다.", solvedDataDir.getAbsolutePath()));
+        this.outputDataDir = new File(dataDir, "output");
+        if (!outputDataDir.exists()) {
+            throw new IllegalStateException(String.format("해당 Path [%s]에 Solved Data Directory는 존재하지 않습니다.", outputDataDir.getAbsolutePath()));
         }
     }
 
-    public List<File> getUnsolvedFileList() {
-        return getFileList(unsolvedDataDir, solutionFileIO.getInputFileExtension());
+    public List<File> getInputFileList() {
+        return getFileList(inputDataDir, solutionFileIO.getInputFileExtension());
     }
 
-    public List<File> getSolvedFileList() {
-        return getFileList(solvedDataDir, solutionFileIO.getInputFileExtension());
+    public List<File> getOutputFileList() {
+        return getFileList(outputDataDir, solutionFileIO.getInputFileExtension());
     }
 
     // 동시성 보장을 윈한 Atomic 객체를 사용했으므로 따르게 get, set 만들기

@@ -1,7 +1,6 @@
 package org.dongguk.crewpairing.score;
 
 import org.dongguk.crewpairing.domain.Pairing;
-import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 import org.optaplanner.core.api.score.stream.Constraint;
 import org.optaplanner.core.api.score.stream.ConstraintFactory;
@@ -86,7 +85,7 @@ public class ParingConstraintProvider implements ConstraintProvider {
     //base 같아야 함 (soft) == Deadhead
     private Constraint baseDiff(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
-                .filter(pairing -> (pairing.getPair().size() >= 1 && !pairing.isBaseSame()))
+                .filter(pairing -> (pairing.getPair().size() >= 1 && pairing.equalBase()))
                 .penalize(HardSoftLongScore.ONE_SOFT, Pairing::getDeadHeadCost)
                 .asConstraint("Base Diff");
     }

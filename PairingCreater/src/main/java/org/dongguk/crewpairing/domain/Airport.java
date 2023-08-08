@@ -11,9 +11,9 @@ import java.util.Map;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class Airport extends AbstractPersistable {
-    //공항 이름
+    // 공항 이름
     private String name;
-    //공항에 따른 Deadhead Cost 맵 ex) deadheadCost.get("ATL") -> 200
+    // 공항에 따른 Deadhead Cost 맵 ex) deadheadCost.get("ATL") -> 200
     private Map<String, Integer> deadheadCost;
 
     @Override
@@ -21,7 +21,7 @@ public class Airport extends AbstractPersistable {
         return "Airport - " + name;
     }
 
-    public static Airport findAirportByName(List<Airport> airports, String name) {
+    public static Airport of(List<Airport> airports, String name) {
         return airports.stream()
                 .filter(airport -> airport.getName().equals(name))
                 .findFirst()
@@ -33,5 +33,9 @@ public class Airport extends AbstractPersistable {
         super(id);
         this.name = name;
         this.deadheadCost = deadheadCost;
+    }
+
+    public void putDeadhead(String name, Integer deadhead) {
+        deadheadCost.put(name, deadhead);
     }
 }

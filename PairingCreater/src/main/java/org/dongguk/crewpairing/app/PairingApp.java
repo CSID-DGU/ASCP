@@ -6,7 +6,6 @@ import org.dongguk.crewpairing.domain.*;
 import org.dongguk.crewpairing.persistence.FlightCrewPairingXlsxFileIO;
 import org.dongguk.crewpairing.util.ViewAllConstraint;
 import org.optaplanner.core.api.score.ScoreExplanation;
-import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 import org.optaplanner.core.api.score.constraint.ConstraintMatchTotal;
 import org.optaplanner.core.api.solver.SolutionManager;

@@ -85,7 +85,7 @@ public class Pairing extends AbstractPersistable {
     //기종이 다 같은지 다 같지 않으면 true 반환
     public boolean getAircraftImpossible() {
         for (int i = 0; i < pair.size() - 1; i++) {
-            if (!pair.get(i).getAircraft().getName().equals(pair.get(i + 1).getAircraft().getName())) {
+            if (!pair.get(i).getAircraft().getType().equals(pair.get(i + 1).getAircraft().getType())) {
                 return true;
             }
         }
@@ -98,8 +98,8 @@ public class Pairing extends AbstractPersistable {
     }
 
     //첫번쨰 비행과 마지막 비행 Base 비교
-    public boolean isBaseSame() {
-        return pair.get(0).getOriginAirport().getName().equals(pair.get(pair.size() - 1).getDestAirport().getName());
+    public boolean equalBase() {
+        return !pair.get(0).getOriginAirport().getName().equals(pair.get(pair.size() - 1).getDestAirport().getName());
     }
 
     //마지막 비행 반환
