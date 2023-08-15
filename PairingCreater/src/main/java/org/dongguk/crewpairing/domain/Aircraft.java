@@ -7,39 +7,37 @@ import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@RequiredArgsConstructor
 public class Aircraft extends AbstractPersistable {
-    //기종 이름
-    private String type;
-    //기종 크루원 수
-    private int crewNum;
-    //비행 수당
-    private int flightSalary;
-    //기본급
-    private int baseSalary;
-    //layover 비용
-    private int layoverCost;
+    // 기종 이름
+    final private String type;
+    // 기종 크루원 수
+    final private int crewNum;
+    // 비행 수당
+    final private int flightCost;
+    // Layover 비용
+    final private int layoverCost;
+    // QuickTurn 비용
+    final private int quickTurnCost;
 
     @Override
     public String toString() {
         return "Aircraft - " + type;
     }
 
-    public static Aircraft of(List<Aircraft> aircrafts, String name) {
+    public static Aircraft of(final List<Aircraft> aircrafts, final String name) {
         return aircrafts.stream()
                 .filter(temp -> temp.getType().equals(name))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new IllegalArgumentException("Aircraft not found"));
     }
 
     @Builder
-    public Aircraft(long id, String type, int crewNum, int flightSalary, int baseSalary, int layoverCost) {
-        super(id);
+    public Aircraft(long id, String type, int crewNum, int flightCost, int layoverCost, int quickTurnCost) {
+        this.id = id;
         this.type = type;
         this.crewNum = crewNum;
-        this.flightSalary = flightSalary;
-        this.baseSalary = baseSalary;
+        this.flightCost = flightCost;
         this.layoverCost = layoverCost;
+        this.quickTurnCost = quickTurnCost;
     }
 }

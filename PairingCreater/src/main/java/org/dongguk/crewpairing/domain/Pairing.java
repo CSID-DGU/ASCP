@@ -21,6 +21,39 @@ public class Pairing extends AbstractPersistable {
     @PlanningListVariable(valueRangeProviderRefs = {"pairing"})
     private List<Flight> pair = new ArrayList<>();
     private Integer totalCost;
+    private static int briefingTime;
+    private static int debriefingTime;
+    private static int restTime;
+    private static int LayoverTime;
+    private static int QuickTurnaroundTime;
+
+    public static void setStaticTime(int briefingTime,
+                        int debriefingTime,
+                        int restTime,
+                        int LayoverTime,
+                        int QuickTurnaroundTime) {
+        Pairing.briefingTime = briefingTime;
+        Pairing.debriefingTime = debriefingTime;
+        Pairing.restTime = restTime;
+        Pairing.LayoverTime = LayoverTime;
+        Pairing.QuickTurnaroundTime = QuickTurnaroundTime;
+    }
+
+    public void setDebriefingTime(int debriefingTime) {
+        Pairing.debriefingTime = debriefingTime;
+    }
+
+    public void setRestTime(int restTime) {
+        Pairing.restTime = restTime;
+    }
+
+    public void setLayoverTime(int layoverTime) {
+        LayoverTime = layoverTime;
+    }
+
+    public void setQuickTurnaroundTime(int quickTurnaroundTime) {
+        QuickTurnaroundTime = quickTurnaroundTime;
+    }
 
     @Builder
     public Pairing(long id, List<Flight> pair, Integer totalCost) {
@@ -36,6 +69,7 @@ public class Pairing extends AbstractPersistable {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -109,7 +143,7 @@ public class Pairing extends AbstractPersistable {
         String dest = pair.get(pair.size() - 1).getDestAirport().getName();
         String origin = pair.get(0).getOriginAirport().getName();
 
-        return deadheads.getOrDefault(origin, 0) * 10000;
+        return deadheads.getOrDefault(origin, 0) * 100;
     }
     /*
     public Integer getLayoverCost(){
