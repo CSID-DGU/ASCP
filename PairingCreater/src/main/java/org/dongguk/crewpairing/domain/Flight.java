@@ -12,8 +12,8 @@ import java.time.temporal.ChronoUnit;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class Flight extends AbstractPersistable {
-    //비행편 인덱스
-    private String index;
+    //비행편 T/N
+    private String TailNumber;
     //출발 공항
     private Airport originAirport;
     //출발 시간
@@ -27,15 +27,19 @@ public class Flight extends AbstractPersistable {
     //운항시간
     private int flightTime;
 
+    public String getIndex() {
+        return "F" + id;
+    }
+
     @Override
     public String toString() {
-        return index;
+        return "F"+ id;
     }
 
     @Builder
-    public Flight(long id, String index, Airport originAirport, LocalDateTime originTime, Airport destAirport, LocalDateTime destTime, Aircraft aircraft) {
+    public Flight(long id, String TailNumber, Airport originAirport, LocalDateTime originTime, Airport destAirport, LocalDateTime destTime, Aircraft aircraft) {
         super(id);
-        this.index = index;
+        this.TailNumber = TailNumber;
         this.originAirport = originAirport;
         this.originTime = originTime;
         this.destAirport = destAirport;

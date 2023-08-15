@@ -7,7 +7,7 @@ import org.optaplanner.core.api.domain.solution.PlanningScore;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
 import org.optaplanner.core.api.domain.solution.ProblemFactCollectionProperty;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
-import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
+import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class PairingSolution extends AbstractPersistable {
 
     //score 변수
     @PlanningScore
-    private HardSoftScore score;
+    private HardSoftLongScore score;
 
     @Override
     public String toString() {
@@ -48,7 +48,7 @@ public class PairingSolution extends AbstractPersistable {
 
             if (pairing.getPair().size() == 0) {
                 str = " ---------------- !! Not Using";
-            } else if (!pairing.isBaseSame()) {
+            } else if (pairing.equalBase()) {
                 str = " ---------------- !! DeadHead";
             }
 

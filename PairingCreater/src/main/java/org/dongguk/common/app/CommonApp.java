@@ -23,6 +23,7 @@ public abstract class CommonApp<Solution_> extends LoggingMain {
     protected final String dataDirName;
 
     protected SolutionBusiness<Solution_, ?> solutionBusiness;
+    protected SolverConfig solverConfig;
 
     // 우리가 사용할 Data Directory의 하위 경로 지정
     public static File determineDataDir(String dataDirName) {
