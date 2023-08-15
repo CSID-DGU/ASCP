@@ -13,6 +13,7 @@ import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 
 import java.io.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -28,16 +29,13 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
 
     @Override
     public PairingSolution read(File inputFile) {
-        try (InputStream in = new ClassPathResource("ASCP_Data_Input.xlsx").getInputStream()) {
+        try (InputStream in = new ClassPathResource("input/ASCP_Data_Input.xlsx").getInputStream()) {
             XSSFWorkbook workbook = new XSSFWorkbook(in);
             return new FlightCrewPairingXlsxReader(workbook).read();
         } catch (IOException | RuntimeException e) {
             log.error("{} {}", e.getMessage(), "Input File Error. Please Input File Format");
-            System.exit(1);
+            throw new RuntimeException(e);
         }
-
-        // 절대 나오면 안되는 null을 정의
-        return null;
     }
 
     @Override
@@ -53,6 +51,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
         private final List<Flight> flightList = new ArrayList<>();
 
         private final Map<String, Airport> airportMap = new HashMap<>();
+        private int exchangeRate;
 
         public FlightCrewPairingXlsxReader(XSSFWorkbook workbook) {
             super(workbook, PairingApp.SOLVER_CONFIG);
@@ -60,11 +59,12 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
 
         @Override
         public PairingSolution read() {
+            readExchangeRate();
+            readTimeData();
             readAircraft();
             readAirport();
             readDeadhead();
             readFlight();
-            createEntities();
             return PairingSolution.builder()
                     .aircraftList(aircraftList)
                     .airportList(airportList)
@@ -72,23 +72,39 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     .pairingList(createEntities()).build();
         }
 
-        private List<Pairing> createEntities() {
-            //초기 페어링 Set 구성 어차피 [solver]가 바꿔버려서 의미 없음 아무것도 안넣으면 오류나서 넣는 것
-            List<Pairing> pairingList = new ArrayList<>();
-            for (int i = 0; i < flightList.size(); i++) {
-                List<Flight> pair = new ArrayList<>();
-                pair.add(flightList.get(i));
-                pairingList.add(new Pairing(i, pair, 0));
-            }
+        private void readTimeData() {
+            nextSheet("User_Time");      // Sheet 고르기
+            currentRowIterator.next();              // 주제목 스킵
+            currentRowIterator.next();              // 빈행  스킵
+            currentRowIterator.next();              // 보조제목  스킵
+            currentRowIterator.next();              // Header  스킵
 
-            return pairingList;
+            XSSFRow row = (XSSFRow) currentRowIterator.next();
+
+            Pairing.setStaticTime((int) row.getCell(1).getNumericCellValue(),
+                    (int) row.getCell(2).getNumericCellValue(),
+                    (int) row.getCell(3).getNumericCellValue(),
+                    (int) row.getCell(4).getNumericCellValue(),
+                    (int) row.getCell(5).getNumericCellValue());
+
+            log.info("Complete Read Time Data");
+        }
+
+        private void readExchangeRate() {
+            nextSheet("User_Cost");      // Sheet 고르기
+            currentRowIterator.next();              // 주제목 스킵
+            currentRowIterator.next();              // 빈 행 스킵
+
+            exchangeRate = (int) currentRowIterator.next().getCell(12).getNumericCellValue();
+
+            log.info("Complete Read Exchange Rate");
         }
 
         private void readAircraft() {
             aircraftList.clear();
-            nextSheet("Program_Input_Aircraft");    // Sheet 고르기
-            currentRowIterator.next();  // 주제목 스킵
-            currentRowIterator.next();  // Header 스킵
+            nextSheet("Program_Cost");      // Sheet 고르기
+            currentRowIterator.next();              // 주제목 스킵
+            currentRowIterator.next();              // Header 스킵
 
             int indexCnt = 0;
             while (currentRowIterator.hasNext()) {
@@ -99,9 +115,9 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                             .id(indexCnt++)
                             .type(row.getCell(0).getStringCellValue())
                             .crewNum((int) row.getCell(1).getNumericCellValue())
-                            .flightSalary((int) row.getCell(2).getNumericCellValue())
-                            .baseSalary((int) row.getCell(3).getNumericCellValue())
-                            .layoverCost((int) row.getCell(4).getNumericCellValue()).build());
+                            .flightCost((int) row.getCell(2).getNumericCellValue() / exchangeRate)
+                            .layoverCost((int) row.getCell(3).getNumericCellValue() / exchangeRate)
+                            .quickTurnCost((int) row.getCell(4).getNumericCellValue() / exchangeRate).build());
                 } catch (IllegalStateException e) {
                     log.info("Finish Read Aircraft File");
                     break;
@@ -109,12 +125,15 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     throw new RuntimeException(e);
                 }
             }
+
+            log.info("Complete Read Aircraft Data");
         }
 
         private void readAirport() {
             airportMap.clear();
-            nextSheet("Program_Input_Airport");    // Sheet 고르기
+            nextSheet("User_Hotel");    // Sheet 고르기
             currentRowIterator.next();  // 주제목 스킵
+            currentRowIterator.next();  // 빈 행 스킵
             currentRowIterator.next();  // Header 스킵
 
             int indexCnt = 0;
@@ -122,9 +141,14 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 XSSFRow row = (XSSFRow) currentRowIterator.next();
 
                 try {
+                    if (row.getCell(0).getStringCellValue().isBlank()) {
+                        continue;
+                    }
+
                     airportMap.put(row.getCell(0).getStringCellValue(), Airport.builder()
                             .id(indexCnt++)
                             .name(row.getCell(0).getStringCellValue())
+                            .hotelCost((int) row.getCell(1).getNumericCellValue() / exchangeRate)
                             .deadheadCost(new HashMap<>()).build());
                 } catch (IllegalStateException e) {
                     log.info("Finish Read Airport File");
@@ -133,12 +157,15 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     throw new RuntimeException(e);
                 }
             }
+
+            log.info("Complete Read Airport Data");
         }
 
         private void readDeadhead() {
             airportList.clear();
             nextSheet("User_Deadhead");    // Sheet 고르기
             currentRowIterator.next();  // 주제목 스킵
+            currentRowIterator.next();  // 빈 행 스킵
             currentRowIterator.next();  // Header 스킵
 
             while (currentRowIterator.hasNext()) {
@@ -152,7 +179,8 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     }
 
                     airportMap.get(origin)
-                            .putDeadhead(row.getCell(1).getStringCellValue(), (int) row.getCell(2).getNumericCellValue());
+                            .putDeadhead(row.getCell(1).getStringCellValue(),
+                                    (int) row.getCell(2).getNumericCellValue() / exchangeRate);
                 } catch (IllegalStateException e) {
                     log.info("Finish Read DeadHead File");
                     break;
@@ -162,12 +190,14 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             }
 
             airportList.addAll(airportMap.values());
+            log.info("Complete Read Deadhead Data");
         }
 
         private void readFlight() {
             flightList.clear();
             nextSheet("User_Flight");    // Sheet 고르기
             currentRowIterator.next();  // 주제목 스킵
+            currentRowIterator.next();  // 빈 행 스킵
             currentRowIterator.next();  // Header 스킵
 
             int indexCnt = 0;
@@ -187,9 +217,24 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     log.info("Finish Read Flight File");
                     break;
                 } catch (Exception e) {
+                    log.error("{}", e.getMessage());
                     throw new RuntimeException(e);
                 }
             }
+
+            log.info("Complete Read Flight Data");
+        }
+
+        private List<Pairing> createEntities() {
+            //초기 페어링 Set 구성 어차피 [solver]가 바꿔버려서 의미 없음 아무것도 안넣으면 오류나서 넣는 것
+            List<Pairing> pairingList = new ArrayList<>();
+            for (int i = 0; i < flightList.size(); i++) {
+                List<Flight> pair = new ArrayList<>();
+                pair.add(flightList.get(i));
+                pairingList.add(new Pairing(i, pair, 0));
+            }
+
+            return pairingList;
         }
     }
 
@@ -201,7 +246,16 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 super(pairingSolution, PairingApp.SOLVER_CONFIG);
             }
 
-            public void output() {
+            @Override
+            public void write() {
+                String timeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
+                exportPairingData(timeStr);
+                exportVisualData(timeStr);
+            }
+
+            private void exportPairingData(String timeStr) {
+                String fileName = timeStr + "-pairingData.csv";
+
                 List<Pairing> pairingList = solution.getPairingList();
                 StringBuilder text = new StringBuilder();
 
@@ -213,16 +267,15 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     text.append("\n");
                 }
 
-                try (FileWriter fw = new FileWriter("src/main/output/output-data.csv")) {
+                try (FileWriter fw = new FileWriter("src/main/resources/output/" + fileName)) {
                     fw.write(text.toString());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }
 
-            @Override
-            public void write() {
-                output();
+            public void exportVisualData(String timeStr) {
+                String fileName = timeStr + "-visualData.csv";
 
                 List<Pairing> pairingList = solution.getPairingList();
                 //첫 항공기의 출발시간을 기준으로 정렬
@@ -274,7 +327,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 }
 
                 //csv 파일로 출력
-                try (FileWriter fw = new FileWriter("src/main/output/visualized-data.csv")) {
+                try (FileWriter fw = new FileWriter("src/main/resources/output/" + fileName)) {
                     fw.write(text.toString());
                 } catch (IOException e) {
                     throw new RuntimeException(e);

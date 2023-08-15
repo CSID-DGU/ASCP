@@ -30,6 +30,9 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok:1.18.28'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
 
+    implementation group: 'joda-time', name: 'joda-time', version: '2.2'
+
+
     // OptaPlanner 기본 제공(필수 라이브러리)
     api 'org.optaplanner:optaplanner-core:9.41.0.Final'
     api 'org.optaplanner:optaplanner-persistence-common:9.41.0.Final'

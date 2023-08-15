@@ -13,6 +13,8 @@ import java.util.Map;
 public class Airport extends AbstractPersistable {
     // 공항 이름
     private String name;
+    // 공항에 따른 호텔비용
+    private int hotelCost;
     // 공항에 따른 Deadhead Cost 맵 ex) deadheadCost.get("ATL") -> 200
     private Map<String, Integer> deadheadCost;
 
@@ -25,13 +27,14 @@ public class Airport extends AbstractPersistable {
         return airports.stream()
                 .filter(airport -> airport.getName().equals(name))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new IllegalArgumentException("Airport not found"));
     }
 
     @Builder
-    public Airport(long id, String name, Map<String, Integer> deadheadCost) {
+    public Airport(long id, String name, int hotelCost, Map<String, Integer> deadheadCost) {
         super(id);
         this.name = name;
+        this.hotelCost = hotelCost;
         this.deadheadCost = deadheadCost;
     }
 
