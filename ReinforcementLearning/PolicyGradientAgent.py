@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from CrewPairingEnv import CrewPairingEnv
+import pandas as pd
 
 
 #Policy를 파라미터화 하기 위한 신경망. 하이퍼파라미터 튜닝 작업 필요
@@ -65,9 +66,24 @@ class PolicyGradientAgent:
         del self.saved_log_probs[:]
 
 # Usage
-initial_pairing_set = ...  # 받아올거임
-cost_threshold = ...  # 설정해야됨.
-env = CrewPairingEnv(initial_pairing_set, cost_threshold)
+initial_pairing_set = pd.read_csv('/home/public/yunairline/dataset/pairingdata/output-data.csv')
+
+cols_to_check = ['1', '2', '3', '4', '5']
+initial_pairing_set.dropna(subset=cols_to_check, how='all', inplace=True)
+initial_pairing_set.reset_index(drop=True, inplace=True)
+
+two_dim_list = initial_pairing_set.values.tolist()
+
+# nan 값을 삭제하고 모든 요소가 nan인 리스트를 삭제하는 함수
+def clean_list(lst):
+    cleaned_lst = [item for item in lst if item is not None and (not isinstance(item, float) or not pd.isna(item))]
+    return cleaned_lst
+
+# 모든 리스트에 대해 작업 수행 -> state 입력 시 pairing index 빼는 작업 필요
+cleaned_data = [clean_list(row) for row in two_dim_list if any(item is not None and (not isinstance(item, float) or not pd.isna(item)) for item in row)]
+
+initial_pairing_set = cleaned_data
+env = CrewPairingEnv(initial_pairing_set)
 agent = PolicyGradientAgent(env)
 
 for i_episode in range(1000):
