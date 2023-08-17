@@ -82,7 +82,8 @@ public class ParingConstraintProvider implements ConstraintProvider {
 //                .asConstraint("Min Length");
 //    }
 
-    //base 같아야 함 (soft) == Deadhead
+    // base 같아야 함 (soft) == Deadhead
+    // 좌석간 점유율 생각
     private Constraint baseDiff(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
                 .filter(pairing -> (pairing.getPair().size() >= 1 && pairing.equalBase()))

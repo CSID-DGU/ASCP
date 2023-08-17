@@ -12,9 +12,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-
 @AllArgsConstructor
-@RequiredArgsConstructor
 @PlanningEntity
 public class Pairing extends AbstractPersistable {
     //변수로서 작동 된다. Pair 는 Flight 들의 연속이므로 ListVariable 로 작동된다.

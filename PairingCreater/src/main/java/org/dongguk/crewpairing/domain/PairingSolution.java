@@ -14,7 +14,6 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-@RequiredArgsConstructor
 @PlanningSolution
 public class PairingSolution extends AbstractPersistable {
     //Aircraft 에 대한 모든 정보
