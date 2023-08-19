@@ -2,9 +2,19 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import re
+import os
 
-btsdata = pd.read_csv('../dataset/flightdata/T_ONTIME_MARKETING.csv')
-sfodata = pd.read_csv('../dataset/flightdata/tailnumTocraft.csv')
+# FlightDataGenerator.py 파일의 상위 경로를 가져옵니다.
+current_dir = os.path.dirname(__file__)
+main_dir = os.path.dirname(current_dir)
+
+# 상대 경로를 기반으로 파일을 불러옵니다.
+btsdata_file_path = os.path.join(main_dir, "dataset", "flightdata", "T_ONTIME_MARKETING.csv")
+sfodata_file_path = os.path.join(main_dir, "dataset", "flightdata", "tailnumTocraft.csv")
+
+# csv_file_path를 사용하여 파일을 처리합니다.
+btsdata = pd.read_csv(btsdata_file_path)
+sfodata = pd.read_csv(sfodata_file_path)
 
 # 각 데이터에서 불필요한 열 삭제
 del btsdata['OP_UNIQUE_CARRIER']
