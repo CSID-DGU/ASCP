@@ -9,8 +9,8 @@ current_dir = os.path.dirname(__file__)
 main_dir = os.path.dirname(current_dir)
 
 # 상대 경로를 기반으로 파일을 불러옵니다.
-btsdata_file_path = os.path.join(main_dir, "dataset", "flightdata", "T_ONTIME_MARKETING.csv")
-sfodata_file_path = os.path.join(main_dir, "dataset", "flightdata", "tailnumTocraft.csv")
+btsdata_file_path = os.path.join(main_dir, "dataset", "flightdata", "input", "T_ONTIME_MARKETING.csv")
+sfodata_file_path = os.path.join(main_dir, "dataset", "flightdata", "input", "tailnumTocraft.csv")
 
 # csv_file_path를 사용하여 파일을 처리합니다.
 btsdata = pd.read_csv(btsdata_file_path)
@@ -74,13 +74,12 @@ def get_valid_datetime_input(prompt):
             print("입력 형식이 잘못되었습니다. 다시 입력해주세요.")
             continue
 
-print("#############    원하는 비행의 기간을 입력해주세요   #############",end='\n\n')
+print("#############    원하는 비행의 기간을 입력해주세요   #############")
 print('데이터 시작 일시 :',converteddata['DEP_TIME'].min())
 print('데이터 종료 일시 :',converteddata['ARR_TIME'].max())
-
 print("입력 예시: 2023-04-01 00:13:00",end='\n\n')
-start_cutoff = get_valid_datetime_input("시작 일시: ")
-end_cutoff = get_valid_datetime_input("종료 일시: ")
+start_cutoff = get_valid_datetime_input("✒ 시작 일시: ")
+end_cutoff = get_valid_datetime_input("✒ 종료 일시: ")
 
 dateFdata = converteddata.loc[(converteddata['DEP_TIME'] > start_cutoff) & (converteddata['ARR_TIME'] < end_cutoff)]
 
@@ -91,18 +90,20 @@ craftdict = {}
 for index, element in enumerate(sorted(craftlist), start=1):
   craftdict[index] = element
 
-print("비행기 기종 리스트")
+print('\n\n')
+print("#############    원하는 비행기의 기종을 입력해주세요   #############")
+print("🛫 기종 목록 🛫")
 print(craftdict)
-craftnum = [int(x) for x in input("\n원하는 항공사의 번호를 입력해주세요 ex) 1 4 5 : ").split()]
+craftnum = [int(x) for x in input("\n✒ 항공사의 번호를 입력해주세요 ex) 1 4 5 : ").split()]
 selectedcraft = [craftdict[key] for key in craftnum]
 
 craftFdata = craftFdata[craftFdata['AIRCRAFT_MODEL'].isin(selectedcraft)]
 
 # 공항 입력
 portFdata = craftFdata.copy()
+print('\n\n')
 print("#############    원하는 공항의 종류을 입력해주세요   #############")
-
-top_n = int(input("\n상위 몇개의 공항을 확인하시겠습니까? : "))
+top_n = int(input("✒ 상위 몇개의 공항을 확인하시겠습니까? : "))
 print()
 print("🛫 출발 공항 개수 🛫")
 originPort = pd.DataFrame(portFdata['ORIGIN'].value_counts()).head(top_n)
@@ -123,9 +124,9 @@ portdict = {}
 for index, element in enumerate(sorted(portset), start=1):
   portdict[index] = element
 
-print("\n공항 리스트")
+print("🛫 공항 목록 🛫")
 print(portdict)
-portnum = [int(x) for x in input("\n원하는 공항의 번호를 입력해주세요 ex) 1 4 5 : ").split()]
+portnum = [int(x) for x in input("\n✒ 공항의 번호를 입력해주세요 ex) 1 4 5 : ").split()]
 selectedport = [portdict[key] for key in portnum]
 
 # ORIGIN 열의 값이 selectedport 리스트에 없는 행 삭제
@@ -141,17 +142,21 @@ carrierdict = {}
 for index, element in enumerate(sorted(carrierlist), start=1):
   carrierdict[index] = element
 
-print("항공사 리스트")
+print('\n\n')
+print("#############    원하는 항공사의 종류을 입력해주세요   #############")
+print("🛫 항공사 목록 🛫")
 print(carrierdict)
-carriernum = [int(x) for x in input("\n원하는 항공사의 번호를 입력해주세요 ex) 1 4 5 : ").split()]
+carriernum = [int(x) for x in input("\n✒ 항공사의 번호를 입력해주세요 ex) 1 4 5 : ").split()]
 selectedcarrier = [carrierdict[key] for key in carriernum]
 
 carrierFdata = carrierFdata[carrierFdata['MKT_UNIQUE_CARRIER'].isin(selectedcarrier)]
 
 # flight 수 입력
 numFdata = carrierFdata.copy()
+print('\n\n')
+print("#############    비행의 수를 입력해주세요   #############")
 print("현재 사용할 수 있는 flight의 수 :",len(numFdata))
-num_flight = int(input("원하는 flight의 개수를 입력하세요 : "))
+num_flight = int(input("\n✒ 원하는 flight의 개수를 입력하세요 : "))
 sampleddata = numFdata.sample(n=num_flight, random_state=42)
 
 # 데이터 정보 확인
@@ -164,15 +169,21 @@ output_text += "항공기 기종 별 flight 개수\n" + str(sampleddata['AIRCRAF
 output_text += "출발/도착 공항 별 flight 개수\n" + str(sampleddata['ORIGIN'].value_counts()) + "\n" + str(sampleddata['DEST'].value_counts()) + "\n"
 output_text += "항공사 별 flight 개수\n" + str(sampleddata['MKT_UNIQUE_CARRIER'].value_counts()) + "\n"
 
-today = datetime.now().date()
+now = datetime.now()
+today = now.strftime("%Y-%m-%d %H:%M:%S")
 
 # 결과를 저장할 파일 경로 설정
-output_file_path = str(today)+"flight_data_summary.txt"
+output_txt_file_path = os.path.join(main_dir, "dataset", "flightdata","output", str(today)+"_flight_data_summary.txt")
+output_csv_file_path = os.path.join(main_dir, "dataset", "flightdata","output", str(today)+"_flight_data.csv")
 
 # 텍스트 파일에 결과 기록
-with open(output_file_path, "w") as output_file:
+with open(output_txt_file_path, "w") as output_file:
     output_file.write(output_text)
 
-print("결과가", output_file_path, "에 저장되었습니다.")
+# csv 파일로 결과 저장
+sampleddata.to_csv(output_csv_file_path,index=False)
 
-sampleddata.to_csv(str(today)+'_flight_data.csv',index=False)
+print('\n\n')
+print("#############    데이터 저장이 완료되었습니다   #############")
+print("flight 데이터 요약 정보가", output_txt_file_path, "에 저장되었습니다.")
+print("flight 데이터 csv가", output_csv_file_path, "에 저장되었습니다.")
