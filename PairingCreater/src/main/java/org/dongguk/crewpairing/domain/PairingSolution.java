@@ -12,8 +12,7 @@ import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 import java.util.List;
 
 @Getter
-@Setter
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @PlanningSolution
 public class PairingSolution extends AbstractPersistable {
     //Aircraft 에 대한 모든 정보
