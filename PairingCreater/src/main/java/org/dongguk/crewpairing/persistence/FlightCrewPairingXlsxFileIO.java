@@ -59,11 +59,10 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
 
         @Override
         public PairingSolution read() {
-            readExchangeRate();
             readTimeData();
-            readAircraft();
-            readAirport();
-            readDeadhead();
+            readAircraft();         // 수정
+            readAirport();          // 수정
+            readDeadhead();         // 수정
             readFlight();
             return PairingSolution.builder()
                     .aircraftList(aircraftList)
@@ -115,9 +114,9 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                             .id(indexCnt++)
                             .type(row.getCell(0).getStringCellValue())
                             .crewNum((int) row.getCell(1).getNumericCellValue())
-                            .flightCost((int) row.getCell(2).getNumericCellValue() / exchangeRate)
-                            .layoverCost((int) row.getCell(3).getNumericCellValue() / exchangeRate)
-                            .quickTurnCost((int) row.getCell(4).getNumericCellValue() / exchangeRate).build());
+                            .flightCost((int) row.getCell(2).getNumericCellValue())
+                            .layoverCost((int) row.getCell(3).getNumericCellValue())
+                            .quickTurnCost((int) row.getCell(4).getNumericCellValue()).build());
                 } catch (IllegalStateException e) {
                     log.info("Finish Read Aircraft File");
                     break;
@@ -148,7 +147,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     airportMap.put(row.getCell(0).getStringCellValue(), Airport.builder()
                             .id(indexCnt++)
                             .name(row.getCell(0).getStringCellValue())
-                            .hotelCost((int) row.getCell(1).getNumericCellValue() / exchangeRate)
+                            .hotelCost((int) row.getCell(1).getNumericCellValue())
                             .deadheadCost(new HashMap<>()).build());
                 } catch (IllegalStateException e) {
                     log.info("Finish Read Airport File");
@@ -180,7 +179,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
 
                     airportMap.get(origin)
                             .putDeadhead(row.getCell(1).getStringCellValue(),
-                                    (int) row.getCell(2).getNumericCellValue() / exchangeRate);
+                                    (int) row.getCell(2).getNumericCellValue());
                 } catch (IllegalStateException e) {
                     log.info("Finish Read DeadHead File");
                     break;
