@@ -69,7 +69,6 @@ public class Pairing extends AbstractPersistable {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -102,8 +101,16 @@ public class Pairing extends AbstractPersistable {
         return layoverCost;
     }
 
-    public void getlawImpossible(){
+    public boolean getLawImpossible(){
+        int time = pair.get(0).getFlightTime();
 
+        for(int i=1; i<pair.size(); i++){
+            if(checkBreakTime(i-1) < 10*60) time += pair.get(i).getFlightTime() + checkBreakTime(i-1);
+            else time = pair.get(i).getFlightTime();
+
+            if(time > 14*60) return true;
+        }
+        return false;
     }
 
     //pair가 공간상 불가능하면 true를 반환
@@ -117,13 +124,26 @@ public class Pairing extends AbstractPersistable {
     }
 
     //기종이 다 같은지 다 같지 않으면 true 반환
-    public boolean getAircraftImpossible() {
+    public boolean getAircraftDiff() {
         for (int i = 0; i < pair.size() - 1; i++) {
             if (!pair.get(i).getAircraft().getType().equals(pair.get(i + 1).getAircraft().getType())) {
                 return true;
             }
         }
         return false;
+    }
+
+    public int getMovingWorkCost(){
+        int maxCrewNum = 0;
+        for (Flight flight : pair) {
+            maxCrewNum = Math.max(maxCrewNum, flight.getAircraft().getCrewNum());
+        }
+        int movingWorkCost = 0;
+        for (Flight flight : pair) {
+            //(최대 승무원 수 - 지금 기종의 승무원 수) * 운항시간(분)*100 <-추후 cost 변경
+            movingWorkCost += (maxCrewNum-flight.getAircraft().getCrewNum()) * flight.getFlightTime() * 10;
+        }
+        return movingWorkCost;
     }
 
     //pair의 총 길이 반환 (일수)
@@ -145,21 +165,6 @@ public class Pairing extends AbstractPersistable {
 
         return deadheads.getOrDefault(origin, 0) * 100;
     }
-    /*
-    public Integer getLayoverCost(){
-        if(pair.size() == 0) return 0;
-
-        long flightTime = 0;
-        long totalFlight = ChronoUnit.MINUTES.between(pair.get(0).getOriginTime(), pair.get(pair.size()-1).getDestTime());
-
-        for(Flight flight : pair){
-            flightTime += ChronoUnit.MINUTES.between(flight.getOriginTime(), flight.getDestTime());
-        }
-        //(총 페어링 시간)이 (비행 시간의 합)보다 작으면 유효하지 않은 해로 간주함(이 경우 하드 조건에서 배제됨);
-        if(totalFlight<flightTime) return 0;
-        return (int) (totalFlight-flightTime)*pair.get(0).getAircraft().getLayoverCost() / 600;
-    }
-    */
     @Override
     public String toString() {
         return "Pairing - " + id +
