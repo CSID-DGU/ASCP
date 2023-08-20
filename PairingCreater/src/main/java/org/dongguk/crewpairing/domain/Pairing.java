@@ -26,6 +26,8 @@ public class Pairing extends AbstractPersistable {
     public static int restTime;
     public static int LayoverTime;
     public static int QuickTurnaroundTime;
+    public static int hotelTime = 18 * 60;
+    public static int hotelMinTime = 720;
 
     public static void setStaticTime(int briefingTime,
                         int debriefingTime,
@@ -146,7 +148,7 @@ public class Pairing extends AbstractPersistable {
         int cost = 0;
         for (int i = 0; i < pair.size() - 1; i++) {
             // 만약 비행편 간격이 하나라도 음수라면 유효한 페어링이 아님
-            if (checkBreakTime(i) < 0) {
+            if (checkBreakTime(i) <= 0) {
                 return 0;
             }
 
@@ -171,7 +173,7 @@ public class Pairing extends AbstractPersistable {
         int cost = 0;
         for (int i = 0; i < pair.size() - 1; i++) {
             // 만약 비행편 간격이 하나라도 음수라면 유효한 페어링이 아님
-            if (checkBreakTime(i) < 0) {
+            if (checkBreakTime(i) <= 0) {
                 return 0;
             }
 
@@ -197,14 +199,16 @@ public class Pairing extends AbstractPersistable {
         int cost = 0;
         for (int i = 0; i < pair.size() - 1; i++) {
             // 만약 비행편 간격이 하나라도 음수라면 유효한 페어링이 아님
-            if (checkBreakTime(i) < 0) {
+            if (checkBreakTime(i) <= 0) {
                 return 0;
             }
 
+            int flightGap = checkBreakTime(i);
             // 음수가 아니라면 유효한 페어링이므로 HotelCost 계산
-            if (checkBreakTime(i) >= LayoverTime) {
-                cost += pair.get(i + 1).getOriginAirport().getHotelCost()
-                        * pair.get(0).getAircraft().getCrewNum();
+            if (flightGap >= hotelMinTime) {
+                cost += (pair.get(i + 1).getOriginAirport().getHotelCost()
+                        * pair.get(0).getAircraft().getCrewNum()
+                        * (int) (1 + (int) Math.floor(((float) flightGap - (float) hotelMinTime) / (float) hotelTime)));
             }
         }
 
