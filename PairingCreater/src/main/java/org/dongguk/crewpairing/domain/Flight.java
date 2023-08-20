@@ -8,9 +8,7 @@ import java.time.temporal.ChronoUnit;
 
 @Getter
 @Setter
-
 @AllArgsConstructor
-@RequiredArgsConstructor
 public class Flight extends AbstractPersistable {
     //비행편 T/N
     private String TailNumber;

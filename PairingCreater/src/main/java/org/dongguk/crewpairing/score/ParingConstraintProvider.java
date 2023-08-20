@@ -21,6 +21,8 @@ public class ParingConstraintProvider implements ConstraintProvider {
 //                pairMinLength(constraintFactory),
                 baseDiff(constraintFactory),
                 layoverCost(constraintFactory),
+                quickTurnCost(constraintFactory),
+                hotelCost(constraintFactory),
                 satisCost(constraintFactory)
         };
     }
@@ -95,6 +97,20 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 .filter(pairing -> (pairing.getPair().size() >= 2))
                 .penalize(HardSoftLongScore.ONE_SOFT, Pairing::getLayoverCost)
                 .asConstraint("Layover Cost");
+    }
+
+    private Constraint quickTurnCost(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Pairing.class)
+                .filter(pairing -> (pairing.getPair().size() >= 2))
+                .penalize(HardSoftLongScore.ONE_SOFT, Pairing::getQuickTurnCost)
+                .asConstraint("QuickTurn Cost");
+    }
+
+    private Constraint hotelCost(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Pairing.class)
+                .filter(pairing -> (pairing.getPair().size() >= 2))
+                .penalize(HardSoftLongScore.ONE_SOFT, Pairing::getHotelCost)
+                .asConstraint("Hotel Cost");
     }
 
     private Constraint satisCost(ConstraintFactory constraintFactory) {

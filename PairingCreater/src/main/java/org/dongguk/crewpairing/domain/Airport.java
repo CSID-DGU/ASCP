@@ -9,7 +9,6 @@ import java.util.Map;
 @Getter
 @Setter
 @AllArgsConstructor
-@RequiredArgsConstructor
 public class Airport extends AbstractPersistable {
     // 공항 이름
     private String name;
