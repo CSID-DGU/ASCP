@@ -71,7 +71,6 @@ public class Pairing extends AbstractPersistable {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -92,8 +91,16 @@ public class Pairing extends AbstractPersistable {
         return satisScore;
     }
 
-    public void getlawImpossible(){
+    public boolean getLawImpossible(){
+        int time = pair.get(0).getFlightTime();
 
+        for(int i=1; i<pair.size(); i++){
+            if(checkBreakTime(i-1) < 10*60) time += pair.get(i).getFlightTime() + checkBreakTime(i-1);
+            else time = pair.get(i).getFlightTime();
+
+            if(time > 14*60) return true;
+        }
+        return false;
     }
 
     //pair가 공간상 불가능하면 true를 반환
@@ -107,13 +114,26 @@ public class Pairing extends AbstractPersistable {
     }
 
     //기종이 다 같은지 다 같지 않으면 true 반환
-    public boolean getAircraftImpossible() {
+    public boolean getAircraftDiff() {
         for (int i = 0; i < pair.size() - 1; i++) {
             if (!pair.get(i).getAircraft().getType().equals(pair.get(i + 1).getAircraft().getType())) {
                 return true;
             }
         }
         return false;
+    }
+
+    public int getMovingWorkCost(){
+        int maxCrewNum = 0;
+        for (Flight flight : pair) {
+            maxCrewNum = Math.max(maxCrewNum, flight.getAircraft().getCrewNum());
+        }
+        int movingWorkCost = 0;
+        for (Flight flight : pair) {
+            //(최대 승무원 수 - 지금 기종의 승무원 수) * 운항시간(분)*100 <-추후 cost 변경
+            movingWorkCost += (maxCrewNum-flight.getAircraft().getCrewNum()) * flight.getFlightTime() * 10;
+        }
+        return movingWorkCost;
     }
 
     //pair의 총 길이 반환 (일수)
