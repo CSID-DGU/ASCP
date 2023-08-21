@@ -7,8 +7,16 @@ import org.optaplanner.core.api.score.constraint.ConstraintMatchTotal;
 
 import java.util.Map;
 
+/**
+ * solve 된 결과의 HardSoft score의 detail 확인하기 위한 클래스
+ */
 public class ViewAllConstraint {
-
+    /**
+     * 각 제약 조건을 몇 번 어겼고, 얼마의 score를 만들어냈는지 확인
+     * + 실제 가격이 얼마가 나왔는지 확인 가능
+     * @param constraintMatchTotalMap
+     * @param solution
+     */
     public static void viewAll(Map<String, ConstraintMatchTotal<HardSoftLongScore>> constraintMatchTotalMap, PairingSolution solution){
         for (ConstraintMatchTotal<HardSoftLongScore> constraintMatchTotal : constraintMatchTotalMap.values()) {
 
