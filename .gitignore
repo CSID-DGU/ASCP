@@ -3,3 +3,4 @@ DataAnalyze/dataset
 
 # pyenv
 *.env
+*__pycache__/
