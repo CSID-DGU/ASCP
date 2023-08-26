@@ -5,19 +5,59 @@
  */
 
 plugins {
-    id 'java-library'
-    id 'maven-publish'
+    id "java-library"
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
+}
+
+group = 'org.dongguk'
+version = '1.0.0-SNAPSHOT'
+description = 'Airline Scheduling Crew Pairing'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+jar {
+    finalizedBy shadowJar
+    manifest {
+        attributes(
+                "Manifest-Version": "1.0",
+                "Main-Class": "org.dongguk.crewpairing.app.PairingApp"
+        )
+    }
+
+    enabled = false
+}
+
+shadowJar {
+    // 실행 가능한 JAR 파일 생성
+    archiveFileName.set("crew-pairing.jar")
+    archiveClassifier.set("")
+    manifest {
+        attributes(
+                "Main-Class": "org.dongguk.crewpairing.app.PairingApp"
+        )
+    }
+}
+
+compileJava {
+    options.encoding = "UTF-8"
+    options.compilerArgs << "-parameters"
+}
+compileTestJava {
+    options.encoding = "UTF-8"
+}
+
+test {
+    // Log the test execution results.
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
 
 repositories {
-    mavenLocal()
-    maven {
-        url = uri('https://repository.jboss.org/nexus/content/groups/public/')
-    }
-
-    maven {
-        url = uri('https://repo.maven.apache.org/maven2/')
-    }
+    mavenCentral()
 }
 
 dependencies {
@@ -58,29 +98,3 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'
     testImplementation 'org.assertj:assertj-core:3.24.2'
 }
-
-group = 'org.optaplanner'
-version = '9.41.0.Final'
-description = 'Airline Scheduling Crew Pairing'
-sourceCompatibility = '17'
-
-java {
-    withSourcesJar()
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
-        }
-    }
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding = '17'
-}
-
-tasks.withType(Javadoc) {
-    options.encoding = 'UTF-8'
-}
-targetCompatibility = '17'
