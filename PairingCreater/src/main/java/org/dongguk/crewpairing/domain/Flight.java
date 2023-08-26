@@ -10,8 +10,9 @@ import java.time.temporal.ChronoUnit;
 @Setter
 @AllArgsConstructor
 public class Flight extends AbstractPersistable {
+    private String serialNumber;
     //비행편 T/N
-    private String TailNumber;
+    private String tailNumber;
     //출발 공항
     private Airport originAirport;
     //출발 시간
@@ -35,9 +36,12 @@ public class Flight extends AbstractPersistable {
     }
 
     @Builder
-    public Flight(long id, String TailNumber, Airport originAirport, LocalDateTime originTime, Airport destAirport, LocalDateTime destTime, Aircraft aircraft) {
+    public Flight(long id, String serialNumber, String tailNumber,
+                  Airport originAirport, LocalDateTime originTime,
+                  Airport destAirport, LocalDateTime destTime, Aircraft aircraft) {
         super(id);
-        this.TailNumber = TailNumber;
+        this.serialNumber = serialNumber;
+        this.tailNumber = tailNumber;
         this.originAirport = originAirport;
         this.originTime = originTime;
         this.destAirport = destAirport;
