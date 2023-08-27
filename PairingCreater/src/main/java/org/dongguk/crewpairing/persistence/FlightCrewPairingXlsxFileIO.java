@@ -30,11 +30,12 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
 
     @Override
     public PairingSolution read(File inputFile) {
-        try (InputStream in = new ClassPathResource("input/ASCP_Data_Input.xlsx").getInputStream()) {
+        try (InputStream in = new ClassPathResource("input/ASCP_Data_Input_new.xlsx").getInputStream()) {
             XSSFWorkbook workbook = new XSSFWorkbook(in);
             return new FlightCrewPairingXlsxReader(workbook).read();
         } catch (IOException | RuntimeException e) {
             log.error("{} {}", e.getMessage(), "Input File Error. Please Input File Format");
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -91,7 +92,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
         }
 
         private void readExchangeRate() {
-            nextSheet("User_Cost");      // Sheet 고르기
+            nextSheet("User_Cost");       // Sheet 고르기
             currentRowIterator.next();              // 주제목 스킵
             currentRowIterator.next();              // 빈 행 스킵
 
@@ -102,7 +103,8 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
 
         private void readAircraft() {
             aircraftList.clear();
-            nextSheet("Program_Cost");      // Sheet 고르기
+            nextSheet("Program_Cost");    // Sheet 고르기
+            currentRowIterator.next();              // 빈 행 스킵
             currentRowIterator.next();              // 주제목 스킵
             currentRowIterator.next();              // Header 스킵
 
@@ -207,11 +209,12 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 try {
                     flightList.add(Flight.builder()
                             .id(indexCnt++)
-                            .TailNumber(row.getCell(0).getStringCellValue())
-                            .originAirport(Airport.of(airportList, row.getCell(1).getStringCellValue()))
-                            .originTime(row.getCell(2).getLocalDateTimeCellValue())
-                            .destAirport(Airport.of(airportList, row.getCell(3).getStringCellValue()))
-                            .destTime(row.getCell(4).getLocalDateTimeCellValue())
+                            .serialNumber(row.getCell(0).getStringCellValue())
+                            .tailNumber(row.getCell(1).getStringCellValue())
+                            .originAirport(Airport.of(airportList, row.getCell(2).getStringCellValue()))
+                            .originTime(row.getCell(3).getLocalDateTimeCellValue())
+                            .destAirport(Airport.of(airportList, row.getCell(4).getStringCellValue()))
+                            .destTime(row.getCell(5).getLocalDateTimeCellValue())
                             .aircraft(Aircraft.of(aircraftList, row.getCell(6).getStringCellValue())).build());
                 } catch (IllegalStateException e) {
                     log.info("Finish Read Flight File");
@@ -239,7 +242,6 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
     }
 
         @Getter
-        @Setter
         private static class FlightCrewPairingXlsxWriter extends AbstractXlsxWriter<PairingSolution, HardSoftScore> {
 
             public FlightCrewPairingXlsxWriter(PairingSolution pairingSolution) {

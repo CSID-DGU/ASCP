@@ -67,7 +67,11 @@ public class Pairing extends AbstractPersistable {
         this.totalCost = totalCost;
     }
 
-    //pair가 시간상 불가능하면 true를 반환
+    /**
+     * pairing의 실행 가능 여부 확인(불가능한 경우:true)
+     * / 앞 비행이 도착하지 않았는데 이후 비행이 출발했을 경우 판단
+     * @return boolean
+     */
     public boolean getTimeImpossible() {
         for (int i = 0; i < pair.size() - 1; i++) {
             if (pair.get(i).getDestTime().isAfter(pair.get(i + 1).getOriginTime())) {
@@ -86,6 +90,11 @@ public class Pairing extends AbstractPersistable {
     }
     */
 
+    /**
+     * 페어링의 총 SatisCost 반환
+     * / breakTime이 180보다 작은 경우 발생
+     * @return sum(180-breakTime)*1000
+     */
     public Integer getSatisCost(){
         int satisScore = 0;
         for(int i=0; i<pair.size()-1; i++){
@@ -118,7 +127,11 @@ public class Pairing extends AbstractPersistable {
         return false;
     }
 
-    //pair가 공간상 불가능하면 true를 반환
+    /**
+     * 동일 공항 출발 여부 확인
+     * / 도착 공항과 출발 공항이 다를 시 true 반환
+     * @return boolean
+     */
     public boolean getAirportImpossible() {
         for (int i = 0; i < pair.size() - 1; i++) {
             if (!pair.get(i).getDestAirport().getName().equals(pair.get(i + 1).getOriginAirport().getName())) {
@@ -128,7 +141,11 @@ public class Pairing extends AbstractPersistable {
         return false;
     }
 
-    //기종이 다 같은지 다 같지 않으면 true 반환
+    /**
+     * pairing의 동일 항공기 여부 검증
+     * / 비행들의 항공기가 동일하지 않을 시 true 반환
+     * @return boolean
+     */
     public boolean getAircraftDiff() {
         for (int i = 0; i < pair.size() - 1; i++) {
             if (!pair.get(i).getAircraft().getType().equals(pair.get(i + 1).getAircraft().getType())) {
@@ -138,12 +155,18 @@ public class Pairing extends AbstractPersistable {
         return false;
     }
 
+    /**
+     * 페어링의 총 이동근무 cost 반환
+     * / 페어링 인원보다 요구 승무원이 적은 비행일 시 발생(maxCrewNum이 기준)
+     * @return sum((maxCrewNum-요구 승무원)*운항시간(분))*10
+     */
     public int getMovingWorkCost(){
         int maxCrewNum = 0;
+        int movingWorkCost = 0;
+
         for (Flight flight : pair) {
             maxCrewNum = Math.max(maxCrewNum, flight.getAircraft().getCrewNum());
         }
-        int movingWorkCost = 0;
         for (Flight flight : pair) {
             //(최대 승무원 수 - 지금 기종의 승무원 수) * 운항시간(분)*100 <-추후 cost 변경
             movingWorkCost += (maxCrewNum-flight.getAircraft().getCrewNum()) * flight.getFlightTime() * 10;
@@ -151,21 +174,32 @@ public class Pairing extends AbstractPersistable {
         return movingWorkCost;
     }
 
-    //pair의 총 길이 반환 (일수)
+    /**
+     * 페어링의 총 갈아 반환 (일)
+     * @return 마지막 비행 도착시간 - 처음 비행 시작시간
+     */
     public long getTotalLength() {
         return ChronoUnit.DAYS.between(pair.get(0).getOriginTime(), pair.get(pair.size() - 1).getDestTime());
     }
 
-    //첫번쨰 비행과 마지막 비행 Base 비교
+    /**
+     * 처음과 끝 공항의 동일 여부 확인
+     * / 처음 출발 공항과 마지막 도착 공항이 다를 시 true
+     * @return boolean
+     */
     public boolean equalBase() {
         return !pair.get(0).getOriginAirport().getName().equals(pair.get(pair.size() - 1).getDestAirport().getName());
     }
 
-    //마지막 비행 반환
+    /**
+     * 페어링의 deadhead cost 반환
+     * / 마지막 도착 공항에서 처음 공항으로 가는데 필요한 deadhead cost 사용
+     * @return deadhead cost / 2 (왜 2로 나누는거?)
+     */
     public Integer getDeadHeadCost() {
         Map<String, Integer> deadheads = pair.get(pair.size() - 1).getDestAirport().getDeadheadCost();
 
-        String dest = pair.get(pair.size() - 1).getDestAirport().getName();
+        String dest = pair.get(pair.size() - 1).getDestAirport().getName(); //제거해야 함
         String origin = pair.get(0).getOriginAirport().getName();
 
         return deadheads.getOrDefault(origin, 0) / 2;
@@ -223,9 +257,9 @@ public class Pairing extends AbstractPersistable {
 
     /**
      * 페어링의 총 HotelCost 반환
-     * 총 인원수를 곱하는 이유 : Flight Cost, Layover Cost, QuickTurn Cost 모두 총 인원에 대한 값으로 계산된 후 입력받음
-     * 이걸 굳이 나눠야 싶음(레이오버가 생기면 호텔비용이 생기므로 합쳐도 되지 않을까 싶음)
-     * @return HotelCost(Layover가 발생했을 때 [해당 항공기의 인원 수 * 공항의 호텔 비용]를 다 더함) / 10
+     * / 총 인원수를 곱하는 이유 : Flight Cost, Layover Cost, QuickTurn Cost 모두 총 인원에 대한 값으로 계산된 후 입력받음
+     * / 휴식시간이 12시간 이상일 경우 1일 숙박,이후 18시간 이상 남을 시 1일 추가 반복
+     * @return sum(hotel cost) / 100
      */
     public Integer getHotelCost() {
         // 페어링의 총 길이가 1개 이하라면 LayoverCost 없음
@@ -242,7 +276,7 @@ public class Pairing extends AbstractPersistable {
             // 음수가 아니라면 유효한 페어링이므로 HotelCost 계산
             if (flightGap >= hotelMinTime) {
                 cost += (pair.get(i + 1).getOriginAirport().getHotelCost()
-                        * pair.get(0).getAircraft().getCrewNum()
+                        * pair.get(0).getAircraft().getCrewNum() //비행마다 crew num 다를 수도 있어서 max crew로 수정해야 할 듯)
                         * (int) (1 + (int) Math.floor(((float) flightGap - (float) hotelMinTime) / (float) hotelTime)));
             }
         }
@@ -250,11 +284,16 @@ public class Pairing extends AbstractPersistable {
         return cost / 100;
     }
 
-    private int checkBreakTime(int index){
+    /**
+     * 비행 사이의 쉬는 시간 계산
+     * @return (int) Math.max(0,breakTime)
+     */
+    private int checkBreakTime(int index){ //수정 필요
         long breakTime = ChronoUnit.MINUTES.between(pair.get(index).getDestTime(), pair.get(index+1).getOriginTime());
 
         return (int) Math.max(0,breakTime);
     }
+
     @Override
     public String toString() {
         return "Pairing - " + id +
