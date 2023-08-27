@@ -1,0 +1,6 @@
+# dataset
+dataset
+
+# pyenv
+*.env
+*__pycache__/
