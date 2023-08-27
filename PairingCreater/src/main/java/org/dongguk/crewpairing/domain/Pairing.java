@@ -92,13 +92,20 @@ public class Pairing extends AbstractPersistable {
     }
 
     public boolean getLawImpossible(){
-        int time = pair.get(0).getFlightTime();
+        int totalTime = pair.get(0).getFlightTime();
+        int workTime = pair.get(0).getFlightTime();
 
         for(int i=1; i<pair.size(); i++){
-            if(checkBreakTime(i-1) < 10*60) time += pair.get(i).getFlightTime() + checkBreakTime(i-1);
-            else time = pair.get(i).getFlightTime();
-
-            if(time > 14*60) return true;
+            if(checkBreakTime(i-1) < 10*60) {
+                totalTime += pair.get(i).getFlightTime() + checkBreakTime(i-1);
+                workTime += pair.get(i).getFlightTime();
+            }
+            else {
+                totalTime = pair.get(i).getFlightTime();
+                workTime = pair.get(i).getFlightTime();
+            }
+            if(totalTime > 14*60) return true;
+            if(workTime > 8*60) return true;
         }
         return false;
     }

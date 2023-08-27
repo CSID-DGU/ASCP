@@ -1,6 +1,7 @@
 package org.dongguk.crewpairing.score;
 
 import org.dongguk.crewpairing.domain.Pairing;
+import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 import org.optaplanner.core.api.score.stream.Constraint;
 import org.optaplanner.core.api.score.stream.ConstraintFactory;
@@ -25,7 +26,8 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 layoverCost(constraintFactory),
                 quickTurnCost(constraintFactory),
                 hotelCost(constraintFactory),
-                satisCost(constraintFactory)
+                satisCost(constraintFactory),
+//                testCost(constraintFactory)
         };
     }
 
@@ -136,4 +138,13 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 .penalize(HardSoftLongScore.ONE_SOFT, Pairing::getSatisCost)
                 .asConstraint("Satis cost");
     }
+
+    //모든 1개 이상인 페어링에 soft 점수를 부여해서 페어링의 수가 줄어드는지 실험
+    private Constraint testCost(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Pairing.class)
+                .filter(pairing -> (pairing.getPair().size() >= 1))
+                .penalize(HardSoftLongScore.ofSoft(1000000))
+                .asConstraint("Test cost");
+    }
+
 }

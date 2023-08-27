@@ -3,8 +3,9 @@ package org.dongguk.crewpairing.persistence;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.*;
 import org.dongguk.common.persistence.AbstractXlsxSolutionFileIO;
 import org.dongguk.crewpairing.app.PairingApp;
 import org.dongguk.crewpairing.domain.*;
@@ -250,26 +251,46 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 String timeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
                 exportPairingData(timeStr);
                 exportVisualData(timeStr);
+                exportUserData(timeStr);
             }
 
             private void exportPairingData(String timeStr) {
-                String fileName = timeStr + "-pairingData.csv";
+                String fileName = timeStr + "-pairingData.xlsx";
 
-                List<Pairing> pairingList = solution.getPairingList();
-                StringBuilder text = new StringBuilder();
+                try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+                    XSSFSheet sheet = workbook.createSheet("Data");
 
-                for (Pairing pairing : pairingList) {
-                    text.append(pairingList.indexOf(pairing)).append(",");
-                    for (Flight flight : pairing.getPair()) {
-                        text.append(flight.getIndex()).append(",");
+                    List<Pairing> pairingList = solution.getPairingList();
+
+                    //Pairing index 셀 스타일(우측 테두리)
+                    CellStyle rightBorder = workbook.createCellStyle();
+                    rightBorder.setAlignment(HorizontalAlignment.CENTER);
+                    rightBorder.setBorderRight(BorderStyle.THIN);
+
+                    Row row = sheet.createRow(0);
+                    Cell cell = row.createCell(0);
+                    cell.setCellValue("Pairing Data");
+
+                    //Pairing data 테이블
+                    int rowIdx = 1;
+                    for(Pairing pairing : pairingList){
+                        row = sheet.createRow(rowIdx);
+                        cell = row.createCell(0);
+                        cell.setCellValue(rowIdx-1);
+                        cell.setCellStyle(rightBorder);
+
+                        for(int i=0; i<pairing.getPair().size(); i++){
+                            cell = row.createCell(i+1);
+                            cell.setCellValue(pairing.getPair().get(i).getId());
+                        }
+                        rowIdx++;
                     }
-                    text.append("\n");
-                }
 
-                try (FileWriter fw = new FileWriter("src/main/resources/output/" + fileName)) {
-                    fw.write(text.toString());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    try (FileOutputStream fo = new FileOutputStream("src/main/resources/output/" + fileName)) {
+                        workbook.write(fo);
+                    }
+                }catch (IOException e){
+                    e.printStackTrace();
                 }
             }
 
@@ -355,6 +376,101 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             //분 단위를 버림함
             private static LocalDateTime stripMinutes(LocalDateTime l) {
                 return LocalDateTime.of(l.getYear(), l.getMonth(), l.getDayOfMonth(), l.getHour(), 0);
+            }
+
+            public void exportUserData(String timeStr) {
+                String fileName = timeStr + "-userData.xlsx";
+                try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+                    XSSFSheet sheet = workbook.createSheet("Data");
+
+                    List<Pairing> pairingList = solution.getPairingList();
+                    LocalDateTime firstTime = pairingList.get(0).getPair().get(0).getOriginTime();
+                    LocalDateTime lastTime = firstTime;
+
+                    for (Pairing pairing : pairingList) {
+                        for (Flight flight : pairing.getPair()) {
+                            lastTime = lastTime.isAfter(flight.getDestTime()) ? lastTime : flight.getDestTime();
+                        }
+                    }
+
+                    //셀 스타일 모음
+                    CellStyle headerStyle = workbook.createCellStyle();
+                    Font headerFont = workbook.createFont();
+                    headerFont.setBold(true);
+                    headerStyle.setFont(headerFont);
+                    headerStyle.setBorderBottom(BorderStyle.DOUBLE);
+                    headerStyle.setFillForegroundColor(new XSSFColor(new byte[] {(byte) 226,(byte) 239,(byte) 217}, null));
+                    headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                    headerStyle.setAlignment(HorizontalAlignment.CENTER);
+
+                    CellStyle contentStyle = workbook.createCellStyle();
+                    Font contentfont = workbook.createFont();
+                    contentfont.setFontHeightInPoints((short) 9);
+                    contentStyle.setAlignment(HorizontalAlignment.LEFT);
+                    contentStyle.setFont(contentfont);
+
+                    CellStyle rightBorder = workbook.createCellStyle();
+                    rightBorder.setBorderRight(BorderStyle.THIN);
+                    rightBorder.setAlignment(HorizontalAlignment.CENTER);
+
+                    //타임 테이블 헤더 작성
+                    Row row = sheet.createRow(0);
+                    Cell cell = row.createCell(0);
+                    cell.setCellValue(firstTime.format(DateTimeFormatter.ofPattern("yyyy")));
+                    cell.setCellStyle(headerStyle);
+
+                    int days = 0;
+                    for (LocalDateTime f = firstTime; ChronoUnit.DAYS.between(f, lastTime) >= 0; f = f.plusDays(1)) {
+                        days += 1;
+                        String MMdd = f.format(DateTimeFormatter.ofPattern("MM/dd"));
+                        cell = row.createCell(days);
+                        cell.setCellValue(MMdd);
+                        cell.setCellStyle(headerStyle);
+                    }
+
+                    //타임 테이블 내용 작성
+                    for(int i=0; i<pairingList.size(); i++){
+                        row = sheet.createRow(i+1);
+                        cell = row.createCell(0);
+                        cell.setCellValue("SET" + i);
+                        cell.setCellStyle(rightBorder);
+
+                        //Pairing의 flight에 대해서, 첫번째 비행과의 날짜 차이 k만큼 떨어진 셀에 내용 입력
+                        for(Flight flight : pairingList.get(i).getPair()){
+                            String sn = flight.getTailNumber();
+
+                            //도착 시간이 24시를 넘어가는 경우 (날짜 차이)*24 + 도착시간 으로 표시
+                            String origin = flight.getOriginTime().format(DateTimeFormatter.ofPattern("HH:mm"));
+                            int daysGap = (int) ChronoUnit.DAYS.between(flight.getOriginTime(), flight.getDestTime());
+                            int destHour = flight.getDestTime().getHour();
+                            int destMin = flight.getDestTime().getMinute();
+                            String dest = String.format("%02d:%02d", daysGap*24 + destHour, destMin);
+
+                            String text = "  ["+sn+"] " + "[ "+origin+" ~ "+dest+" ]";
+
+                            int k = (int) ChronoUnit.DAYS.between(firstTime, flight.getOriginTime())+1;
+
+                            //이미 셀에 값이 있다면 내용 추가
+                            if(row.getCell(k) == null){
+                                cell = row.createCell(k);
+                                cell.setCellValue(text);
+                            }
+                            else {
+                                StringBuilder sb = new StringBuilder(cell.getStringCellValue());
+                                cell.setCellValue(sb.append("  /").append(text).toString());
+                            }
+                            cell.setCellStyle(contentStyle);
+                            sheet.autoSizeColumn(k);
+                            sheet.setColumnWidth(k, sheet.getColumnWidth(k));
+                        }
+                    }
+
+                    try (FileOutputStream fo = new FileOutputStream("src/main/resources/output/" + fileName)) {
+                        workbook.write(fo);
+                    }
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
             }
         }
     }
