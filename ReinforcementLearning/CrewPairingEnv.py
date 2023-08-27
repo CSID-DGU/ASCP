@@ -7,16 +7,19 @@ import random
 input_flight = pd.read_excel('/home/public/yunairline/dataset/pairingdata/Input-data.xlsx', sheet_name='User_Flight', header=1)
 input_deadhead = pd.read_excel('/home/public/yunairline/dataset/pairingdata/Input-data.xlsx', sheet_name='User_Deadhead', header=1)
 input_salary = pd.read_excel('/home/public/yunairline/dataset/pairingdata/ASCP_Data_Input.xlsx', sheet_name='Program_Input_Aircraft', header=1)
+# 엑셀을  위처럼  읽는  대신  객체화
+# 파일 읽는 부분을 전역변수로 둘 필요가 없을 거 같다. -> 이 함수를 optaplanner 팀처럼 클래스로 만든다. (crewparing의 Pairingsolution.java 중 List<Pairing> pairingList 참고)
+# crewpairing-domain의 Aircraft, Airport, Flight, Pairing 부분만 객체 형식을 갖추어 졌으면 좋겠다.
 
 del input_flight['INDEX']
 
-class CrewPairingEnv(gym.Env):
-    def __init__(self, initial_pairing_set):
-        super(CrewPairingEnv, self).__init__()
-        
+class CrewPairingEnv(gym.Env): # 소괄호로 상속 표현 -> customEnv 정의
+    def __init__(self, initial_pairing_set): # constructor
+        super(CrewPairingEnv, self).__init__() #부모 클래스의 __init__() 메소드를 자식 클래스의 __init__() 메소드에서 실행
+       
         self.initial_pairing_set=initial_pairing_set              
         self.n_pairings=len(initial_pairing_set)
-        self.max_flights = 4 #일단 임시로 4로 설정해둠. -> 후에 initial pairing set의 최대 flgiht로 설정할 것.
+        self.max_flights = 4 #일단 임시로 4로 설정해둠. -> 후에 initial pairin현 set의 최대 flgiht로 설정할 것.
         self.action_space = spaces.MultiDiscrete([self.n_pairings, self.max_flights, self.n_pairings, self.max_flights])
         self.observation_space = spaces.Box(low=0, high=self.n_pairings, shape=(self.n_pairings, self.max_flights), dtype=np.int16)
 
@@ -48,7 +51,7 @@ class CrewPairingEnv(gym.Env):
         num_columns = num_flights    
             
         # 바꾸기 전 cost 계산
-        reshaped_matrix = reshape_list(pairing_set, num_rows, num_columns)
+        reshaped_matrix = self.reshape_list(pairing_set, num_rows, num_columns) #self 추가
         reshaped_matrix = [arr.tolist() for arr in reshaped_matrix]
         #print(reshaped_matrix)
         before_pairing_idx = before_idx // num_flights
@@ -62,13 +65,13 @@ class CrewPairingEnv(gym.Env):
         
         # 위치 서로 바꾸기
         pairing_set[before_idx], pairing_set[after_idx] = pairing_set[after_idx], pairing_set[before_idx]        
-        reshaped_matrix = reshape_list(pairing_set, num_rows, num_columns)
+        reshaped_matrix = self.reshape_list(pairing_set, num_rows, num_columns) # keyword 'self' added
         reshaped_matrix = [arr.tolist() for arr in reshaped_matrix]
         #print(reshaped_matrix)
         before_pairing_idx = before_idx // num_flights
         after_pairing_idx = after_idx // num_flights
         
-        reshaped_matrix = shift_minus_ones(reshaped_matrix)
+        reshaped_matrix = self.shift_minus_ones(reshaped_matrix) # shift_minus_ones -> self.shift_minus_ones로 수정
 
         src_new_hard, src_new_soft = self.calculateScore(reshaped_matrix[before_pairing_idx])
         trg_new_hard, trg_new_soft = self.calculateScore(reshaped_matrix[after_pairing_idx])
@@ -132,6 +135,8 @@ class CrewPairingEnv(gym.Env):
                 before_flight_aircraft_type = input_flight.loc[before_flight, 'AIRCRAFT_TYPE']
                 next_flight_aircraft_type = input_flight.loc[next_flight, 'AIRCRAFT_TYPE']
 
+                # 점수 계산시 PairingConstraintProvider.java 를 참고하면 된다.
+                
                 # 비행일정의 선후관계 만족 여부 -> 어기는 경우 1000점씩 부여
                 if before_flight_arrival_time > next_flight_departure_time:
                     pair_hard_score += time_possible_score
@@ -150,7 +155,7 @@ class CrewPairingEnv(gym.Env):
                     landing_times += input_flight.loc[next_flight, 'DURATION']
                 # 선행 비행 도착시간과 후행 비행 출발시간의 차이가 1시간 이상인지 여부 -> 어기는 경우 100점씩 부여
                 if flight_term_hours < break_term_threshold:
-                    pair_soft_score += min_break_time_score    
+                    pair_soft_score += min_break_time_score   
                     print('[SOFT] 휴식시간 불만족 : ', min_break_time_score, end='\t')
                 # 두 비행 사이 간격이 6시간 이상인 경우, 해당 시간만큼의 layover salary를 score를 추가해줌.
                 if flight_term_hours >= layover_threshold:

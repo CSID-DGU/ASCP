@@ -22,9 +22,9 @@ public class Airport extends AbstractPersistable {
         return "Airport - " + name;
     }
 
-    public static Airport of(List<Airport> airports, String name) {
+    public static Airport of(List<Airport> airports, String name) { // function
         return airports.stream()
-                .filter(airport -> airport.getName().equals(name))
+                .filter(airport -> airport.getName().equals(name)) 
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Airport not found"));
     }

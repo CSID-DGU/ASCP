@@ -83,6 +83,8 @@ class PolicyGradientAgent:
 
 # Usage
 initial_pairing_set = pd.read_csv('/home/public/yunairline/dataset/pairingdata/output-data.csv')
+# initial_pairing_set은 PairingSolution.java 의 List<Pairing> pairingList 부분이다.
+# 우린 pairing 안에 List<Long> 으로 들어가 있는데 이를 List<Flight> 형식으로, 즉 객체가 들어가게 하기
 
 cols_to_check = ['1', '2', '3', '4', '5']
 initial_pairing_set.dropna(subset=cols_to_check, how='all', inplace=True)
