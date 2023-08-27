@@ -4,11 +4,21 @@ from gym import spaces
 import pandas as pd
 import random
 
-input_flight = pd.read_excel('/home/public/yunairline/dataset/pairingdata/Input-data.xlsx', sheet_name='User_Flight', header=1)
-input_deadhead = pd.read_excel('/home/public/yunairline/dataset/pairingdata/Input-data.xlsx', sheet_name='User_Deadhead', header=1)
-input_salary = pd.read_excel('/home/public/yunairline/dataset/pairingdata/ASCP_Data_Input.xlsx', sheet_name='Program_Input_Aircraft', header=1)
 
-del input_flight['INDEX']
+input_flight = pd.read_excel('/home/public/yunairline/ASCP/ReinforcementLearning/dataset/ASCP_Data_Input_new.xlsx', sheet_name='User_Flight', header=2)
+input_deadhead = pd.read_excel('/home/public/yunairline/ASCP/ReinforcementLearning/dataset/ASCP_Data_Input_new.xlsx', sheet_name='User_Deadhead', header=2)
+input_salary = pd.read_excel('/home/public/yunairline/ASCP/ReinforcementLearning/dataset/ASCP_Data_Input_new.xlsx', sheet_name='Program_Cost', header=1)
+# 날짜 형식 변환
+date_format = '%m/%d/%y %H:%M'
+input_flight['ORIGIN_DATE'] = pd.to_datetime(input_flight['ORIGIN_DATE'], format=date_format)
+input_flight['DEST_DATE'] = pd.to_datetime(input_flight['DEST_DATE'], format=date_format)
+
+# DURATION 열 계산 (초 단위)
+input_flight['DURATION_SECONDS'] = (input_flight['DEST_DATE'] - input_flight['ORIGIN_DATE']).dt.total_seconds()
+
+# DURATION 열 변환 (소수로 표현)
+input_flight['DURATION'] = input_flight['DURATION_SECONDS'] / 3600  # 초를 시간으로 변환
+
 
 class CrewPairingEnv(gym.Env):
     def __init__(self, initial_pairing_set):
@@ -46,36 +56,39 @@ class CrewPairingEnv(gym.Env):
         num_flights = 4
         num_rows = 215
         num_columns = num_flights    
-            
+        print()
+        print('------ 바꾸기 전 pairing set ------')
         # 바꾸기 전 cost 계산
-        reshaped_matrix = reshape_list(pairing_set, num_rows, num_columns)
+        reshaped_matrix = self.reshape_list(pairing_set, num_rows, num_columns)
         reshaped_matrix = [arr.tolist() for arr in reshaped_matrix]
         #print(reshaped_matrix)
         before_pairing_idx = before_idx // num_flights
         after_pairing_idx = after_idx // num_flights
         src_last_hard, src_last_soft = self.calculateScore(reshaped_matrix[before_pairing_idx])
+        print()
         trg_last_hard, trg_last_soft = self.calculateScore(reshaped_matrix[after_pairing_idx])
         current_hard = src_last_hard + trg_last_hard
         current_soft = src_last_soft + trg_last_soft
+        print()
         print('바꾸기 전 hard cost : ', current_hard, '\t바꾸기 전 soft cost : ', current_soft)
-        print('바꾸기 전 pairing set : ', reshaped_matrix[before_pairing_idx], reshaped_matrix[after_pairing_idx])
         
         # 위치 서로 바꾸기
         pairing_set[before_idx], pairing_set[after_idx] = pairing_set[after_idx], pairing_set[before_idx]        
-        reshaped_matrix = reshape_list(pairing_set, num_rows, num_columns)
+        reshaped_matrix = self.reshape_list(pairing_set, num_rows, num_columns)
         reshaped_matrix = [arr.tolist() for arr in reshaped_matrix]
         #print(reshaped_matrix)
         before_pairing_idx = before_idx // num_flights
         after_pairing_idx = after_idx // num_flights
         
-        reshaped_matrix = shift_minus_ones(reshaped_matrix)
+        reshaped_matrix = self.shift_minus_ones(reshaped_matrix)
 
+        print('------ 바꾼 후 pairing set ------')
         src_new_hard, src_new_soft = self.calculateScore(reshaped_matrix[before_pairing_idx])
+        print()
         trg_new_hard, trg_new_soft = self.calculateScore(reshaped_matrix[after_pairing_idx])
         new_hard = src_new_hard + trg_new_hard
         new_soft = src_new_soft + trg_new_soft
         print('바꾼 후 hard cost : ', new_hard, '\t바꾼 후 soft cost : ', new_soft)
-        print('바꾼 후 pairing set : ', reshaped_matrix[before_pairing_idx], reshaped_matrix[after_pairing_idx])
 
         done = False
         
@@ -94,10 +107,11 @@ class CrewPairingEnv(gym.Env):
         reshaped_matrix = [item for sublist in reshaped_matrix for item in sublist]
         reshaped_matrix = np.array(reshaped_matrix)
         
-        return self.pairing_set, soft_reward, done, {}
+        return reshaped_matrix, soft_reward, done, {}
 
     # 한 pair의 cost를 구하는 것으로 구현해둠.
     def calculateScore(self, pair):
+        print('pair : ', pair, end='\t')
         pair_hard_score = 0
         time_possible_score = 1000 
         airport_possible_score = 1000
@@ -117,13 +131,12 @@ class CrewPairingEnv(gym.Env):
         satisfaction_score = 0
 
         if pair_length > 1:
-            for i in range(1, pair_length):
+            for i in range(0, pair_length-1):
                 before_flight = pair[i]
                 next_flight = pair[i+1]
                 if next_flight == -1:
                     break
-                
-                
+                #print('before_flight : ', before_flight, '\tnext_flight : ', next_flight, end='\t')
                 before_flight_arrival_time = input_flight.loc[before_flight, 'DEST_DATE']
                 next_flight_departure_time = input_flight.loc[next_flight, 'ORIGIN_DATE']
                 flight_term_hours = int((next_flight_departure_time - before_flight_arrival_time).total_seconds() / 3600) # 오류 발생으로 인한 표현방식 수정
@@ -154,7 +167,7 @@ class CrewPairingEnv(gym.Env):
                     print('[SOFT] 휴식시간 불만족 : ', min_break_time_score, end='\t')
                 # 두 비행 사이 간격이 6시간 이상인 경우, 해당 시간만큼의 layover salary를 score를 추가해줌.
                 if flight_term_hours >= layover_threshold:
-                    layover_salary_per_hour = input_salary.loc[input_salary['AIRCRAFT'] == before_flight_aircraft_type, 'LAYOVER_SALARY'].values[0]
+                    layover_salary_per_hour = input_salary.loc[input_salary['AIRCRAFT'] == before_flight_aircraft_type, 'Layover Cost(원/분)'].values[0]
                     layover_salary_score += flight_term_hours*layover_salary_per_hour
                     pair_soft_score += layover_salary_score
                     print('[SOFT] layover salary 추가 : ', layover_salary_score, end='\t')
@@ -187,14 +200,13 @@ class CrewPairingEnv(gym.Env):
             start_airport = input_flight.loc[pair[0], 'ORIGIN']
             end_airport = input_flight.loc[pair[pair_length-1], 'DEST']
             if start_airport != end_airport:
-                deadhead_cost = input_deadhead.loc[(input_deadhead['ORIGIN'] == end_airport) & (input_deadhead['DEST']==start_airport), 'deadhead'].values[0]
+                deadhead_cost = input_deadhead.loc[(input_deadhead['출발 공항'] == end_airport) & (input_deadhead['도착 공항']==start_airport), 'Deadhead(원)'].values[0]
                 print('[SOFT] deadhead_cost : ',deadhead_cost, end='\t')
                 deadhead_score += deadhead_cost
                 pair_soft_score += deadhead_score
         else:
             print('비행 없음')
             return 0, 0
-
         return pair_hard_score, pair_soft_score
 
     def reset(self):
