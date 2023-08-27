@@ -16,18 +16,12 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 timePossible(constraintFactory),
                 airportPossible(constraintFactory),
                 continuityPossible(constraintFactory),
-                //aircraftType(constraintFactory),
-                //landingTimes(constraintFactory),
-                //pairLength(constraintFactory),
-//                minBreakTime(constraintFactory),
-//                pairMinLength(constraintFactory),
                 movingWorkCost(constraintFactory),
-                baseDiff(constraintFactory),
+                baseDifferent(constraintFactory),
                 layoverCost(constraintFactory),
                 quickTurnCost(constraintFactory),
                 hotelCost(constraintFactory),
                 satisCost(constraintFactory),
-//                testCost(constraintFactory)
         };
     }
 
@@ -38,7 +32,7 @@ public class ParingConstraintProvider implements ConstraintProvider {
      */
     private Constraint timePossible(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
-                .filter(Pairing::getTimeImpossible)
+                .filter(Pairing::isImpossibleTime)
                 .penalize(HardSoftLongScore.ofHard(1000))
                 .asConstraint("Flight possible");
     }
@@ -50,47 +44,9 @@ public class ParingConstraintProvider implements ConstraintProvider {
      */
     private Constraint airportPossible(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
-                .filter(Pairing::getAirportImpossible)
+                .filter(Pairing::isImpossibleAirport)
                 .penalize(HardSoftLongScore.ofHard(1000))
                 .asConstraint("Airport possible");
-    }
-
-    /**
-     * HARD
-     * 기종 제약(Same aircraft):
-     * pairing의 항공기 기종이 다를 시 -> 하드스코어 부여(500)
-     */
-    private Constraint aircraftType(ConstraintFactory constraintFactory) {
-        return constraintFactory.forEach(Pairing.class)
-                .filter((Pairing::getAircraftDiff))
-                .penalize(HardSoftLongScore.ofHard(500))
-                .asConstraint("Same aircraft");
-    }
-
-    /**
-     * HARD
-     * 비행 횟수 제약(Landing times):
-     * 비행 횟수가 4회 이상일 시 -> 하드스코어 부여(총 비행횟수 * 100)
-     */
-    @Deprecated
-    private Constraint landingTimes(ConstraintFactory constraintFactory) {
-        return constraintFactory.forEach(Pairing.class)
-                .filter(pairing -> pairing.getPair().size() > 4)
-                .penalize(HardSoftLongScore.ONE_HARD, pairing -> pairing.getPair().size() * 100)
-                .asConstraint("Landing times");
-    }
-
-    /**
-     * HARD
-     * 비행 일수 제약(Max length):
-     * 페어링 총 기간이 7일 이상일 시 -> 하드스코어 부여((총 길이-7) * 100)
-     */
-    @Deprecated
-    private Constraint pairLength(ConstraintFactory constraintFactory) {
-        return constraintFactory.forEach(Pairing.class)
-                .filter(pairing -> pairing.getPair().size() >= 2 && pairing.getTotalLength() > 7)
-                .penalize(HardSoftLongScore.ONE_HARD, pairing -> (int) (Math.floor(((double) pairing.getTotalLength() - 7)) * 100))
-                .asConstraint("Max length");
     }
 
     /**
@@ -101,27 +57,10 @@ public class ParingConstraintProvider implements ConstraintProvider {
     private Constraint continuityPossible(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
                 .filter(pairing -> pairing.getPair().size() >= 2)
-                .filter(Pairing::getContinuityImpossible)
+                .filter(Pairing::isImpossibleContinuity)
                 .penalize(HardSoftLongScore.ofHard(1000))
                 .asConstraint("law possible");
     }
-/*
-    private Constraint minBreakTime(ConstraintFactory constraintFactory) {
-        return constraintFactory.forEach(Pairing.class)
-                .filter(pairing -> (pairing.getPair().size() >= 2))
-                .filter((Pairing::minBreakTime))
-                .penalize(HardSoftLongScore.ofHard(500))
-                .asConstraint("Break Time");
-    }
- */
-
-    //페어링 최소 길이
-//    private Constraint pairMinLength(ConstraintFactory constraintFactory) {
-//        return constraintFactory.forEach(Pairing.class)
-//                .filter(pairing -> pairing.getPair().size() == 0)
-//                .penalize(HardSoftScore.ofHard(100))
-//                .asConstraint("Min Length");
-//    }
 
     /**
      * SOFT
@@ -129,9 +68,9 @@ public class ParingConstraintProvider implements ConstraintProvider {
      * 첫 출발공항과 마지막 도착공항이 다를 시 - > 소프트스코어 부여(항공편에 따른 가격)
      * @return getDeadheadCost
      */
-    private Constraint baseDiff(ConstraintFactory constraintFactory) {
+    private Constraint baseDifferent(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
-                .filter(pairing -> (pairing.getPair().size() >= 1 && pairing.equalBase()))
+                .filter(pairing -> (pairing.getPair().size() >= 1 && pairing.isEqualBase()))
                 .penalize(HardSoftLongScore.ONE_SOFT, Pairing::getDeadHeadCost)
                 .asConstraint("Base diff");
     }
@@ -210,4 +149,42 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 .asConstraint("Test cost");
     }
 
+    /**
+     * HARD
+     * 기종 제약(Same aircraft):
+     * pairing의 항공기 기종이 다를 시 -> 하드스코어 부여(500)
+     */
+    @Deprecated
+    private Constraint aircraftType(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Pairing.class)
+                .filter((Pairing::isDifferentAircraft))
+                .penalize(HardSoftLongScore.ofHard(500))
+                .asConstraint("Same aircraft");
+    }
+
+    /**
+     * HARD
+     * 비행 횟수 제약(Landing times):
+     * 비행 횟수가 4회 이상일 시 -> 하드스코어 부여(총 비행횟수 * 100)
+     */
+    @Deprecated
+    private Constraint landingTimes(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Pairing.class)
+                .filter(pairing -> pairing.getPair().size() > 4)
+                .penalize(HardSoftLongScore.ONE_HARD, pairing -> pairing.getPair().size() * 100)
+                .asConstraint("Landing times");
+    }
+
+    /**
+     * HARD
+     * 비행 일수 제약(Max length):
+     * 페어링 총 기간이 7일 이상일 시 -> 하드스코어 부여((총 길이-7) * 100)
+     */
+    @Deprecated
+    private Constraint pairLength(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Pairing.class)
+                .filter(pairing -> pairing.getPair().size() >= 2 && pairing.getTotalLength() > 7)
+                .penalize(HardSoftLongScore.ONE_HARD, pairing -> (int) (Math.floor(((double) pairing.getTotalLength() - 7)) * 100))
+                .asConstraint("Max length");
+    }
 }

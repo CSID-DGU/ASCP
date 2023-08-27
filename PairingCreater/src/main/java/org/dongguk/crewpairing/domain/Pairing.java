@@ -20,16 +20,16 @@ public class Pairing extends AbstractPersistable {
     @PlanningListVariable(valueRangeProviderRefs = {"pairing"})
     private List<Flight> pair = new ArrayList<>();
     private Integer totalCost;
-    public static int briefingTime;
-    public static int debriefingTime;
-    public static int restTime;
-    public static int LayoverTime;
-    public static int QuickTurnaroundTime;
-    public static int hotelTime = 18 * 60;
-    public static int hotelMinTime = 720;
-    public final static int checkContinueTime = 60*10;
-    public final static int continueMaxTime = 14*60;
-    public final static int workMaxTime = 8*60;
+    private static int briefingTime;
+    private static int debriefingTime;
+    private static int restTime;
+    private static int LayoverTime;
+    private static int QuickTurnaroundTime;
+    private static int hotelTime = 18 * 60;
+    private static int hotelMinTime = 720;
+    private static int checkContinueTime = 60 * 10;
+    private static int continueMaxTime = 14 * 60;
+    private static int workMaxTime = 8 * 60;
 
     public static void setStaticTime(int briefingTime,
                         int debriefingTime,
@@ -55,7 +55,7 @@ public class Pairing extends AbstractPersistable {
      * / 앞 비행이 도착하지 않았는데 이후 비행이 출발했을 경우 판단
      * @return boolean
      */
-    public boolean getTimeImpossible() {
+    public boolean isImpossibleTime() {
         for (int i = 0; i < pair.size() - 1; i++) {
             if (pair.get(i).getDestTime().isAfter(pair.get(i + 1).getOriginTime())) {
                 return true;
@@ -64,26 +64,18 @@ public class Pairing extends AbstractPersistable {
         return false;
     }
 
-    /*
-    public boolean minBreakTime(){
-        for(int i=0; i<pair.size()-1; i++){
-            if(checkBreakTime(i) <= 60) return true;
+    /**
+     * 동일 공항 출발 여부 확인
+     * / 도착 공항과 출발 공항이 다를 시 true 반환
+     * @return boolean
+     */
+    public boolean isImpossibleAirport() {
+        for (int i = 0; i < pair.size() - 1; i++) {
+            if (!pair.get(i).getDestAirport().getName().equals(pair.get(i + 1).getOriginAirport().getName())) {
+                return true;
+            }
         }
         return false;
-    }
-    */
-
-    /**
-     * 페어링의 총 SatisCost 반환
-     * / breakTime이 180보다 작은 경우 발생
-     * @return sum(180-breakTime)*1000
-     */
-    public Integer getSatisCost(){
-        int satisScore = 0;
-        for(int i=0; i<pair.size()-1; i++){
-            if(checkBreakTime(i) <= 180) satisScore += 1000 * (180-checkBreakTime(i));
-        }
-        return satisScore;
     }
 
     /**
@@ -91,13 +83,13 @@ public class Pairing extends AbstractPersistable {
      * / 연속되는 비행이 14시간 이상일 시 true 반환(연속: breakTime이 10시간 이하)
      * @return boolean
      */
-    public boolean getContinuityImpossible(){
+    public boolean isImpossibleContinuity(){
         int totalTime = pair.get(0).getFlightTime();
         int workTime = pair.get(0).getFlightTime();
 
         for(int i=1; i<pair.size(); i++){
-            if(checkBreakTime(i-1) < checkContinueTime) {
-                totalTime += pair.get(i).getFlightTime() + checkBreakTime(i-1);
+            if(getFlightGap(i - 1) < checkContinueTime) {
+                totalTime += pair.get(i).getFlightTime() + getFlightGap(i - 1);
                 workTime += pair.get(i).getFlightTime();
             }
             else {
@@ -111,13 +103,13 @@ public class Pairing extends AbstractPersistable {
     }
 
     /**
-     * 동일 공항 출발 여부 확인
-     * / 도착 공항과 출발 공항이 다를 시 true 반환
+     * pairing의 동일 항공기 여부 검증
+     * / 비행들의 항공기가 동일하지 않을 시 true 반환
      * @return boolean
      */
-    public boolean getAirportImpossible() {
+    public boolean isDifferentAircraft() {
         for (int i = 0; i < pair.size() - 1; i++) {
-            if (!pair.get(i).getDestAirport().getName().equals(pair.get(i + 1).getOriginAirport().getName())) {
+            if (!pair.get(i).getAircraft().getType().equals(pair.get(i + 1).getAircraft().getType())) {
                 return true;
             }
         }
@@ -125,17 +117,25 @@ public class Pairing extends AbstractPersistable {
     }
 
     /**
-     * pairing의 동일 항공기 여부 검증
-     * / 비행들의 항공기가 동일하지 않을 시 true 반환
+     * 처음과 끝 공항의 동일 여부 확인
+     * / 처음 출발 공항과 마지막 도착 공항이 다를 시 true
      * @return boolean
      */
-    public boolean getAircraftDiff() {
-        for (int i = 0; i < pair.size() - 1; i++) {
-            if (!pair.get(i).getAircraft().getType().equals(pair.get(i + 1).getAircraft().getType())) {
-                return true;
-            }
+    public boolean isEqualBase() {
+        return !pair.get(0).getOriginAirport().getName().equals(pair.get(pair.size() - 1).getDestAirport().getName());
+    }
+
+    /**
+     * 페어링의 총 SatisCost 반환
+     * / breakTime이 180보다 작은 경우 발생
+     * @return sum(180-breakTime)*1000
+     */
+    public Integer getSatisCost(){
+        int satisScore = 0;
+        for(int i=0; i<pair.size()-1; i++){
+            if(getFlightGap(i) <= 180) satisScore += 1000 * (180 - getFlightGap(i));
         }
-        return false;
+        return satisScore;
     }
 
     /**
@@ -166,18 +166,9 @@ public class Pairing extends AbstractPersistable {
     }
 
     /**
-     * 처음과 끝 공항의 동일 여부 확인
-     * / 처음 출발 공항과 마지막 도착 공항이 다를 시 true
-     * @return boolean
-     */
-    public boolean equalBase() {
-        return !pair.get(0).getOriginAirport().getName().equals(pair.get(pair.size() - 1).getDestAirport().getName());
-    }
-
-    /**
      * 페어링의 deadhead cost 반환
      * / 마지막 도착 공항에서 처음 공항으로 가는데 필요한 deadhead cost 사용
-     * @return deadhead cost / 2 (왜 2로 나누는거?)
+     * @return deadhead cost / 2
      */
     public Integer getDeadHeadCost() {
         Map<String, Integer> deadheads = pair.get(pair.size() - 1).getDestAirport().getDeadheadCost();
@@ -200,13 +191,13 @@ public class Pairing extends AbstractPersistable {
         int cost = 0;
         for (int i = 0; i < pair.size() - 1; i++) {
             // 만약 비행편 간격이 하나라도 음수라면 유효한 페어링이 아님
-            if (checkBreakTime(i) <= 0) {
+            if (getFlightGap(i) <= 0) {
                 return 0;
             }
 
             // 음수가 아니라면 유효한 페어링이므로 LayoverCost 계산
-            if (checkBreakTime(i) >= LayoverTime) {
-                cost += (checkBreakTime(i) - LayoverTime) * pair.get(0).getAircraft().getLayoverCost();
+            if (getFlightGap(i) >= LayoverTime) {
+                cost += (getFlightGap(i) - LayoverTime) * pair.get(0).getAircraft().getLayoverCost();
             }
         }
 
@@ -225,13 +216,13 @@ public class Pairing extends AbstractPersistable {
         int cost = 0;
         for (int i = 0; i < pair.size() - 1; i++) {
             // 만약 비행편 간격이 하나라도 음수라면 유효한 페어링이 아님
-            if (checkBreakTime(i) <= 0) {
+            if (getFlightGap(i) <= 0) {
                 return 0;
             }
 
             // 음수가 아니라면 유효한 페어링이므로 QuickTurnCost 계산
-            if (checkBreakTime(i) < QuickTurnaroundTime) {
-                cost += (QuickTurnaroundTime - checkBreakTime(i)) * pair.get(0).getAircraft().getQuickTurnCost();
+            if (getFlightGap(i) < QuickTurnaroundTime) {
+                cost += (QuickTurnaroundTime - getFlightGap(i)) * pair.get(0).getAircraft().getQuickTurnCost();
             }
         }
 
@@ -251,11 +242,11 @@ public class Pairing extends AbstractPersistable {
         int cost = 0;
         for (int i = 0; i < pair.size() - 1; i++) {
             // 만약 비행편 간격이 하나라도 음수라면 유효한 페어링이 아님
-            if (checkBreakTime(i) <= 0) {
+            if (getFlightGap(i) <= 0) {
                 return 0;
             }
 
-            int flightGap = checkBreakTime(i);
+            int flightGap = getFlightGap(i);
             // 음수가 아니라면 유효한 페어링이므로 HotelCost 계산
             if (flightGap >= hotelMinTime) {
                 cost += (pair.get(i + 1).getOriginAirport().getHotelCost()
@@ -271,10 +262,10 @@ public class Pairing extends AbstractPersistable {
      * 비행 사이의 쉬는 시간 계산
      * @return (int) Math.max(0,breakTime)
      */
-    private int checkBreakTime(int index){ //수정 필요
+    private int getFlightGap(int index){ //수정 필요
         long breakTime = ChronoUnit.MINUTES.between(pair.get(index).getDestTime(), pair.get(index+1).getOriginTime());
 
-        return (int) Math.max(0,breakTime);
+        return (int) Math.max(0, breakTime);
     }
 
     @Override

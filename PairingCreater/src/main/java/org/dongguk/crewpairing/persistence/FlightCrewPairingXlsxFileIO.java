@@ -1,7 +1,6 @@
 package org.dongguk.crewpairing.persistence;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
@@ -33,7 +32,6 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             return new FlightCrewPairingXlsxReader(workbook).read();
         } catch (IOException | RuntimeException e) {
             log.error("{} {}", e.getMessage(), "Input File Error. Please Input File Format");
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -55,7 +53,6 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
     }
 
     @Getter
-    @Setter
     private static class FlightCrewPairingXlsxReader extends AbstractXlsxReader<PairingSolution, HardSoftScore> {
         private final List<Aircraft> aircraftList = new ArrayList<>();
         private final List<Airport> airportList = new ArrayList<>();
@@ -71,10 +68,15 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
         @Override
         public PairingSolution read() {
             readTimeData();
+            log.debug("Complete Read Time Data");
             readAircraft();         // 수정
+            log.debug("Complete Read Aircraft Data");
             readAirport();          // 수정
+            log.debug("Complete Read Airport Data");
             readDeadhead();         // 수정
+            log.debug("Complete Read Deadhead Data");
             readFlight();
+            log.debug("Complete Read Flight Data");
             return PairingSolution.builder()
                     .aircraftList(aircraftList)
                     .airportList(airportList)
@@ -85,8 +87,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
         public List<Pairing> readPairingSet(List<Flight> inputFlightList) {
             List<Pairing> list = new ArrayList<>();
 
-            nextSheet("Sheet1");    // Sheet 고르기
-            currentRowIterator.next();              // 점수 스킵
+            nextSheet("Data");    // Sheet 고르기
             currentRowIterator.next();              // 주제목 스킵
 
             while (currentRowIterator.hasNext()) {
@@ -98,18 +99,17 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 List<Flight> pair = new ArrayList<>();
                 while (currentCellIterator.hasNext()) {
                     Cell cell = currentCellIterator.next();
-                    if (cell.getCellType() == CellType.BLANK || cell.getCellType() == CellType.STRING
-                    || cell.getNumericCellValue() == 0) {
+                    if (cell.getCellType() == CellType.BLANK || cell.getCellType() == CellType.STRING || cell.getNumericCellValue() == 0) {
                         break;
                     }
 
-                    System.out.println(cell.getNumericCellValue());
                     pair.add(inputFlightList.get((int) cell.getNumericCellValue()));
                 }
 
                 list.add(new Pairing(indexCnt, pair, 0));
             }
 
+            log.debug("Complete Read Pairing Data");
             return list;
         }
 
@@ -291,8 +291,8 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             public void write() {
                 String timeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
                 exportPairingData(timeStr);
-                exportVisualData(timeStr);
-                exportUserData(timeStr);
+//                exportVisualData(timeStr);
+//                exportUserData(timeStr);
             }
 
             private void exportPairingData(String timeStr) {
