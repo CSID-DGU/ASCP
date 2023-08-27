@@ -72,7 +72,6 @@ public final class SolutionBusiness<Solution_, Score_ extends Score<Score_>> imp
     private File inputDataDir;
     private File outputDataDir;
 
-    private String solutionFileName = null;
 
     public SolutionBusiness(CommonApp<Solution_> app, SolverFactory<Solution_> solverFactory) {
         this.app = app;
@@ -84,12 +83,12 @@ public final class SolutionBusiness<Solution_, Score_ extends Score<Score_>> imp
     public void updateDataDirs() {
         this.inputDataDir = new File(dataDir, "input");
         if (!inputDataDir.exists()) {
-            throw new IllegalStateException(String.format("해당 Path [%s]에 Unsolved Data Directory는 존재하지 않습니다.", inputDataDir.getAbsolutePath()));
+            throw new IllegalStateException(String.format("해당 Path [%s]에 Input Data Directory는 존재하지 않습니다.", inputDataDir.getAbsolutePath()));
         }
 
         this.outputDataDir = new File(dataDir, "output");
         if (!outputDataDir.exists()) {
-            throw new IllegalStateException(String.format("해당 Path [%s]에 Solved Data Directory는 존재하지 않습니다.", outputDataDir.getAbsolutePath()));
+            throw new IllegalStateException(String.format("해당 Path [%s]에 Output Data Directory는 존재하지 않습니다.", outputDataDir.getAbsolutePath()));
         }
     }
 
@@ -204,13 +203,11 @@ public final class SolutionBusiness<Solution_, Score_ extends Score<Score_>> imp
         }
     }
 
-    public void openSolution(File file) {
-        Solution_ solution = solutionFileIO.read(file);
-        LOGGER.info("Opened: Xlsx File");
-//        LOGGER.info("Opened: {}", file);
-//        solutionFileName = file.getName();
+    public void openSolution(File informationFile) {
+        Solution_ solution = solutionFileIO.read(informationFile);
         workingSolutionRef.set(solution);
     }
+
 
     public void saveSolution(File file) {
         solutionFileIO.write(getSolution(), file);

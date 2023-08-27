@@ -3,12 +3,13 @@ package org.dongguk.crewpairing.persistence;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dongguk.common.persistence.AbstractXlsxSolutionFileIO;
 import org.dongguk.crewpairing.app.PairingApp;
 import org.dongguk.crewpairing.domain.*;
-import org.drools.io.ClassPathResource;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 
 import java.io.*;
@@ -28,10 +29,21 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
     }
 
     @Override
-    public PairingSolution read(File inputFile) {
-        try (InputStream in = new ClassPathResource("input/ASCP_Data_Input_new.xlsx").getInputStream()) {
+    public PairingSolution read(File informationXlsxFile) {
+        try (InputStream in = new BufferedInputStream(new FileInputStream(informationXlsxFile))) {
             XSSFWorkbook workbook = new XSSFWorkbook(in);
             return new FlightCrewPairingXlsxReader(workbook).read();
+        } catch (IOException | RuntimeException e) {
+            log.error("{} {}", e.getMessage(), "Input File Error. Please Input File Format");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Pairing> readPairingList(List<Flight> flightList, File pairingXlsxFile) {
+        try (InputStream in = new BufferedInputStream(new FileInputStream(pairingXlsxFile))) {
+            XSSFWorkbook workbook = new XSSFWorkbook(in);
+            return new FlightCrewPairingXlsxReader(workbook).readPairingSet(flightList);
         } catch (IOException | RuntimeException e) {
             log.error("{} {}", e.getMessage(), "Input File Error. Please Input File Format");
             e.printStackTrace();
@@ -72,6 +84,37 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     .pairingList(createEntities()).build();
         }
 
+        public List<Pairing> readPairingSet(List<Flight> inputFlightList) {
+            List<Pairing> list = new ArrayList<>();
+
+            nextSheet("Sheet1");    // Sheet 고르기
+            currentRowIterator.next();              // 점수 스킵
+            currentRowIterator.next();              // 주제목 스킵
+
+            while (currentRowIterator.hasNext()) {
+                XSSFRow row = (XSSFRow) currentRowIterator.next();
+
+                Iterator<Cell> currentCellIterator =  row.cellIterator();
+
+                int indexCnt = (int) currentCellIterator.next().getNumericCellValue();
+                List<Flight> pair = new ArrayList<>();
+                while (currentCellIterator.hasNext()) {
+                    Cell cell = currentCellIterator.next();
+                    if (cell.getCellType() == CellType.BLANK || cell.getCellType() == CellType.STRING
+                    || cell.getNumericCellValue() == 0) {
+                        break;
+                    }
+
+                    System.out.println(cell.getNumericCellValue());
+                    pair.add(inputFlightList.get((int) cell.getNumericCellValue()));
+                }
+
+                list.add(new Pairing(indexCnt, pair, 0));
+            }
+
+            return list;
+        }
+
         private void readTimeData() {
             nextSheet("User_Time");      // Sheet 고르기
             currentRowIterator.next();              // 주제목 스킵
@@ -103,7 +146,6 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
         private void readAircraft() {
             aircraftList.clear();
             nextSheet("Program_Cost");    // Sheet 고르기
-            currentRowIterator.next();              // 빈 행 스킵
             currentRowIterator.next();              // 주제목 스킵
             currentRowIterator.next();              // Header 스킵
 
@@ -268,7 +310,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     text.append("\n");
                 }
 
-                try (FileWriter fw = new FileWriter("src/main/resources/output/" + fileName)) {
+                try (FileWriter fw = new FileWriter("./data/crewpairing/output" + fileName)) {
                     fw.write(text.toString());
                 } catch (IOException e) {
                     throw new RuntimeException(e);

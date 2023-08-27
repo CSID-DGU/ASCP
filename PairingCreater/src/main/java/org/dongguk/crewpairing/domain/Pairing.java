@@ -12,7 +12,6 @@ import java.util.Map;
 
 @Getter
 @Setter
-
 @AllArgsConstructor
 @RequiredArgsConstructor
 @PlanningEntity
@@ -28,8 +27,8 @@ public class Pairing extends AbstractPersistable {
     public static int QuickTurnaroundTime;
     public static int hotelTime = 18 * 60;
     public static int hotelMinTime = 720;
-    public final static int checkContinueTime = 60*10;
-    public final static int continueMaxTime = 14*60;
+    public final static int checkContinueTime = 60 * 10;
+    public final static int continueMaxTime = 14 * 60;
 
     public static void setStaticTime(int briefingTime,
                         int debriefingTime,
@@ -41,22 +40,6 @@ public class Pairing extends AbstractPersistable {
         Pairing.restTime = restTime;
         Pairing.LayoverTime = LayoverTime;
         Pairing.QuickTurnaroundTime = QuickTurnaroundTime;
-    }
-
-    public void setDebriefingTime(int debriefingTime) {
-        Pairing.debriefingTime = debriefingTime;
-    }
-
-    public void setRestTime(int restTime) {
-        Pairing.restTime = restTime;
-    }
-
-    public void setLayoverTime(int layoverTime) {
-        LayoverTime = layoverTime;
-    }
-
-    public void setQuickTurnaroundTime(int quickTurnaroundTime) {
-        QuickTurnaroundTime = quickTurnaroundTime;
     }
 
     @Builder
