@@ -30,6 +30,7 @@ public class Pairing extends AbstractPersistable {
     public static int hotelMinTime = 720;
     public final static int checkContinueTime = 60*10;
     public final static int continueMaxTime = 14*60;
+    public final static int workMaxTime = 8*60;
 
     public static void setStaticTime(int briefingTime,
                         int debriefingTime,
@@ -108,13 +109,20 @@ public class Pairing extends AbstractPersistable {
      * @return boolean
      */
     public boolean getContinuityImpossible(){
-        int time = pair.get(0).getFlightTime();
+        int totalTime = pair.get(0).getFlightTime();
+        int workTime = pair.get(0).getFlightTime();
 
         for(int i=1; i<pair.size(); i++){
-            if(checkBreakTime(i-1) < checkContinueTime) time += pair.get(i).getFlightTime() + checkBreakTime(i-1);
-            else time = pair.get(i).getFlightTime();
-
-            if(time > continueMaxTime) return true;
+            if(checkBreakTime(i-1) < checkContinueTime) {
+                totalTime += pair.get(i).getFlightTime() + checkBreakTime(i-1);
+                workTime += pair.get(i).getFlightTime();
+            }
+            else {
+                totalTime = pair.get(i).getFlightTime();
+                workTime = pair.get(i).getFlightTime();
+            }
+            if(totalTime > continueMaxTime) return true;
+            if(workTime > workMaxTime) return true;
         }
         return false;
     }
