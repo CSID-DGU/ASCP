@@ -47,7 +47,7 @@ public class PairingSolution extends AbstractPersistable {
 
             if (pairing.getPair().size() == 0) {
                 str = " ---------------- !! Not Using";
-            } else if (pairing.equalBase()) {
+            } else if (pairing.isEqualBase()) {
                 str = " ---------------- !! DeadHead";
             }
 

@@ -25,22 +25,21 @@ public class Pairing extends AbstractPersistable {
     private static int restTime;
     private static int LayoverTime;
     private static int QuickTurnaroundTime;
-    private static int hotelTime = 18 * 60;
+    private static int hotelTime;
     private static int hotelMinTime = 720;
     private static int checkContinueTime = 60 * 10;
     private static int continueMaxTime = 14 * 60;
     private static int workMaxTime = 8 * 60;
 
-    public static void setStaticTime(int briefingTime,
-                        int debriefingTime,
-                        int restTime,
-                        int LayoverTime,
-                        int QuickTurnaroundTime) {
+    public static void setStaticTime(int briefingTime, int debriefingTime,
+                                     int restTime, int LayoverTime, int QuickTurnaroundTime,
+                                     int hotelTime) {
         Pairing.briefingTime = briefingTime;
         Pairing.debriefingTime = debriefingTime;
         Pairing.restTime = restTime;
         Pairing.LayoverTime = LayoverTime;
         Pairing.QuickTurnaroundTime = QuickTurnaroundTime;
+        Pairing.hotelTime = hotelTime;
     }
 
     @Builder
@@ -128,7 +127,7 @@ public class Pairing extends AbstractPersistable {
     /**
      * 페어링의 총 SatisCost 반환
      * / breakTime이 180보다 작은 경우 발생
-     * @return sum(180-breakTime)*1000
+     * @return sum(180 - breakTime)*1000
      */
     public Integer getSatisCost(){
         int satisScore = 0;
@@ -141,7 +140,7 @@ public class Pairing extends AbstractPersistable {
     /**
      * 페어링의 총 이동근무 cost 반환
      * / 페어링 인원보다 요구 승무원이 적은 비행일 시 발생(maxCrewNum이 기준)
-     * @return sum((maxCrewNum-요구 승무원)*운항시간(분))*10
+     * @return sum((maxCrewNum - 요구 승무원)*운항시간(분))*10
      */
     public int getMovingWorkCost(){
         int maxCrewNum = 0;
@@ -152,7 +151,7 @@ public class Pairing extends AbstractPersistable {
         }
         for (Flight flight : pair) {
             //(최대 승무원 수 - 지금 기종의 승무원 수) * 운항시간(분)*100 <-추후 cost 변경
-            movingWorkCost += (maxCrewNum-flight.getAircraft().getCrewNum()) * flight.getFlightTime() * 10;
+            movingWorkCost += (maxCrewNum - flight.getAircraft().getCrewNum()) * flight.getFlightTime() * 10;
         }
         return movingWorkCost;
     }
@@ -172,8 +171,6 @@ public class Pairing extends AbstractPersistable {
      */
     public Integer getDeadHeadCost() {
         Map<String, Integer> deadheads = pair.get(pair.size() - 1).getDestAirport().getDeadheadCost();
-
-        String dest = pair.get(pair.size() - 1).getDestAirport().getName(); //제거해야 함
         String origin = pair.get(0).getOriginAirport().getName();
 
         return deadheads.getOrDefault(origin, 0) / 2;

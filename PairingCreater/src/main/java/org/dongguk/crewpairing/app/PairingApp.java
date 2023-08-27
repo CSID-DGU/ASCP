@@ -1,6 +1,5 @@
 package org.dongguk.crewpairing.app;
 
-import lombok.val;
 import org.dongguk.common.app.CommonApp;
 import org.dongguk.common.business.SolutionBusiness;
 import org.dongguk.crewpairing.domain.*;
@@ -48,9 +47,8 @@ public class PairingApp extends CommonApp<PairingSolution> {
 
         // Solution 출력
         PairingSolution solution = business.getSolution();
-        System.out.println(business.getSolution());
 
-        // Output CSV File
+        // Output Excel File
         business.saveSolution(null);
 
         // Check score detail
