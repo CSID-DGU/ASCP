@@ -28,6 +28,9 @@ public class Pairing extends AbstractPersistable {
     public static int QuickTurnaroundTime;
     public static int hotelTime = 18 * 60;
     public static int hotelMinTime = 720;
+    public final static int checkContinueTime = 60*10;
+    public final static int continueMaxTime = 14*60;
+    public final static int workMaxTime = 8*60;
 
     public static void setStaticTime(int briefingTime,
                         int debriefingTime,
@@ -91,12 +94,17 @@ public class Pairing extends AbstractPersistable {
         return satisScore;
     }
 
-    public boolean getLawImpossible(){
+    /**
+     * 페어링의 최소 휴식시간 보장 여부 검증
+     * / 연속되는 비행이 14시간 이상일 시 true 반환(연속: breakTime이 10시간 이하)
+     * @return boolean
+     */
+    public boolean getContinuityImpossible(){
         int totalTime = pair.get(0).getFlightTime();
         int workTime = pair.get(0).getFlightTime();
 
         for(int i=1; i<pair.size(); i++){
-            if(checkBreakTime(i-1) < 10*60) {
+            if(checkBreakTime(i-1) < checkContinueTime) {
                 totalTime += pair.get(i).getFlightTime() + checkBreakTime(i-1);
                 workTime += pair.get(i).getFlightTime();
             }
@@ -104,8 +112,8 @@ public class Pairing extends AbstractPersistable {
                 totalTime = pair.get(i).getFlightTime();
                 workTime = pair.get(i).getFlightTime();
             }
-            if(totalTime > 14*60) return true;
-            if(workTime > 8*60) return true;
+            if(totalTime > continueMaxTime) return true;
+            if(workTime > workMaxTime) return true;
         }
         return false;
     }

@@ -74,7 +74,7 @@ public class ParingConstraintProvider implements ConstraintProvider {
     private Constraint lawPossible(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
                 .filter(pairing -> pairing.getPair().size() >= 2)
-                .filter(Pairing::getLawImpossible)
+                .filter(Pairing::getContinuityImpossible)
                 .penalize(HardSoftLongScore.ofHard(1000))
                 .asConstraint("law possible");
     }
