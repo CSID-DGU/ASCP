@@ -20,16 +20,15 @@ public abstract class CommonApp<Solution_> extends LoggingMain {
     protected final String name;
     protected final String description;
     protected final String solverConfigResource;
+    protected final String dataDirPath;
     protected final String dataDirName;
+    protected final String informationFileName;
 
     protected SolutionBusiness<Solution_, ?> solutionBusiness;
     protected SolverConfig solverConfig;
 
     // 우리가 사용할 Data Directory의 하위 경로 지정
-    public static File determineDataDir(String dataDirName) {
-        // 만약 기존경로가 없다면 프로젝트 내 data Dir을 사용함
-        String dataDirPath = System.getProperty(DATA_DIR_SYSTEM_PROPERTY, "data/");
-
+    public File determineDataDir() {
         // 우리가 원하는 Data Directory 사용
         File dataDir = new File(dataDirPath, dataDirName);
         if (!dataDir.exists()) {
@@ -39,12 +38,16 @@ public abstract class CommonApp<Solution_> extends LoggingMain {
         return dataDir;
     }
 
+
     // 생성자
-    protected CommonApp(String name, String description, String solverConfigResource, String dataDirName) {
+    protected CommonApp(String name, String description, String solverConfigResource,
+                        String dataDirPath, String dataDirName, String informationFileName) {
         this.name = name;
         this.description = description;
         this.solverConfigResource = solverConfigResource;
+        this.dataDirPath = dataDirPath;
         this.dataDirName = dataDirName;
+        this.informationFileName = informationFileName;
     }
 
     // 초기화 함수
@@ -58,13 +61,15 @@ public abstract class CommonApp<Solution_> extends LoggingMain {
     }
 
     private SolutionBusiness<Solution_, ?> createSolutionBusiness() {
+        // SolverConfig.xml을 읽어서 SolverConfig 객체를 생성 및 종료 조건 설정
         SolverConfig solverConfig = SolverConfig.createFromXmlResource(solverConfigResource);
         solverConfig.withTerminationConfig(
                 new TerminationConfig().withUnimprovedSecondsSpentLimit(100L).withSecondsSpentLimit(100L));
 
+        // SolutionBusiness 객체 생성
         SolutionBusiness<Solution_, ?> solutionBusiness = new SolutionBusiness<>(this,
                 SolverFactory.create(solverConfig));
-        solutionBusiness.setDataDir(determineDataDir(dataDirName));
+        solutionBusiness.setDataDir(determineDataDir());
         solutionBusiness.setSolutionFileIO(createSolutionFileIO());
         solutionBusiness.updateDataDirs();
         return solutionBusiness;

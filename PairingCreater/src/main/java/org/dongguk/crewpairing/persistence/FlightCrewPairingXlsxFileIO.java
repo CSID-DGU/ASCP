@@ -292,8 +292,8 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             public void write() {
                 String timeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
                 exportPairingData(timeStr);
-//                exportVisualData(timeStr);
-//                exportUserData(timeStr);
+                exportVisualData(timeStr);
+                exportUserData(timeStr);
             }
 
             private void exportPairingData(String timeStr) {
