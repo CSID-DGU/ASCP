@@ -12,6 +12,12 @@ class Flight:
         self._aircraft = aircraft
         self._flightTime = int((self._destTime - self._originTime).total_seconds() // 60)
     
+    def findByID(self,id):
+        if self.id==id:
+            return self
+        else:
+            return None
+
     @property
     def TailNumber(self):
         return self._TailNumber
