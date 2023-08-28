@@ -29,6 +29,7 @@ public class PairingSolution extends AbstractPersistable {
     private List<Flight> flightList;
 
     // solver 가 풀어낸 Entity 들
+    @Setter
     @PlanningEntityCollectionProperty
     private List<Pairing> pairingList;
 
@@ -46,7 +47,7 @@ public class PairingSolution extends AbstractPersistable {
 
             if (pairing.getPair().size() == 0) {
                 str = " ---------------- !! Not Using";
-            } else if (pairing.equalBase()) {
+            } else if (pairing.isEqualBase()) {
                 str = " ---------------- !! DeadHead";
             }
 

@@ -15,22 +15,40 @@ import java.util.*;
 
 public class PairingApp extends CommonApp<PairingSolution> {
     public static final String SOLVER_CONFIG = "solverConfig.xml";
-    public static final String DATA_DIR_NAME = "crewpairing";
 
     public static void main(String[] args) {
-        SolutionBusiness<PairingSolution, ?> business = new PairingApp().init().getSolutionBusiness();
+        String dataDirPath = args.length > 0 ? args[0] : null;
+        String dataDirName = args.length > 1 ? args[1] : null;
+        String informationXlsxFile = args.length > 2 ? args[2] : null;
+        String pairingXlsxFile = args.length > 3 ? args[3] : null;
 
-        // Input Xlsx File
-        business.openSolution(null);
+        SolutionBusiness<PairingSolution, ?> business = new PairingApp(dataDirPath, dataDirName, informationXlsxFile)
+                .init().getSolutionBusiness();
+
+        // Input Information Xlsx File
+        business.openSolution(
+                business.getInputFileList()
+                        .stream()
+                        .filter(inputFile -> inputFile.getName().equals(informationXlsxFile))
+                        .findFirst().orElseThrow(() -> new IllegalArgumentException("파일이 존재하지 않습니다.")));
+
+        if (pairingXlsxFile != null) {
+            FlightCrewPairingXlsxFileIO xlsxFileIO = new FlightCrewPairingXlsxFileIO();
+            List<Flight> flightList = business.getSolution().getFlightList();
+            List<Pairing> pairingList = xlsxFileIO.readPairingList(flightList, business.getOutputFileList()
+                    .stream()
+                    .filter(outputFile -> outputFile.getName().equals(pairingXlsxFile))
+                    .findFirst().orElseGet(() -> null));
+            business.getSolution().setPairingList(pairingList);
+        }
 
         // Solve By SolverJob
         business.solve(business.getSolution());
 
         // Solution 출력
         PairingSolution solution = business.getSolution();
-        System.out.println(business.getSolution());
 
-        // Output CSV File
+        // Output Excel File
         business.saveSolution(null);
 
         // Check score detail
@@ -42,11 +60,13 @@ public class PairingApp extends CommonApp<PairingSolution> {
         System.exit(0);
     }
 
-    public PairingApp() {
+    public PairingApp(String dataDirPath, String dataDirName, String informationFileName) {
         super("CrewPairing",
                 "Airline Scheduling Crew Pairing",
                 SOLVER_CONFIG,
-                DATA_DIR_NAME);
+                dataDirPath,
+                dataDirName,
+                informationFileName);
     }
 
     @Override
