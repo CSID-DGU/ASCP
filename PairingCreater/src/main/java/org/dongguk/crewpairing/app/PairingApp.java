@@ -1,5 +1,6 @@
 package org.dongguk.crewpairing.app;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dongguk.common.app.CommonApp;
 import org.dongguk.common.business.SolutionBusiness;
 import org.dongguk.crewpairing.domain.*;
@@ -13,6 +14,7 @@ import org.optaplanner.persistence.common.api.domain.solution.SolutionFileIO;
 
 import java.util.*;
 
+@Slf4j
 public class PairingApp extends CommonApp<PairingSolution> {
     public static final String SOLVER_CONFIG = "solverConfig.xml";
 
