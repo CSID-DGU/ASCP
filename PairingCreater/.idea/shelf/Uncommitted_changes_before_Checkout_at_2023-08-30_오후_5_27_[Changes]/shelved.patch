@@ -1,0 +1,305 @@
+Index: src/main/java/org/dongguk/crewpairing/persistence/FlightCrewPairingXlsxFileIO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.dongguk.crewpairing.persistence;\r\n\r\nimport lombok.Getter;\r\nimport lombok.Setter;\r\nimport lombok.extern.slf4j.Slf4j;\r\nimport org.apache.poi.ss.usermodel.*;\r\nimport org.apache.poi.ss.util.CellRangeAddress;\r\nimport org.apache.poi.xssf.usermodel.*;\r\nimport org.dongguk.common.persistence.AbstractXlsxSolutionFileIO;\r\nimport org.dongguk.crewpairing.app.PairingApp;\r\nimport org.dongguk.crewpairing.domain.*;\r\nimport org.drools.io.ClassPathResource;\r\nimport org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;\r\n\r\nimport java.io.*;\r\nimport java.time.LocalDateTime;\r\nimport java.time.format.DateTimeFormatter;\r\nimport java.time.temporal.ChronoUnit;\r\nimport java.util.*;\r\n\r\nimport static java.lang.String.valueOf;\r\n\r\n@Slf4j\r\npublic class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<PairingSolution> {\r\n\r\n    @Override\r\n    public String getOutputFileExtension() {\r\n        return super.getOutputFileExtension();\r\n    }\r\n\r\n    @Override\r\n    public PairingSolution read(File inputFile) {\r\n        try (InputStream in = new ClassPathResource(\"input/ASCP_Data_Input_new.xlsx\").getInputStream()) {\r\n            XSSFWorkbook workbook = new XSSFWorkbook(in);\r\n            return new FlightCrewPairingXlsxReader(workbook).read();\r\n        } catch (IOException | RuntimeException e) {\r\n            log.error(\"{} {}\", e.getMessage(), \"Input File Error. Please Input File Format\");\r\n            e.printStackTrace();\r\n            throw new RuntimeException(e);\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public void write(PairingSolution pairingSolution, File file) {\r\n        new FlightCrewPairingXlsxWriter(pairingSolution).write();\r\n    }\r\n\r\n    @Getter\r\n    @Setter\r\n    private static class FlightCrewPairingXlsxReader extends AbstractXlsxReader<PairingSolution, HardSoftScore> {\r\n        private final List<Aircraft> aircraftList = new ArrayList<>();\r\n        private final List<Airport> airportList = new ArrayList<>();\r\n        private final List<Flight> flightList = new ArrayList<>();\r\n\r\n        private final Map<String, Airport> airportMap = new HashMap<>();\r\n        private int exchangeRate;\r\n\r\n        public FlightCrewPairingXlsxReader(XSSFWorkbook workbook) {\r\n            super(workbook, PairingApp.SOLVER_CONFIG);\r\n        }\r\n\r\n        @Override\r\n        public PairingSolution read() {\r\n            readTimeData();\r\n            readAircraft();         // 수정\r\n            readAirport();          // 수정\r\n            readDeadhead();         // 수정\r\n            readFlight();\r\n            return PairingSolution.builder()\r\n                    .aircraftList(aircraftList)\r\n                    .airportList(airportList)\r\n                    .flightList(flightList)\r\n                    .pairingList(createEntities()).build();\r\n        }\r\n\r\n        private void readTimeData() {\r\n            nextSheet(\"User_Time\");      // Sheet 고르기\r\n            currentRowIterator.next();              // 주제목 스킵\r\n            currentRowIterator.next();              // 빈행  스킵\r\n            currentRowIterator.next();              // 보조제목  스킵\r\n            currentRowIterator.next();              // Header  스킵\r\n\r\n            XSSFRow row = (XSSFRow) currentRowIterator.next();\r\n\r\n            Pairing.setStaticTime((int) row.getCell(1).getNumericCellValue(),\r\n                    (int) row.getCell(2).getNumericCellValue(),\r\n                    (int) row.getCell(3).getNumericCellValue(),\r\n                    (int) row.getCell(4).getNumericCellValue(),\r\n                    (int) row.getCell(5).getNumericCellValue());\r\n\r\n            log.info(\"Complete Read Time Data\");\r\n        }\r\n\r\n        private void readExchangeRate() {\r\n            nextSheet(\"User_Cost\");       // Sheet 고르기\r\n            currentRowIterator.next();              // 주제목 스킵\r\n            currentRowIterator.next();              // 빈 행 스킵\r\n\r\n            exchangeRate = (int) currentRowIterator.next().getCell(12).getNumericCellValue();\r\n\r\n            log.info(\"Complete Read Exchange Rate\");\r\n        }\r\n\r\n        private void readAircraft() {\r\n            aircraftList.clear();\r\n            nextSheet(\"Program_Cost\");    // Sheet 고르기\r\n            currentRowIterator.next();              // 빈 행 스킵\r\n            currentRowIterator.next();              // 주제목 스킵\r\n            currentRowIterator.next();              // Header 스킵\r\n\r\n            int indexCnt = 0;\r\n            while (currentRowIterator.hasNext()) {\r\n                XSSFRow row = (XSSFRow) currentRowIterator.next();\r\n\r\n                try {\r\n                    aircraftList.add(Aircraft.builder()\r\n                            .id(indexCnt++)\r\n                            .type(row.getCell(0).getStringCellValue())\r\n                            .crewNum((int) row.getCell(1).getNumericCellValue())\r\n                            .flightCost((int) row.getCell(2).getNumericCellValue())\r\n                            .layoverCost((int) row.getCell(3).getNumericCellValue())\r\n                            .quickTurnCost((int) row.getCell(4).getNumericCellValue()).build());\r\n                } catch (IllegalStateException e) {\r\n                    log.info(\"Finish Read Aircraft File\");\r\n                    break;\r\n                } catch (Exception e) {\r\n                    throw new RuntimeException(e);\r\n                }\r\n            }\r\n\r\n            log.info(\"Complete Read Aircraft Data\");\r\n        }\r\n\r\n        private void readAirport() {\r\n            airportMap.clear();\r\n            nextSheet(\"User_Hotel\");    // Sheet 고르기\r\n            currentRowIterator.next();  // 주제목 스킵\r\n            currentRowIterator.next();  // 빈 행 스킵\r\n            currentRowIterator.next();  // Header 스킵\r\n\r\n            int indexCnt = 0;\r\n            while (currentRowIterator.hasNext()) {\r\n                XSSFRow row = (XSSFRow) currentRowIterator.next();\r\n\r\n                try {\r\n                    if (row.getCell(0).getStringCellValue().isBlank()) {\r\n                        continue;\r\n                    }\r\n\r\n                    airportMap.put(row.getCell(0).getStringCellValue(), Airport.builder()\r\n                            .id(indexCnt++)\r\n                            .name(row.getCell(0).getStringCellValue())\r\n                            .hotelCost((int) row.getCell(1).getNumericCellValue())\r\n                            .deadheadCost(new HashMap<>()).build());\r\n                } catch (IllegalStateException e) {\r\n                    log.info(\"Finish Read Airport File\");\r\n                    break;\r\n                } catch (Exception e) {\r\n                    throw new RuntimeException(e);\r\n                }\r\n            }\r\n\r\n            log.info(\"Complete Read Airport Data\");\r\n        }\r\n\r\n        private void readDeadhead() {\r\n            airportList.clear();\r\n            nextSheet(\"User_Deadhead\");    // Sheet 고르기\r\n            currentRowIterator.next();  // 주제목 스킵\r\n            currentRowIterator.next();  // 빈 행 스킵\r\n            currentRowIterator.next();  // Header 스킵\r\n\r\n            while (currentRowIterator.hasNext()) {\r\n                XSSFRow row = (XSSFRow) currentRowIterator.next();\r\n\r\n                try {\r\n                    String origin = row.getCell(0).getStringCellValue();\r\n\r\n                    if (origin.isBlank()) {\r\n                        continue;\r\n                    }\r\n\r\n                    airportMap.get(origin)\r\n                            .putDeadhead(row.getCell(1).getStringCellValue(),\r\n                                    (int) row.getCell(2).getNumericCellValue());\r\n                } catch (IllegalStateException e) {\r\n                    log.info(\"Finish Read DeadHead File\");\r\n                    break;\r\n                } catch (Exception e) {\r\n                    throw new RuntimeException(e);\r\n                }\r\n            }\r\n\r\n            airportList.addAll(airportMap.values());\r\n            log.info(\"Complete Read Deadhead Data\");\r\n        }\r\n\r\n        private void readFlight() {\r\n            flightList.clear();\r\n            nextSheet(\"User_Flight\");    // Sheet 고르기\r\n            currentRowIterator.next();  // 주제목 스킵\r\n            currentRowIterator.next();  // 빈 행 스킵\r\n            currentRowIterator.next();  // Header 스킵\r\n\r\n            int indexCnt = 0;\r\n            while (currentRowIterator.hasNext()) {\r\n                XSSFRow row = (XSSFRow) currentRowIterator.next();\r\n\r\n                try {\r\n                    flightList.add(Flight.builder()\r\n                            .id(indexCnt++)\r\n                            .serialNumber(row.getCell(0).getStringCellValue())\r\n                            .tailNumber(row.getCell(1).getStringCellValue())\r\n                            .originAirport(Airport.of(airportList, row.getCell(2).getStringCellValue()))\r\n                            .originTime(row.getCell(3).getLocalDateTimeCellValue())\r\n                            .destAirport(Airport.of(airportList, row.getCell(4).getStringCellValue()))\r\n                            .destTime(row.getCell(5).getLocalDateTimeCellValue())\r\n                            .aircraft(Aircraft.of(aircraftList, row.getCell(6).getStringCellValue())).build());\r\n                } catch (IllegalStateException e) {\r\n                    log.info(\"Finish Read Flight File\");\r\n                    break;\r\n                } catch (Exception e) {\r\n                    log.error(\"{}\", e.getMessage());\r\n                    throw new RuntimeException(e);\r\n                }\r\n            }\r\n\r\n            log.info(\"Complete Read Flight Data\");\r\n        }\r\n\r\n        private List<Pairing> createEntities() {\r\n            //초기 페어링 Set 구성 어차피 [solver]가 바꿔버려서 의미 없음 아무것도 안넣으면 오류나서 넣는 것\r\n            List<Pairing> pairingList = new ArrayList<>();\r\n            for (int i = 0; i < flightList.size(); i++) {\r\n                List<Flight> pair = new ArrayList<>();\r\n                pair.add(flightList.get(i));\r\n                pairingList.add(new Pairing(i, pair, 0));\r\n            }\r\n\r\n            return pairingList;\r\n        }\r\n    }\r\n\r\n        @Getter\r\n        private static class FlightCrewPairingXlsxWriter extends AbstractXlsxWriter<PairingSolution, HardSoftScore> {\r\n\r\n            public FlightCrewPairingXlsxWriter(PairingSolution pairingSolution) {\r\n                super(pairingSolution, PairingApp.SOLVER_CONFIG);\r\n            }\r\n\r\n            @Override\r\n            public void write() {\r\n                String timeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern(\"yyyy_MM_dd_HH_mm_ss\"));\r\n                exportPairingData(timeStr);\r\n                exportVisualData(timeStr);\r\n                exportUserData(timeStr);\r\n            }\r\n\r\n            private void exportPairingData(String timeStr) {\r\n                String fileName = timeStr + \"-pairingData.xlsx\";\r\n\r\n                try (XSSFWorkbook workbook = new XSSFWorkbook()) {\r\n                    XSSFSheet sheet = workbook.createSheet(\"Data\");\r\n\r\n                    List<Pairing> pairingList = solution.getPairingList();\r\n\r\n                    //Pairing index 셀 스타일(우측 테두리)\r\n                    CellStyle rightBorder = workbook.createCellStyle();\r\n                    rightBorder.setAlignment(HorizontalAlignment.CENTER);\r\n                    rightBorder.setBorderRight(BorderStyle.THIN);\r\n\r\n                    Row row = sheet.createRow(0);\r\n                    Cell cell = row.createCell(0);\r\n                    cell.setCellValue(\"Pairing Data\");\r\n\r\n                    //Pairing data 테이블\r\n                    int rowIdx = 1;\r\n                    for(Pairing pairing : pairingList){\r\n                        row = sheet.createRow(rowIdx);\r\n                        cell = row.createCell(0);\r\n                        cell.setCellValue(rowIdx-1);\r\n                        cell.setCellStyle(rightBorder);\r\n\r\n                        for(int i=0; i<pairing.getPair().size(); i++){\r\n                            cell = row.createCell(i+1);\r\n                            cell.setCellValue(pairing.getPair().get(i).getId());\r\n                        }\r\n                        rowIdx++;\r\n                    }\r\n\r\n                    try (FileOutputStream fo = new FileOutputStream(\"src/main/resources/output/\" + fileName)) {\r\n                        workbook.write(fo);\r\n                    }\r\n                }catch (IOException e){\r\n                    e.printStackTrace();\r\n                }\r\n            }\r\n\r\n            public void exportVisualData(String timeStr) {\r\n                String fileName = timeStr + \"-visualData.csv\";\r\n\r\n                List<Pairing> pairingList = solution.getPairingList();\r\n                //첫 항공기의 출발시간을 기준으로 정렬\r\n                pairingList.removeIf(pairing -> pairing.getPair().isEmpty());\r\n                pairingList.sort(Comparator.comparing(a -> a.getPair().get(0).getOriginTime()));\r\n\r\n                //첫 항공기의 출발시간~마지막 항공기의 도착 시간까지 타임 테이블 생성\r\n                StringBuilder text = new StringBuilder();\r\n                LocalDateTime f = pairingList.get(0).getPair().get(0).getOriginTime();\r\n                LocalDateTime firstTime = stripMinutes(f);\r\n                LocalDateTime l = firstTime;\r\n\r\n                for (Pairing pairing : pairingList) {\r\n                    for (Flight flight : pairing.getPair()) {\r\n                        l = l.isAfter(flight.getDestTime()) ? l : flight.getDestTime();\r\n                    }\r\n                }\r\n                LocalDateTime lastTime = stripMinutes(l);\r\n\r\n                //첫 줄에 날짜 단위 입력\r\n                f = firstTime;\r\n                text.append(\",,\").append(f).append(\",\");\r\n                f = f.plusHours(1);\r\n                do {\r\n                    if (f.getHour() == 0) text.append(f);\r\n                    text.append(\",\");\r\n\r\n                    f = f.plusHours(1);\r\n                } while (!f.equals(lastTime));\r\n                text.append(\"\\n\");\r\n\r\n                //두번째 줄에 시간 단위 입력\r\n                text.append(\"INDEX,TYPE,\");\r\n                f = firstTime;\r\n                do {\r\n                    text.append(f.getHour());\r\n                    text.append(\":00,\");\r\n\r\n                    f = f.plusHours(1);\r\n                } while (!f.equals(lastTime));\r\n                text.append(\"\\n\");\r\n\r\n                //타임 테이블의 내용 작성\r\n                for (Pairing pairing : pairingList) {\r\n                    text.append(\"SET\").append(pairingList.indexOf(pairing)).append(\",\");\r\n                    text.append(pairing.getPair().get(0).getAircraft().getType()).append(\",\");\r\n                    String s = buildTable(pairing.getPair(), firstTime);\r\n                    text.append(s);\r\n                }\r\n\r\n                //csv 파일로 출력\r\n                try (FileWriter fw = new FileWriter(\"src/main/resources/output/\" + fileName)) {\r\n                    fw.write(text.toString());\r\n                } catch (IOException e) {\r\n                    throw new RuntimeException(e);\r\n                }\r\n            }\r\n\r\n            //출발시간과 도착 시간의 차이를 구하며 csv format 에 맞는 text 생성.\r\n            private static String buildTable(List<Flight> pairing, LocalDateTime firstTime) {\r\n                StringBuilder sb = new StringBuilder();\r\n                for (Flight flight : pairing) {\r\n                    int a = (int) ChronoUnit.HOURS.between(firstTime, stripMinutes(flight.getOriginTime()));\r\n                    sb.append(\",\".repeat(Math.max(0, a)));\r\n                    sb.append(flight.getOriginAirport().getName());\r\n                    sb.append(\",\");\r\n                    int b = (int) ChronoUnit.HOURS.between(flight.getOriginTime(), stripMinutes(flight.getDestTime()));\r\n                    sb.append(\"#######,\".repeat(Math.max(0, b - 1)));\r\n                    sb.append(flight.getDestAirport().getName());\r\n\r\n                    firstTime = stripMinutes(flight.getDestTime());\r\n                }\r\n                sb.append(\"\\n\");\r\n\r\n                return valueOf(sb);\r\n            }\r\n\r\n            //분 단위를 버림함\r\n            private static LocalDateTime stripMinutes(LocalDateTime l) {\r\n                return LocalDateTime.of(l.getYear(), l.getMonth(), l.getDayOfMonth(), l.getHour(), 0);\r\n            }\r\n\r\n            public void exportUserData(String timeStr) {\r\n                String fileName = timeStr + \"-userData.xlsx\";\r\n                try (XSSFWorkbook workbook = new XSSFWorkbook()) {\r\n                    XSSFSheet sheet = workbook.createSheet(\"Data\");\r\n\r\n                    List<Pairing> pairingList = solution.getPairingList();\r\n                    LocalDateTime firstTime = pairingList.get(0).getPair().get(0).getOriginTime();\r\n                    LocalDateTime lastTime = firstTime;\r\n\r\n                    for (Pairing pairing : pairingList) {\r\n                        for (Flight flight : pairing.getPair()) {\r\n                            lastTime = lastTime.isAfter(flight.getDestTime()) ? lastTime : flight.getDestTime();\r\n                        }\r\n                    }\r\n\r\n                    //셀 스타일 모음\r\n                    CellStyle headerStyle = workbook.createCellStyle();\r\n                    Font headerFont = workbook.createFont();\r\n                    headerFont.setBold(true);\r\n                    headerStyle.setFont(headerFont);\r\n                    headerStyle.setBorderBottom(BorderStyle.DOUBLE);\r\n                    headerStyle.setFillForegroundColor(new XSSFColor(new byte[] {(byte) 226,(byte) 239,(byte) 217}, null));\r\n                    headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);\r\n                    headerStyle.setAlignment(HorizontalAlignment.CENTER);\r\n\r\n                    CellStyle contentStyle = workbook.createCellStyle();\r\n                    Font contentfont = workbook.createFont();\r\n                    contentfont.setFontHeightInPoints((short) 9);\r\n                    contentStyle.setAlignment(HorizontalAlignment.LEFT);\r\n                    contentStyle.setFont(contentfont);\r\n\r\n                    CellStyle rightBorder = workbook.createCellStyle();\r\n                    rightBorder.setBorderRight(BorderStyle.THIN);\r\n                    rightBorder.setAlignment(HorizontalAlignment.CENTER);\r\n\r\n                    //타임 테이블 헤더 작성\r\n                    Row row = sheet.createRow(0);\r\n                    Cell cell = row.createCell(0);\r\n                    cell.setCellValue(firstTime.format(DateTimeFormatter.ofPattern(\"yyyy\")));\r\n                    cell.setCellStyle(headerStyle);\r\n\r\n                    int days = 0;\r\n                    for (LocalDateTime f = firstTime; ChronoUnit.DAYS.between(f, lastTime) >= 0; f = f.plusDays(1)) {\r\n                        days += 1;\r\n                        String MMdd = f.format(DateTimeFormatter.ofPattern(\"MM/dd\"));\r\n                        cell = row.createCell(days);\r\n                        cell.setCellValue(MMdd);\r\n                        cell.setCellStyle(headerStyle);\r\n                    }\r\n\r\n                    //타임 테이블 내용 작성\r\n                    for(int i=0; i<pairingList.size(); i++){\r\n                        row = sheet.createRow(i+1);\r\n                        cell = row.createCell(0);\r\n                        cell.setCellValue(\"SET\" + i);\r\n                        cell.setCellStyle(rightBorder);\r\n\r\n                        //Pairing의 flight에 대해서, 첫번째 비행과의 날짜 차이 k만큼 떨어진 셀에 내용 입력\r\n                        for(Flight flight : pairingList.get(i).getPair()){\r\n                            String sn = flight.getTailNumber();\r\n\r\n                            //도착 시간이 24시를 넘어가는 경우 (날짜 차이)*24 + 도착시간 으로 표시\r\n                            String origin = flight.getOriginTime().format(DateTimeFormatter.ofPattern(\"HH:mm\"));\r\n                            int daysGap = (int) ChronoUnit.DAYS.between(flight.getOriginTime(), flight.getDestTime());\r\n                            int destHour = flight.getDestTime().getHour();\r\n                            int destMin = flight.getDestTime().getMinute();\r\n                            String dest = String.format(\"%02d:%02d\", daysGap*24 + destHour, destMin);\r\n\r\n                            String text = \"  [\"+sn+\"] \" + \"[ \"+origin+\" ~ \"+dest+\" ]\";\r\n\r\n                            int k = (int) ChronoUnit.DAYS.between(firstTime, flight.getOriginTime())+1;\r\n\r\n                            //이미 셀에 값이 있다면 내용 추가\r\n                            if(row.getCell(k) == null){\r\n                                cell = row.createCell(k);\r\n                                cell.setCellValue(text);\r\n                            }\r\n                            else {\r\n                                StringBuilder sb = new StringBuilder(cell.getStringCellValue());\r\n                                cell.setCellValue(sb.append(\"  /\").append(text).toString());\r\n                            }\r\n                            cell.setCellStyle(contentStyle);\r\n                            sheet.autoSizeColumn(k);\r\n                            sheet.setColumnWidth(k, sheet.getColumnWidth(k));\r\n                        }\r\n                    }\r\n\r\n                    try (FileOutputStream fo = new FileOutputStream(\"src/main/resources/output/\" + fileName)) {\r\n                        workbook.write(fo);\r\n                    }\r\n                }catch (IOException e){\r\n                    e.printStackTrace();\r\n                }\r\n            }\r\n        }\r\n    }\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/dongguk/crewpairing/persistence/FlightCrewPairingXlsxFileIO.java b/src/main/java/org/dongguk/crewpairing/persistence/FlightCrewPairingXlsxFileIO.java
+--- a/src/main/java/org/dongguk/crewpairing/persistence/FlightCrewPairingXlsxFileIO.java	(revision f85bb3377fa52b5f38d700e66d0357294bfb659f)
++++ b/src/main/java/org/dongguk/crewpairing/persistence/FlightCrewPairingXlsxFileIO.java	(date 1693216126501)
+@@ -253,7 +253,9 @@
+                 String timeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
+                 exportPairingData(timeStr);
+                 exportVisualData(timeStr);
+-                exportUserData(timeStr);
++                exportUserData1(timeStr);
++                exportUserData2(timeStr);
++                exportUserData3(timeStr);
+             }
+ 
+             private void exportPairingData(String timeStr) {
+@@ -380,8 +382,8 @@
+                 return LocalDateTime.of(l.getYear(), l.getMonth(), l.getDayOfMonth(), l.getHour(), 0);
+             }
+ 
+-            public void exportUserData(String timeStr) {
+-                String fileName = timeStr + "-userData.xlsx";
++            public void exportUserData1(String timeStr) {
++                String fileName = timeStr + "-userData1.xlsx";
+                 try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+                     XSSFSheet sheet = workbook.createSheet("Data");
+ 
+@@ -422,7 +424,7 @@
+                     cell.setCellStyle(headerStyle);
+ 
+                     int days = 0;
+-                    for (LocalDateTime f = firstTime; ChronoUnit.DAYS.between(f, lastTime) >= 0; f = f.plusDays(1)) {
++                    for (LocalDateTime f = firstTime; ChronoUnit.DAYS.between(f.toLocalDate(), lastTime.toLocalDate()) >= 0; f = f.plusDays(1)) {
+                         days += 1;
+                         String MMdd = f.format(DateTimeFormatter.ofPattern("MM/dd"));
+                         cell = row.createCell(days);
+@@ -439,18 +441,115 @@
+ 
+                         //Pairing의 flight에 대해서, 첫번째 비행과의 날짜 차이 k만큼 떨어진 셀에 내용 입력
+                         for(Flight flight : pairingList.get(i).getPair()){
+-                            String sn = flight.getTailNumber();
+ 
+                             //도착 시간이 24시를 넘어가는 경우 (날짜 차이)*24 + 도착시간 으로 표시
+-                            String origin = flight.getOriginTime().format(DateTimeFormatter.ofPattern("HH:mm"));
+-                            int daysGap = (int) ChronoUnit.DAYS.between(flight.getOriginTime(), flight.getDestTime());
++                            int daysGap = (int) ChronoUnit.DAYS.between(flight.getOriginTime().toLocalDate(), flight.getDestTime().toLocalDate());
+                             int destHour = flight.getDestTime().getHour();
+                             int destMin = flight.getDestTime().getMinute();
+-                            String dest = String.format("%02d:%02d", daysGap*24 + destHour, destMin);
++                            String tn = flight.getTailNumber();
++                            String oriTime = flight.getOriginTime().format(DateTimeFormatter.ofPattern("HH:mm"));
++                            String dstTime = String.format("%02d:%02d", daysGap*24 + destHour, destMin);
++                            String oriApt = flight.getOriginAirport().getName();
++                            String dstApt = flight.getDestAirport().getName();
++
++                            String text = "    ["+tn+"] " + "[ "+oriTime+" ~ "+dstTime+" ] " + "[" + oriApt + " -> " + dstApt +"]";
++
++                            int k = (int) ChronoUnit.DAYS.between(firstTime.toLocalDate(), flight.getOriginTime().toLocalDate())+1;
++
++                            //이미 셀에 값이 있다면 내용 추가
++                            if(row.getCell(k) == null){
++                                cell = row.createCell(k);
++                                cell.setCellValue(text);
++                            }
++                            else {
++                                StringBuilder sb = new StringBuilder(cell.getStringCellValue());
++                                cell.setCellValue(sb.append("    /").append(text).toString());
++                            }
++                            cell.setCellStyle(contentStyle);
++                            sheet.autoSizeColumn(k);
++                            sheet.setColumnWidth(k, sheet.getColumnWidth(k));
++                        }
++                    }
++
++                    try (FileOutputStream fo = new FileOutputStream("src/main/resources/output/" + fileName)) {
++                        workbook.write(fo);
++                    }
++                }catch (IOException e){
++                    e.printStackTrace();
++                }
++            }
++
++            public void exportUserData2(String timeStr) {
++                String fileName = timeStr + "-userData2.xlsx";
++                try (XSSFWorkbook workbook = new XSSFWorkbook()) {
++                    XSSFSheet sheet = workbook.createSheet("Data");
++
++                    List<Pairing> pairingList = solution.getPairingList();
++                    LocalDateTime firstTime = pairingList.get(0).getPair().get(0).getOriginTime();
++                    LocalDateTime lastTime = firstTime;
++
++                    for (Pairing pairing : pairingList) {
++                        for (Flight flight : pairing.getPair()) {
++                            lastTime = lastTime.isAfter(flight.getDestTime()) ? lastTime : flight.getDestTime();
++                        }
++                    }
+ 
+-                            String text = "  ["+sn+"] " + "[ "+origin+" ~ "+dest+" ]";
++                    //셀 스타일 모음
++                    CellStyle headerStyle = workbook.createCellStyle();
++                    Font headerFont = workbook.createFont();
++                    headerFont.setBold(true);
++                    headerStyle.setFont(headerFont);
++                    headerStyle.setBorderBottom(BorderStyle.DOUBLE);
++                    headerStyle.setFillForegroundColor(new XSSFColor(new byte[] {(byte) 226,(byte) 239,(byte) 217}, null));
++                    headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
++                    headerStyle.setAlignment(HorizontalAlignment.CENTER);
+ 
+-                            int k = (int) ChronoUnit.DAYS.between(firstTime, flight.getOriginTime())+1;
++                    CellStyle contentStyle = workbook.createCellStyle();
++                    Font contentfont = workbook.createFont();
++                    contentfont.setFontHeightInPoints((short) 9);
++                    contentStyle.setAlignment(HorizontalAlignment.LEFT);
++                    contentStyle.setFont(contentfont);
++
++                    CellStyle rightBorder = workbook.createCellStyle();
++                    rightBorder.setBorderRight(BorderStyle.THIN);
++                    rightBorder.setAlignment(HorizontalAlignment.CENTER);
++
++                    //타임 테이블 헤더 작성
++                    Row row = sheet.createRow(0);
++                    Cell cell = row.createCell(0);
++                    cell.setCellValue(firstTime.format(DateTimeFormatter.ofPattern("yyyy")));
++                    cell.setCellStyle(headerStyle);
++
++                    int days = 0;
++                    for (LocalDateTime f = firstTime; ChronoUnit.DAYS.between(f.toLocalDate(), lastTime.toLocalDate()) >= 0; f = f.plusDays(1)) {
++                        days += 1;
++                        String MMdd = f.format(DateTimeFormatter.ofPattern("MM/dd"));
++                        cell = row.createCell(days);
++                        cell.setCellValue(MMdd);
++                        cell.setCellStyle(headerStyle);
++                    }
++
++                    //타임 테이블 내용 작성
++                    for(int i=0; i<pairingList.size(); i++){
++                        row = sheet.createRow(i+1);
++                        cell = row.createCell(0);
++                        cell.setCellValue("SET" + i);
++                        cell.setCellStyle(rightBorder);
++
++                        //Pairing의 flight에 대해서, 첫번째 비행과의 날짜 차이 k만큼 떨어진 셀에 내용 입력
++                        for(Flight flight : pairingList.get(i).getPair()){
++                            String tn = flight.getTailNumber();
++
++                            //(날짜 차이)+도착시간 으로 표시
++                            int daysGap = (int) ChronoUnit.DAYS.between(flight.getOriginTime().toLocalDate(), flight.getDestTime().toLocalDate());
++                            String oriTime = flight.getOriginTime().format(DateTimeFormatter.ofPattern("00+HH+mm"));
++                            String dstTime = flight.getDestTime().format(DateTimeFormatter.ofPattern(String.format("%02d", daysGap)+"+HH+mm"));
++                            String oriApt = flight.getOriginAirport().getName();
++                            String dstApt = flight.getDestAirport().getName();
++
++                            String text = "    ["+tn+"] " + "[ "+oriTime+" ~ "+dstTime+" ] " + "[" + oriApt + " -> " + dstApt +"]";
++
++                            int k = (int) ChronoUnit.DAYS.between(firstTime.toLocalDate(), flight.getOriginTime().toLocalDate())+1;
+ 
+                             //이미 셀에 값이 있다면 내용 추가
+                             if(row.getCell(k) == null){
+@@ -459,18 +558,103 @@
+                             }
+                             else {
+                                 StringBuilder sb = new StringBuilder(cell.getStringCellValue());
+-                                cell.setCellValue(sb.append("  /").append(text).toString());
++                                cell.setCellValue(sb.append("    /").append(text).toString());
+                             }
+                             cell.setCellStyle(contentStyle);
+                             sheet.autoSizeColumn(k);
+                             sheet.setColumnWidth(k, sheet.getColumnWidth(k));
+                         }
+                     }
++
++                    try (FileOutputStream fo = new FileOutputStream("src/main/resources/output/" + fileName)) {
++                        workbook.write(fo);
++                    }
++                }catch (IOException e){
++                    e.printStackTrace();
++                }
++            }
++
++            public void exportUserData3(String timeStr) {
++                String fileName = timeStr + "-userData3.xlsx";
++                try (XSSFWorkbook workbook = new XSSFWorkbook()) {
++                    XSSFSheet sheet = workbook.createSheet("Data");
++
++                    List<Pairing> pairingList = solution.getPairingList();
++                    LocalDateTime firstTime = pairingList.get(0).getPair().get(0).getOriginTime();
++                    LocalDateTime lastTime = firstTime;
++
++                    for (Pairing pairing : pairingList) {
++                        for (Flight flight : pairing.getPair()) {
++                            lastTime = lastTime.isAfter(flight.getDestTime()) ? lastTime : flight.getDestTime();
++                        }
++                    }
++
++                    // 타임 테이블 헤더 작성
++                    int days = 0;
++                    CellStyle headerStyle = workbook.createCellStyle();
++                    headerStyle.setBorderBottom(BorderStyle.DOUBLE);
++                    headerStyle.setAlignment(HorizontalAlignment.CENTER);
++
++                    Row row = sheet.createRow(0);
++                    Cell cell = row.createCell(0);
++                    cell.setCellValue("페어링 넘버");
++                    cell.setCellStyle(headerStyle);
++
++                    for (LocalDateTime f = firstTime; ChronoUnit.DAYS.between(f, lastTime) >= 0; f = f.plusDays(1)) {
++                        days += 1;
++                        cell = row.createCell(days);
++                        cell.setCellValue("비행" + days);
++                        cell.setCellStyle(headerStyle);
++                    }
++
++                    // 타임 테이블 내용 작성
++                    headerStyle.setBorderRight(BorderStyle.THIN);
++                    headerStyle.setAlignment(HorizontalAlignment.CENTER);
++
++                    XSSFColor[] colors = {
++                            new XSSFColor(new byte[]{(byte) 242, (byte) 234, (byte) 130}, null),
++                            new XSSFColor(new byte[]{(byte) 151, (byte) 206, (byte) 255}, null)
++                    };
++
++                    for (int i = 0; i < pairingList.size(); i++) {
++                        row = sheet.createRow(i + 1);
++                        cell = row.createCell(0);
++                        cell.setCellValue("SET " + i);
++                        cell.setCellStyle(headerStyle);
++
++                        int k = 0;
++                        for (Flight flight : pairingList.get(i).getPair()) {
++                            String tn = flight.getTailNumber();
++                            String oriTime = flight.getOriginTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
++                            String dstTime = flight.getDestTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
++                            String oriApt = flight.getOriginAirport().getName();
++                            String dstApt = flight.getDestAirport().getName();
++                            String text = "["+tn+"] " + "[ "+oriTime+" ~ "+dstTime+" ] " + "[" + oriApt + " -> " + dstApt +"]";
++                            cell = row.createCell(++k);
++                            cell.setCellValue(text);
++
++                            CellStyle contentStyle = workbook.createCellStyle();
++                            Font contentfont = workbook.createFont();
++                            contentfont.setFontHeightInPoints((short) 9);
++                            contentStyle.setAlignment(HorizontalAlignment.LEFT);
++                            contentStyle.setFont(contentfont);
++
++                            cell.setCellStyle(contentStyle);
++
++                            XSSFColor currentColor = ((k % 2 == 0) && (i % 2 == 0)) || ((k % 2 == 1) && (i % 2 == 1)) ? colors[0] : colors[1];
++
++                            contentStyle.setFillForegroundColor(currentColor);
++                            contentStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
++
++                            sheet.autoSizeColumn(k);
++                            sheet.setColumnWidth(k, sheet.getColumnWidth(k));
++                        }
++                    }
+ 
+                     try (FileOutputStream fo = new FileOutputStream("src/main/resources/output/" + fileName)) {
+                         workbook.write(fo);
+                     }
+-                }catch (IOException e){
++                } catch (IOException e) {
+                     e.printStackTrace();
+                 }
+             }
+Index: src/main/java/org/dongguk/common/app/CommonApp.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.dongguk.common.app;\r\n\r\nimport lombok.Getter;\r\nimport lombok.Setter;\r\nimport org.dongguk.common.business.SolutionBusiness;\r\nimport org.optaplanner.core.api.solver.SolverFactory;\r\nimport org.optaplanner.core.config.solver.SolverConfig;\r\nimport org.optaplanner.core.config.solver.termination.TerminationConfig;\r\nimport org.optaplanner.persistence.common.api.domain.solution.SolutionFileIO;\r\n\r\nimport java.awt.*;\r\nimport java.io.File;\r\n\r\n@Getter\r\n@Setter\r\npublic abstract class CommonApp<Solution_> extends LoggingMain {\r\n    // Data Directory 경로\r\n    public static final String DATA_DIR_SYSTEM_PROPERTY = \"org.dongguk.dataDir\";\r\n\r\n    protected final String name;\r\n    protected final String description;\r\n    protected final String solverConfigResource;\r\n    protected final String dataDirName;\r\n\r\n    protected SolutionBusiness<Solution_, ?> solutionBusiness;\r\n    protected SolverConfig solverConfig;\r\n\r\n    // 우리가 사용할 Data Directory의 하위 경로 지정\r\n    public static File determineDataDir(String dataDirName) {\r\n        // 만약 기존경로가 없다면 프로젝트 내 data Dir을 사용함\r\n        String dataDirPath = System.getProperty(DATA_DIR_SYSTEM_PROPERTY, \"data/\");\r\n\r\n        // 우리가 원하는 Data Directory 사용\r\n        File dataDir = new File(dataDirPath, dataDirName);\r\n        if (!dataDir.exists()) {\r\n            throw new IllegalStateException(String.format(\"해당 Path [%s]에 Data Directory는 존재하지 않습니다\", dataDir.getAbsolutePath()));\r\n        }\r\n\r\n        return dataDir;\r\n    }\r\n\r\n    // 생성자\r\n    protected CommonApp(String name, String description, String solverConfigResource, String dataDirName) {\r\n        this.name = name;\r\n        this.description = description;\r\n        this.solverConfigResource = solverConfigResource;\r\n        this.dataDirName = dataDirName;\r\n    }\r\n\r\n    // 초기화 함수\r\n    public CommonApp<Solution_> init() {\r\n        init(null, true);\r\n        return this;\r\n    }\r\n\r\n    public void init(Component centerForComponent, boolean exitOnClose) {\r\n        solutionBusiness = createSolutionBusiness();\r\n    }\r\n\r\n    private SolutionBusiness<Solution_, ?> createSolutionBusiness() {\r\n        SolverConfig solverConfig = SolverConfig.createFromXmlResource(solverConfigResource);\r\n        solverConfig.withTerminationConfig(\r\n                new TerminationConfig().withUnimprovedSecondsSpentLimit(100L).withSecondsSpentLimit(100L));\r\n\r\n        SolutionBusiness<Solution_, ?> solutionBusiness = new SolutionBusiness<>(this,\r\n                SolverFactory.create(solverConfig));\r\n        solutionBusiness.setDataDir(determineDataDir(dataDirName));\r\n        solutionBusiness.setSolutionFileIO(createSolutionFileIO());\r\n        solutionBusiness.updateDataDirs();\r\n        return solutionBusiness;\r\n    }\r\n\r\n    // Solution File IO\r\n    public abstract SolutionFileIO<Solution_> createSolutionFileIO();\r\n\r\n    // 사용 유무 모르겠음\r\n    // public interface ExtraAction<Solution_> extends BiConsumer<SolutionBusiness<Solution_, ?>, SolutionPanel<Solution_>> {\r\n    //     String getName();\r\n    // }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/dongguk/common/app/CommonApp.java b/src/main/java/org/dongguk/common/app/CommonApp.java
+--- a/src/main/java/org/dongguk/common/app/CommonApp.java	(revision f85bb3377fa52b5f38d700e66d0357294bfb659f)
++++ b/src/main/java/org/dongguk/common/app/CommonApp.java	(date 1693198671279)
+@@ -60,7 +60,7 @@
+     private SolutionBusiness<Solution_, ?> createSolutionBusiness() {
+         SolverConfig solverConfig = SolverConfig.createFromXmlResource(solverConfigResource);
+         solverConfig.withTerminationConfig(
+-                new TerminationConfig().withUnimprovedSecondsSpentLimit(100L).withSecondsSpentLimit(100L));
++                new TerminationConfig().withUnimprovedSecondsSpentLimit(60L).withSecondsSpentLimit(60L));
+ 
+         SolutionBusiness<Solution_, ?> solutionBusiness = new SolutionBusiness<>(this,
+                 SolverFactory.create(solverConfig));
+Index: .idea/gradle.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"GradleSettings\">\r\n    <option name=\"linkedExternalProjectsSettings\">\r\n      <GradleProjectSettings>\r\n        <option name=\"externalProjectPath\" value=\"$PROJECT_DIR$\" />\r\n        <option name=\"modules\">\r\n          <set>\r\n            <option value=\"$PROJECT_DIR$\" />\r\n          </set>\r\n        </option>\r\n      </GradleProjectSettings>\r\n    </option>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/gradle.xml b/.idea/gradle.xml
+--- a/.idea/gradle.xml	(revision f85bb3377fa52b5f38d700e66d0357294bfb659f)
++++ b/.idea/gradle.xml	(date 1693175333456)
+@@ -1,5 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
++  <component name="GradleMigrationSettings" migrationVersion="1" />
+   <component name="GradleSettings">
+     <option name="linkedExternalProjectsSettings">
+       <GradleProjectSettings>
