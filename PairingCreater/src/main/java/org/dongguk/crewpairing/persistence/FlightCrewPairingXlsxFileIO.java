@@ -292,9 +292,9 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             public void write() {
                 String timeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
                 exportPairingData(timeStr);
-                exportVisualData(timeStr);
                 exportUserData1(timeStr);
-                exportUserData2(timeStr);
+//                exportVisualData(timeStr);
+//                exportUserData2(timeStr);
             }
 
             private void exportPairingData(String timeStr) {
@@ -429,6 +429,9 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     XSSFSheet sheet = workbook.createSheet("Data");
 
                     List<Pairing> pairingList = solution.getPairingList();
+                    pairingList.removeIf(pairing -> pairing.getPair().isEmpty());
+                    pairingList.sort(Comparator.comparing(a -> a.getPair().get(0).getOriginTime()));
+
                     LocalDateTime firstTime = pairingList.get(0).getPair().get(0).getOriginTime();
                     LocalDateTime lastTime = firstTime;
 
