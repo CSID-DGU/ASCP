@@ -391,7 +391,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 }
 
                 //csv 파일로 출력
-                try (FileWriter fw = new FileWriter("src/main/resources/output/" + fileName)) {
+                try (FileWriter fw = new FileWriter("./data/crewpairing/output/" + fileName)) {
                     fw.write(text.toString());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -509,7 +509,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                         }
                     }
 
-                    try (FileOutputStream fo = new FileOutputStream("src/main/resources/output/" + fileName)) {
+                    try (FileOutputStream fo = new FileOutputStream("./data/crewpairing/output/" + fileName)) {
                         workbook.write(fo);
                     }
                 }catch (IOException e){

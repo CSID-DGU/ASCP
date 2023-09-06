@@ -64,7 +64,7 @@ public abstract class CommonApp<Solution_> extends LoggingMain {
         // SolverConfig.xml을 읽어서 SolverConfig 객체를 생성 및 종료 조건 설정
         SolverConfig solverConfig = SolverConfig.createFromXmlResource(solverConfigResource);
         solverConfig.withTerminationConfig(
-                new TerminationConfig().withUnimprovedSecondsSpentLimit(100L).withSecondsSpentLimit(100L));
+                new TerminationConfig().withUnimprovedSecondsSpentLimit(10L).withSecondsSpentLimit(30L));
 
         // SolutionBusiness 객체 생성
         SolutionBusiness<Solution_, ?> solutionBusiness = new SolutionBusiness<>(this,
