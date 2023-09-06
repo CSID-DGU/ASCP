@@ -1,7 +1,7 @@
 package org.dongguk.domain;
 
 import lombok.*;
-import org.dongguk.common.domain.AbstractPersistable;
+import org.dongguk.AbstractPersistable;
 
 import java.util.List;
 

@@ -1,6 +1,9 @@
 package org.dongguk;
 
+import org.dongguk.domain.Flight;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +37,6 @@ public class Main {
                 while( (line = br.readLine()) != null ){
                     if (line.startsWith("Create Output File : ")) {
                         pairingFileName = line.substring(21);
-                        System.out.println(line);
                         continue;
                     }
 
@@ -50,10 +52,8 @@ public class Main {
                         continue;
                     }
 
-                    if (cnt % 20 == 0) {
+                    if (cnt++ % 60 == 0) {
                         System.out.println(line);
-                        cnt++;
-                        cnt = cnt % 20;
                     }
                 }
             } catch (Exception e) {
@@ -98,10 +98,13 @@ public class Main {
                 break;
             }
         }
+        List<Flight> flightList = FlightCrewPairingXlsxFileIO.read(new File("./data/crewpairing/input/" + inputFileName));
+
+        FlightCrewPairingXlsxFileIO.write(FlightCrewPairingXlsxFileIO.readPairing(flightList, new File("./data/crewpairing/output/" + pairingFileName)));
 
         for (int i = 0; i < otHardScore.size(); i++) {
             // 인덱스와 같이 Hard, Soft 점수 출력
-            System.out.println("[ OT - " + i + " ] " + "Hard Score : " + otHardScore.get(i) + ", Soft Score : " + otSoftScore.get(i));
+            System.out.print("[ OT - " + i + " ] " + "Hard Score : " + otHardScore.get(i) + ", Soft Score : " + otSoftScore.get(i) + "  ");
 //            System.out.println("[ RL - " + i + " ] " + "Hard Score : " + rlHardScore.get(i) + ", Soft Score : " + rlSoftScore.get(i));
         }
     }
