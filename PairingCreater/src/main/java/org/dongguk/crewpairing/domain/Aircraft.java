@@ -1,4 +1,4 @@
-package org.dongguk.domain;
+package org.dongguk.crewpairing.domain;
 
 import lombok.*;
 import org.dongguk.common.domain.AbstractPersistable;
