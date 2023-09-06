@@ -42,13 +42,13 @@ public class Main {
 
                     if (line.startsWith("Hard Score : ")) {
                         otHardScore.add(Long.parseLong(line.substring(13)));
-                        System.out.println(line);
+                        System.out.println("HardScore: " + line.substring(13));
                         continue;
                     }
 
                     if (line.startsWith("Soft Score : ")) {
                         otSoftScore.add(Long.parseLong(line.substring(13)));
-                        System.out.println(line);
+                        System.out.println("SoftScore: " + line.substring(13));
                         continue;
                     }
 
@@ -60,41 +60,41 @@ public class Main {
                 e.printStackTrace();
             }
 
-//            // Half Cycle: Reinforcement Learning 실행
-//            try {
-//                ProcessBuilder pb = CommandUtil.getPythonCommand(inputFileName, pairingFileName);
-//
-//                System.out.println("Running " + pb.command());
-//                Process p = pb.start();
-//
-//                BufferedReader br = new BufferedReader(new InputStreamReader( p.getInputStream() ));
-//                String line = null;
-//                while( (line = br.readLine()) != null ){
-//                    if (line.startsWith("Create Output File : ")) {
-//                        pairingFileName = line.substring(21);
-//                    }
-//
-//                    if (line.startsWith("Hard Score : ")) {
-//                        rlHardScore.add(Long.parseLong(line.substring(13)));
-//                    }
-//
-//                    if (line.startsWith("Soft Score : ")) {
-//                        rlSoftScore.add(Long.parseLong(line.substring(13)));
-//                    }
-//
-//                    System.out.println(line);
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//
-//            // 만약 사이클에서 변화가 없다면 종료(현재는 점수 변화가 없다면 끝나지만, 추후에는 다른 조건을 추가할 예정)
-//            if (otSoftScore.get(i) - rlSoftScore.get(i) == 0) {
-//                break;
-//            }
+            // Half Cycle: Reinforcement Learning 실행
+            try {
+                ProcessBuilder pb = CommandUtil.getPythonCommand(inputFileName, pairingFileName);
 
-            // 임시 종료 조건(OptaPlanner만 실행할 경우)
-            if (i != 0 && otSoftScore.get(i) - otSoftScore.get(i - 1) == 0) {
+                System.out.println("Running " + pb.command());
+                Process p = pb.start();
+
+                BufferedReader br = new BufferedReader(new InputStreamReader( p.getInputStream() ));
+                String line = null;
+                while( (line = br.readLine()) != null ){
+                    if (line.startsWith("Create Output File : ")) {
+                        pairingFileName = line.substring(21);
+                        continue;
+                    }
+
+                    if (line.startsWith("Hard Score : ")) {
+                        rlHardScore.add(Long.parseLong(line.substring(13)));
+                        System.out.println("HardScore: " + line.substring(13));
+                        continue;
+                    }
+
+                    if (line.startsWith("Soft Score : ")) {
+                        rlSoftScore.add(Long.parseLong(line.substring(13)));
+                        System.out.println("SoftScore: " + line.substring(13));
+                        continue;
+                    }
+
+                    System.out.println(line);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // 만약 사이클에서 변화가 없다면 종료(현재는 점수 변화가 없다면 끝나지만, 추후에는 다른 조건을 추가할 예정)
+            if (otSoftScore.get(i) - rlSoftScore.get(i) == 0) {
                 break;
             }
         }
@@ -105,7 +105,7 @@ public class Main {
         for (int i = 0; i < otHardScore.size(); i++) {
             // 인덱스와 같이 Hard, Soft 점수 출력
             System.out.print("[ OT - " + i + " ] " + "Hard Score : " + otHardScore.get(i) + ", Soft Score : " + otSoftScore.get(i) + "  ");
-//            System.out.println("[ RL - " + i + " ] " + "Hard Score : " + rlHardScore.get(i) + ", Soft Score : " + rlSoftScore.get(i));
+            System.out.println("[ RL - " + i + " ] " + "Hard Score : " + rlHardScore.get(i) + ", Soft Score : " + rlSoftScore.get(i));
         }
     }
 }

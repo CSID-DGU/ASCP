@@ -32,6 +32,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             return new FlightCrewPairingXlsxReader(workbook).read();
         } catch (IOException | RuntimeException e) {
             log.error("{} {}", e.getMessage(), "Input File Error. Please Input File Format");
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -99,7 +100,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 List<Flight> pair = new ArrayList<>();
                 while (currentCellIterator.hasNext()) {
                     Cell cell = currentCellIterator.next();
-                    if (cell.getCellType() == CellType.BLANK || cell.getCellType() == CellType.STRING || cell.getNumericCellValue() == 0) {
+                    if (cell.getCellType() == CellType.BLANK || cell.getCellType() == CellType.STRING) {
                         break;
                     }
 
