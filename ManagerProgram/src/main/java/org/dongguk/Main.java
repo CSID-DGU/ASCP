@@ -30,20 +30,31 @@ public class Main {
 
                 BufferedReader br = new BufferedReader(new InputStreamReader( p.getInputStream() ));
                 String line = null;
+                int cnt = 0;
                 while( (line = br.readLine()) != null ){
                     if (line.startsWith("Create Output File : ")) {
                         pairingFileName = line.substring(21);
+                        System.out.println(line);
+                        continue;
                     }
 
                     if (line.startsWith("Hard Score : ")) {
                         otHardScore.add(Long.parseLong(line.substring(13)));
+                        System.out.println(line);
+                        continue;
                     }
 
                     if (line.startsWith("Soft Score : ")) {
                         otSoftScore.add(Long.parseLong(line.substring(13)));
+                        System.out.println(line);
+                        continue;
                     }
 
-                    System.out.println(line);
+                    if (cnt % 20 == 0) {
+                        System.out.println(line);
+                        cnt++;
+                        cnt = cnt % 20;
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
