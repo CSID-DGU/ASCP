@@ -165,7 +165,7 @@ public class Pairing extends AbstractPersistable {
             movingWorkCost += (getMaxCrewNum() - presentCrewNum) * deadheadsOfCurrentAirport.get(nextAirportName);
         }
 
-        return movingWorkCost;
+        return movingWorkCost / 100;
     }
 
     /**
