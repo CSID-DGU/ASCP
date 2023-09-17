@@ -5,6 +5,7 @@ import org.dongguk.common.domain.AbstractPersistable;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.variable.PlanningListVariable;
 
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,10 @@ public class Pairing extends AbstractPersistable {
      */
     public boolean isImpossibleTime() {
         for (int i = 0; i < pair.size() - 1; i++) {
-            if (pair.get(i).getDestTime().isAfter(pair.get(i + 1).getOriginTime())) {
+            LocalDateTime beforeDestTime = pair.get(i).getDestTime();
+            LocalDateTime afterOriginTime = pair.get(i + 1).getOriginTime();
+
+            if (beforeDestTime.isAfter(afterOriginTime)){
                 return true;
             }
         }
@@ -70,9 +74,10 @@ public class Pairing extends AbstractPersistable {
      */
     public boolean isImpossibleAirport() {
         for (int i = 0; i < pair.size() - 1; i++) {
-            if (!pair.get(i).getDestAirport().getName().equals(pair.get(i + 1).getOriginAirport().getName())) {
-                return true;
-            }
+            String beforeAirportName = pair.get(i).getDestAirport().getName();
+            String afterAirportName = pair.get(i + 1).getOriginAirport().getName();
+
+            if (!beforeAirportName.equals(afterAirportName)) {return true;}
         }
         return false;
     }
@@ -87,13 +92,16 @@ public class Pairing extends AbstractPersistable {
         int workTime = pair.get(0).getFlightTime();
 
         for(int i=1; i<pair.size(); i++){
+            int FlightTime = pair.get(i).getFlightTime();
+            int FlightGap = getFlightGap(i - 1);
+
             if(getFlightGap(i - 1) < checkContinueTime) {
-                totalTime += pair.get(i).getFlightTime() + getFlightGap(i - 1);
-                workTime += pair.get(i).getFlightTime();
+                totalTime += FlightTime + FlightGap;
+                workTime += FlightTime;
             }
             else {
-                totalTime = pair.get(i).getFlightTime();
-                workTime = pair.get(i).getFlightTime();
+                totalTime = FlightTime;
+                workTime = FlightTime;
             }
             if(totalTime > continueMaxTime) return true;
             if(workTime > workMaxTime) return true;
@@ -106,9 +114,11 @@ public class Pairing extends AbstractPersistable {
      * / 비행들의 항공기가 동일하지 않을 시 true 반환
      * @return boolean
      */
+    @Deprecated
     public boolean isDifferentAircraft() {
         for (int i = 0; i < pair.size() - 1; i++) {
-            if (!pair.get(i).getAircraft().getType().equals(pair.get(i + 1).getAircraft().getType())) {
+            if (!pair.get(i).getAircraft().getType()
+                    .equals(pair.get(i + 1).getAircraft().getType())) {
                 return true;
             }
         }
@@ -121,7 +131,10 @@ public class Pairing extends AbstractPersistable {
      * @return boolean
      */
     public boolean isEqualBase() {
-        return !pair.get(0).getOriginAirport().getName().equals(pair.get(pair.size() - 1).getDestAirport().getName());
+        String startAirport = pair.get(0).getOriginAirport().getName();
+        String endAirport = pair.get(pair.size() - 1).getDestAirport().getName();
+
+        return !startAirport.equals(endAirport);
     }
 
     /**
@@ -143,15 +156,12 @@ public class Pairing extends AbstractPersistable {
      * @return sum((maxCrewNum - 요구 승무원)*운항시간(분))*10
      */
     public int getMovingWorkCost(){
-        int maxCrewNum = 0;
         int movingWorkCost = 0;
 
         for (Flight flight : pair) {
-            maxCrewNum = Math.max(maxCrewNum, flight.getAircraft().getCrewNum());
-        }
-        for (Flight flight : pair) {
+            int presentCrewNum =flight.getAircraft().getCrewNum();
             //(최대 승무원 수 - 지금 기종의 승무원 수) * 운항시간(분)*100 <-추후 cost 변경
-            movingWorkCost += (maxCrewNum - flight.getAircraft().getCrewNum()) * flight.getFlightTime() * 10;
+            movingWorkCost += (getMaxCrewNum() - presentCrewNum) * flight.getFlightTime() * 10;
         }
         return movingWorkCost;
     }
@@ -169,7 +179,7 @@ public class Pairing extends AbstractPersistable {
      * / 마지막 도착 공항에서 처음 공항으로 가는데 필요한 deadhead cost 사용
      * @return deadhead cost / 2
      */
-    public Integer getDeadHeadCost() {
+    public Integer getDeadHeadCost() { //인원수만큼 곱해야하지 않나????
         Map<String, Integer> deadheads = pair.get(pair.size() - 1).getDestAirport().getDeadheadCost();
         String origin = pair.get(0).getOriginAirport().getName();
 
@@ -213,9 +223,7 @@ public class Pairing extends AbstractPersistable {
         int cost = 0;
         for (int i = 0; i < pair.size() - 1; i++) {
             // 만약 비행편 간격이 하나라도 음수라면 유효한 페어링이 아님
-            if (getFlightGap(i) <= 0) {
-                return 0;
-            }
+            if (getFlightGap(i) <= 0) return 0;
 
             // 음수가 아니라면 유효한 페어링이므로 QuickTurnCost 계산
             if (getFlightGap(i) < QuickTurnaroundTime) {
@@ -239,16 +247,17 @@ public class Pairing extends AbstractPersistable {
         int cost = 0;
         for (int i = 0; i < pair.size() - 1; i++) {
             // 만약 비행편 간격이 하나라도 음수라면 유효한 페어링이 아님
-            if (getFlightGap(i) <= 0) {
-                return 0;
-            }
+            if (getFlightGap(i) <= 0) return 0;
 
             int flightGap = getFlightGap(i);
             // 음수가 아니라면 유효한 페어링이므로 HotelCost 계산
             if (flightGap >= hotelMinTime) {
                 cost += (pair.get(i + 1).getOriginAirport().getHotelCost()
-                        * pair.get(0).getAircraft().getCrewNum() //비행마다 crew num 다를 수도 있어서 max crew로 수정해야 할 듯)
+                        * getMaxCrewNum()
                         * (int) (1 + (int) Math.floor(((float) flightGap - (float) hotelMinTime) / (float) hotelTime)));
+                        //이 부분을 숫자를 지정하는건 어떨까요. 휴식 시간이 3일이 넘어갈 일이 없으니
+                        //8~15시간: 1일 / ~25시간 :2일 / ~33시간: 3일
+                        //이런식으로 지정하면 수정도 쉽고 더 명확할 것 같아요.
             }
         }
 
@@ -263,6 +272,17 @@ public class Pairing extends AbstractPersistable {
         long breakTime = ChronoUnit.MINUTES.between(pair.get(index).getDestTime(), pair.get(index+1).getOriginTime());
 
         return (int) Math.max(0, breakTime);
+    }
+    /**
+     * pairing의 인원을 구하는 메서드
+     * @return maxCrewNum
+     */
+    private int getMaxCrewNum(){
+        int maxCrewNum = 0;
+        for (Flight flight : pair) {
+            maxCrewNum = Math.max(maxCrewNum, flight.getAircraft().getCrewNum());
+        }
+        return maxCrewNum;
     }
 
     @Override

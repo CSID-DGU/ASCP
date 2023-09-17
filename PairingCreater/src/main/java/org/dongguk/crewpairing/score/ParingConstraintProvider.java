@@ -51,8 +51,8 @@ public class ParingConstraintProvider implements ConstraintProvider {
 
     /**
      * HARD
-     * 비행 일수 제약(Max length):
-     * 페어링 총 기간이 7일 이상일 시 -> 하드스코어 부여((총 길이-7) * 100)
+     * 연속된 비행 일수 제약(law possible):
+     * 연속된 비행이ㅣ 14시간 이상인 제약 -> 하드스코어 부여(1000)
      */
     private Constraint continuityPossible(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Pairing.class)
