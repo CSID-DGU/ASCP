@@ -20,22 +20,22 @@ public class ViewAllConstraint {
      * @param solution
      */
     public static void viewAll(Map<String, ConstraintMatchTotal<HardSoftLongScore>> constraintMatchTotalMap, PairingSolution solution){
-        for (ConstraintMatchTotal<HardSoftLongScore> constraintMatchTotal : constraintMatchTotalMap.values()) {
-
-            String constraintName = constraintMatchTotal.getConstraintName();
-            int constraintMatchCount = constraintMatchTotal.getConstraintMatchCount();
-            HardSoftLongScore constraintScore = constraintMatchTotal.getScore();
-            long hardScore = constraintScore.hardScore();
-            long softScore = constraintScore.softScore();
-            long checkScore=0;
-
-            if(hardScore!=0){
-                checkScore=-hardScore;
-            } else {
-                checkScore=-softScore;
-            }
-            System.out.println("Constraint: " + constraintName + "-> cost " + checkScore +" (violated "+ constraintMatchCount+" times)");
-        }
+//        for (ConstraintMatchTotal<HardSoftLongScore> constraintMatchTotal : constraintMatchTotalMap.values()) {
+//
+//            String constraintName = constraintMatchTotal.getConstraintName();
+//            int constraintMatchCount = constraintMatchTotal.getConstraintMatchCount();
+//            HardSoftLongScore constraintScore = constraintMatchTotal.getScore();
+//            long hardScore = constraintScore.hardScore();
+//            long softScore = constraintScore.softScore();
+//            long checkScore=0;
+//
+//            if(hardScore!=0){
+//                checkScore=-hardScore;
+//            } else {
+//                checkScore=-softScore;
+//            }
+//            System.out.println("Constraint: " + constraintName + "-> cost " + checkScore +" (violated "+ constraintMatchCount+" times)");
+//        }
 
         System.out.println("Hard Score : " + solution.getScore().hardScore());
         System.out.println("Soft Score : " + solution.getScore().softScore());

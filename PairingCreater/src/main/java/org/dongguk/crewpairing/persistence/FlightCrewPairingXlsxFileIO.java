@@ -7,6 +7,7 @@ import org.apache.poi.xssf.usermodel.*;
 import org.dongguk.common.persistence.AbstractXlsxSolutionFileIO;
 import org.dongguk.crewpairing.app.PairingApp;
 import org.dongguk.crewpairing.domain.*;
+import org.dongguk.crewpairing.domain.factory.DomainFactory;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 
 import java.io.*;
@@ -32,6 +33,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             return new FlightCrewPairingXlsxReader(workbook).read();
         } catch (IOException | RuntimeException e) {
             log.error("{} {}", e.getMessage(), "Input File Error. Please Input File Format");
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -54,12 +56,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
 
     @Getter
     private static class FlightCrewPairingXlsxReader extends AbstractXlsxReader<PairingSolution, HardSoftScore> {
-        private final List<Aircraft> aircraftList = new ArrayList<>();
-        private final List<Airport> airportList = new ArrayList<>();
-        private final List<Flight> flightList = new ArrayList<>();
-
         private final Map<String, Airport> airportMap = new HashMap<>();
-        private int exchangeRate;
 
         public FlightCrewPairingXlsxReader(XSSFWorkbook workbook) {
             super(workbook, PairingApp.SOLVER_CONFIG);
@@ -78,9 +75,9 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             readFlight();
             log.debug("Complete Read Flight Data");
             return PairingSolution.builder()
-                    .aircraftList(aircraftList)
-                    .airportList(airportList)
-                    .flightList(flightList)
+                    .aircraftList(DomainFactory.getAircraftList())
+                    .airportList(DomainFactory.getAirportList())
+                    .flightList(DomainFactory.getFlightList())
                     .pairingList(createEntities()).build();
         }
 
@@ -99,7 +96,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 List<Flight> pair = new ArrayList<>();
                 while (currentCellIterator.hasNext()) {
                     Cell cell = currentCellIterator.next();
-                    if (cell.getCellType() == CellType.BLANK || cell.getCellType() == CellType.STRING || cell.getNumericCellValue() == 0) {
+                    if (cell.getCellType() == CellType.BLANK || cell.getCellType() == CellType.STRING) {
                         break;
                     }
 
@@ -132,18 +129,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             log.info("Complete Read Time Data");
         }
 
-        private void readExchangeRate() {
-            nextSheet("User_Cost");       // Sheet 고르기
-            currentRowIterator.next();              // 주제목 스킵
-            currentRowIterator.next();              // 빈 행 스킵
-
-            exchangeRate = (int) currentRowIterator.next().getCell(12).getNumericCellValue();
-
-            log.info("Complete Read Exchange Rate");
-        }
-
         private void readAircraft() {
-            aircraftList.clear();
             nextSheet("Program_Cost");    // Sheet 고르기
             currentRowIterator.next();              // 주제목 스킵
             currentRowIterator.next();              // Header 스킵
@@ -153,7 +139,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 XSSFRow row = (XSSFRow) currentRowIterator.next();
 
                 try {
-                    aircraftList.add(Aircraft.builder()
+                    DomainFactory.addAircraft(Aircraft.builder()
                             .id(indexCnt++)
                             .type(row.getCell(0).getStringCellValue())
                             .crewNum((int) row.getCell(1).getNumericCellValue())
@@ -167,8 +153,6 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     throw new RuntimeException(e);
                 }
             }
-
-            log.info("Complete Read Aircraft Data");
         }
 
         private void readAirport() {
@@ -204,7 +188,6 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
         }
 
         private void readDeadhead() {
-            airportList.clear();
             nextSheet("User_Deadhead");    // Sheet 고르기
             currentRowIterator.next();  // 주제목 스킵
             currentRowIterator.next();  // 빈 행 스킵
@@ -231,12 +214,11 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 }
             }
 
-            airportList.addAll(airportMap.values());
+            DomainFactory.addAllAirport(airportMap);
             log.info("Complete Read Deadhead Data");
         }
 
         private void readFlight() {
-            flightList.clear();
             nextSheet("User_Flight");    // Sheet 고르기
             currentRowIterator.next();  // 주제목 스킵
             currentRowIterator.next();  // 빈 행 스킵
@@ -247,15 +229,15 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 XSSFRow row = (XSSFRow) currentRowIterator.next();
 
                 try {
-                    flightList.add(Flight.builder()
+                    DomainFactory.addFlight(Flight.builder()
                             .id(indexCnt++)
                             .serialNumber(row.getCell(0).getStringCellValue())
                             .tailNumber(row.getCell(1).getStringCellValue())
-                            .originAirport(Airport.of(airportList, row.getCell(2).getStringCellValue()))
+                            .originAirport(DomainFactory.getAirport(row.getCell(2).getStringCellValue()))
                             .originTime(row.getCell(3).getLocalDateTimeCellValue())
-                            .destAirport(Airport.of(airportList, row.getCell(4).getStringCellValue()))
+                            .destAirport(DomainFactory.getAirport(row.getCell(4).getStringCellValue()))
                             .destTime(row.getCell(5).getLocalDateTimeCellValue())
-                            .aircraft(Aircraft.of(aircraftList, row.getCell(6).getStringCellValue())).build());
+                            .aircraft(DomainFactory.getAircraft(row.getCell(6).getStringCellValue())).build());
                 } catch (IllegalStateException e) {
                     log.info("Finish Read Flight File");
                     break;
@@ -264,11 +246,11 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     throw new RuntimeException(e);
                 }
             }
-
-            log.info("Complete Read Flight Data");
         }
 
         private List<Pairing> createEntities() {
+            List<Flight> flightList = DomainFactory.getFlightList();
+
             //초기 페어링 Set 구성 어차피 [solver]가 바꿔버려서 의미 없음 아무것도 안넣으면 오류나서 넣는 것
             List<Pairing> pairingList = new ArrayList<>();
             for (int i = 0; i < flightList.size(); i++) {
@@ -292,9 +274,9 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             public void write() {
                 String timeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
                 exportPairingData(timeStr);
-                exportVisualData(timeStr);
-                exportUserData1(timeStr);
-                exportUserData2(timeStr);
+//                exportUserData1(timeStr);
+//                exportVisualData(timeStr);
+//                exportUserData2(timeStr);
             }
 
             private void exportPairingData(String timeStr) {
@@ -392,7 +374,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 }
 
                 //csv 파일로 출력
-                try (FileWriter fw = new FileWriter("src/main/resources/output/" + fileName)) {
+                try (FileWriter fw = new FileWriter("./data/crewpairing/output/" + fileName)) {
                     fw.write(text.toString());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -421,203 +403,6 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             //분 단위를 버림함
             private static LocalDateTime stripMinutes(LocalDateTime l) {
                 return LocalDateTime.of(l.getYear(), l.getMonth(), l.getDayOfMonth(), l.getHour(), 0);
-            }
-
-            public void exportUserData1(String timeStr) {
-                String fileName = timeStr + "-userData1.xlsx";
-                try (XSSFWorkbook workbook = new XSSFWorkbook()) {
-                    XSSFSheet sheet = workbook.createSheet("Data");
-
-                    List<Pairing> pairingList = solution.getPairingList();
-                    LocalDateTime firstTime = pairingList.get(0).getPair().get(0).getOriginTime();
-                    LocalDateTime lastTime = firstTime;
-
-                    //셀 스타일 모음
-                    CellStyle headerStyle = workbook.createCellStyle();
-                    Font headerFont = workbook.createFont();
-                    headerFont.setBold(true);
-                    headerStyle.setFont(headerFont);
-                    headerStyle.setBorderBottom(BorderStyle.DOUBLE);
-                    headerStyle.setFillForegroundColor(new XSSFColor(new byte[] {(byte) 226,(byte) 239,(byte) 217}, null));
-                    headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-                    headerStyle.setAlignment(HorizontalAlignment.CENTER);
-
-                    CellStyle centerStyle = workbook.createCellStyle();
-                    centerStyle.setAlignment(HorizontalAlignment.CENTER);
-                    centerStyle.setBorderRight(BorderStyle.THIN);
-
-                    //타임 테이블 헤더 작성
-                    Row row = sheet.createRow(0);
-                    Cell cell = row.createCell(0);
-                    cell.setCellValue("Pairing SET");
-                    cell.setCellStyle(headerStyle);
-                    sheet.autoSizeColumn(0);
-
-                    //가장 늦게 끝나는 페어링을 헤더의 마지막 날짜로 잡기 위함
-                    for (Pairing pairing : pairingList) {
-                        for (Flight flight : pairing.getPair()) {
-                            lastTime = lastTime.isAfter(flight.getDestTime()) ? lastTime : flight.getDestTime();
-                        }
-                    }
-
-                    int days = 0;
-                    for (LocalDateTime f = firstTime; ChronoUnit.DAYS.between(f.toLocalDate(), lastTime.toLocalDate()) >= 0; f = f.plusDays(1)) {
-                        days += 1;
-                        String MMdd = f.format(DateTimeFormatter.ofPattern("MM/dd"));
-                        cell = row.createCell(days);
-                        cell.setCellValue(MMdd);
-                        cell.setCellStyle(headerStyle);
-                    }
-
-                    //타임 테이블 내용 작성
-                    XSSFColor[] colors = {
-                            new XSSFColor(new byte[]{(byte) 255, (byte) 242, (byte) 204}, null),
-                            new XSSFColor(new byte[]{(byte) 221, (byte) 235, (byte) 247}, null)
-                    };
-
-                    for(int i=0; i<pairingList.size(); i++){
-                        row = sheet.createRow(i+1);
-                        cell = row.createCell(0);
-                        cell.setCellValue("SET" + i);
-                        cell.setCellStyle(centerStyle);
-
-                        //Pairing의 flight에 대해서, 첫번째 비행과의 날짜 차이 k만큼 떨어진 셀에 내용 입력
-                        for(Flight flight : pairingList.get(i).getPair()){
-
-                            //도착 시간이 24시를 넘어가는 경우 (날짜 차이)*24 + 도착시간 으로 표시
-                            int daysGap = (int) ChronoUnit.DAYS.between(flight.getOriginTime().toLocalDate(), flight.getDestTime().toLocalDate());
-                            int destHour = flight.getDestTime().getHour();
-                            int destMin = flight.getDestTime().getMinute();
-                            String tn = flight.getTailNumber();
-                            String oriTime = flight.getOriginTime().format(DateTimeFormatter.ofPattern("HH:mm"));
-                            String dstTime = String.format("%02d:%02d", daysGap*24 + destHour, destMin);
-                            String oriApt = flight.getOriginAirport().getName();
-                            String dstApt = flight.getDestAirport().getName();
-
-                            String text = "    ["+tn+"] " + "[ "+oriTime+" ~ "+dstTime+" ] " + "[" + oriApt + " -> " + dstApt +"]";
-
-                            int k = (int) ChronoUnit.DAYS.between(firstTime.toLocalDate(), flight.getOriginTime().toLocalDate())+1;
-
-                            //이미 셀에 값이 있다면 내용 추가
-                            if(row.getCell(k) == null){
-                                cell = row.createCell(k);
-                                cell.setCellValue(text);
-                            }
-                            else {
-                                StringBuilder sb = new StringBuilder(cell.getStringCellValue());
-                                cell.setCellValue(sb.append("    /").append(text).toString());
-                            }
-
-                            XSSFColor currentColor = ((k % 2 == 0) && (i % 2 == 0)) || ((k % 2 == 1) && (i % 2 == 1)) ? colors[1] : colors[0];
-
-                            CellStyle contentStyle = workbook.createCellStyle();
-                            Font contentfont = workbook.createFont();
-                            contentfont.setFontHeightInPoints((short) 9);
-                            contentStyle.setAlignment(HorizontalAlignment.LEFT);
-                            contentStyle.setBorderBottom(BorderStyle.DASH_DOT_DOT);
-                            contentStyle.setBorderLeft(BorderStyle.DASH_DOT_DOT);
-                            contentStyle.setFont(contentfont);
-                            contentStyle.setFillForegroundColor(currentColor);
-                            contentStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-                            cell.setCellStyle(contentStyle);
-                            sheet.autoSizeColumn(k);
-                        }
-                    }
-
-                    try (FileOutputStream fo = new FileOutputStream("src/main/resources/output/" + fileName)) {
-                        workbook.write(fo);
-                    }
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-            }
-
-            public void exportUserData2(String timeStr) {
-                String fileName = timeStr + "-userData2.xlsx";
-                try (XSSFWorkbook workbook = new XSSFWorkbook()) {
-                    XSSFSheet sheet = workbook.createSheet("Data");
-
-                    List<Pairing> pairingList = solution.getPairingList();
-
-                    //셀 스타일 모음
-                    CellStyle headerStyle = workbook.createCellStyle();
-                    Font headerFont = workbook.createFont();
-                    headerFont.setBold(true);
-                    headerStyle.setFont(headerFont);
-                    headerStyle.setBorderBottom(BorderStyle.DOUBLE);
-                    headerStyle.setFillForegroundColor(new XSSFColor(new byte[] {(byte) 226,(byte) 239,(byte) 217}, null));
-                    headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-                    headerStyle.setAlignment(HorizontalAlignment.CENTER);
-
-                    CellStyle rightBorder = workbook.createCellStyle();
-                    rightBorder.setBorderRight(BorderStyle.THIN);
-                    rightBorder.setAlignment(HorizontalAlignment.CENTER);
-
-                    Row row = sheet.createRow(0);
-                    Cell cell = row.createCell(0);
-                    cell.setCellValue("Pairing SET");
-                    cell.setCellStyle(headerStyle);
-                    sheet.autoSizeColumn(0);
-
-                    // 타임 테이블 내용 작성
-                    XSSFColor[] colors = {
-                            new XSSFColor(new byte[]{(byte) 255, (byte) 242, (byte) 204}, null),
-                            new XSSFColor(new byte[]{(byte) 221, (byte) 235, (byte) 247}, null)
-                    };
-
-                    //pairing의 최대 길이를 테이블의 길이로 설정
-                    int maxCell = 0;
-                    for (int i = 0; i < pairingList.size(); i++) {
-                        row = sheet.createRow(i + 1);
-                        cell = row.createCell(0);
-                        cell.setCellValue("SET " + i);
-                        cell.setCellStyle(rightBorder);
-                        maxCell = Math.max(maxCell, pairingList.get(i).getPair().size());
-
-                        int k = 0;
-                        for (Flight flight : pairingList.get(i).getPair()) {
-                            String tn = flight.getTailNumber();
-                            String oriTime = flight.getOriginTime().format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
-                            String dstTime = flight.getDestTime().format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
-                            String oriApt = flight.getOriginAirport().getName();
-                            String dstApt = flight.getDestAirport().getName();
-                            String text = "  ["+tn+"] " + "[ "+oriTime+" ~ "+dstTime+" ] " + "[" + oriApt + " -> " + dstApt +"]";
-                            cell = row.createCell(++k);
-                            cell.setCellValue(text);
-
-                            //바둑판 형식으로 색 칠하기, 셀 스타일을 위로 빼서 색만 바꿀 경우 적용이 안됨. 적용할 때 마다 새로 만들어야 함.
-                            XSSFColor currentColor = ((k % 2 == 0) && (i % 2 == 0)) || ((k % 2 == 1) && (i % 2 == 1)) ? colors[1] : colors[0];
-
-                            CellStyle contentStyle = workbook.createCellStyle();
-                            Font contentfont = workbook.createFont();
-                            contentfont.setFontHeightInPoints((short) 9);
-                            contentStyle.setAlignment(HorizontalAlignment.LEFT);
-                            contentStyle.setBorderBottom(BorderStyle.DASH_DOT_DOT);
-                            contentStyle.setBorderLeft(BorderStyle.DASH_DOT_DOT);
-                            contentStyle.setFont(contentfont);
-                            contentStyle.setFillForegroundColor(currentColor);
-                            contentStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-                            cell.setCellStyle(contentStyle);
-
-                            sheet.autoSizeColumn(k);
-                        }
-                    }
-
-                    row = sheet.getRow(0);
-                    for(int i=1; i<=maxCell; i++){
-                        cell = row.createCell(i);
-                        cell.setCellValue("Flight" + i);
-                        cell.setCellStyle(headerStyle);
-                    }
-
-                    try (FileOutputStream fo = new FileOutputStream("src/main/resources/output/" + fileName)) {
-                        workbook.write(fo);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }
     }
