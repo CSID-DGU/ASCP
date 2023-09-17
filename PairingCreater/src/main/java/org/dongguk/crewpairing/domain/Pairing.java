@@ -153,16 +153,19 @@ public class Pairing extends AbstractPersistable {
     /**
      * 페어링의 총 이동근무 cost 반환
      * / 페어링 인원보다 요구 승무원이 적은 비행일 시 발생(maxCrewNum이 기준)
-     * @return sum((maxCrewNum - 요구 승무원)*운항시간(분))*10
+     * @return sum((maxCrewNum - 요구 승무원) * (해당 항공편의 시작 공항 -> 종료 공항에 해당하는 Deadhead Cost))
      */
     public int getMovingWorkCost(){
         int movingWorkCost = 0;
 
         for (Flight flight : pair) {
-            int presentCrewNum =flight.getAircraft().getCrewNum();
-            //(최대 승무원 수 - 지금 기종의 승무원 수) * 운항시간(분)*100 <-추후 cost 변경
-            movingWorkCost += (getMaxCrewNum() - presentCrewNum) * flight.getFlightTime() * 10;
+            int presentCrewNum = flight.getAircraft().getCrewNum();
+            Map<String, Integer> deadheadsOfCurrentAirport = flight.getOriginAirport().getDeadheadCost();
+            String nextAirportName = flight.getDestAirport().getName();
+
+            movingWorkCost += (getMaxCrewNum() - presentCrewNum) * deadheadsOfCurrentAirport.get(nextAirportName);
         }
+
         return movingWorkCost;
     }
 
@@ -227,7 +230,7 @@ public class Pairing extends AbstractPersistable {
         if(pair.size() <= 1) return 0;
         //최대 QuickTurn cost 계산
         int maxQuickTurnCost = pair.get(0).getAircraft().getQuickTurnCost();
-        for(int i =0;i< pair.size();i++){
+        for(int i = 0; i< pair.size(); i++){
             if (maxQuickTurnCost > pair.get(i).getAircraft().getQuickTurnCost()){
                 maxQuickTurnCost = pair.get(i).getAircraft().getQuickTurnCost();
             }
