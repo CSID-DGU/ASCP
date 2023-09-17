@@ -1,0 +1,18 @@
+
+`	java:S112#"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ
+`	java:S112."FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ
+a	java:S112§"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ
+a	java:S112Ç"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ
+a	java:S112æ"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ
+a	java:S112ˆ"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ
+a	java:S112"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ
+t	java:S135¶"YReduce the total number of break and continue statements in this loop to use at most one.(ö¹¶½ÿÿÿÿÿ
+t	java:S135Õ"YReduce the total number of break and continue statements in this loop to use at most one.(ö¹¶½ÿÿÿÿÿ
+g	java:S117Õ"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(’Ïİ–
+\
+java:S2184Á"ECast one of the operands of this subtraction operation to a "double".(¥ûÉ¡
+C
+java:S1185"(Remove this method to simply inherit it.(§Æ£úÿÿÿÿ
+A	java:S106Ò"+Replace this use of System.out by a logger.(—Ş¿¹
+Q
+java:S1144‡"5Remove this unused private "readExchangeRate" method.(»€ËŒşÿÿÿÿ
