@@ -13,7 +13,7 @@ public class Main {
         // 총 사이클 횟수와 informationFile 이름을 입력받는다.
         int count = args.length > 0 ? Integer.parseInt(args[0]) : 1;
         String inputFileName = args.length > 1 ? args[1] : "input_base.xlsx";
-        String pairingFileName = null;
+        String pairingFileName = args.length > 2 ? args[2] : null;
 
         // Hard, Soft 점수를 저장할 리스트 생성
         List<Long> otHardScore = new ArrayList<>();
@@ -42,17 +42,17 @@ public class Main {
 
                     if (line.startsWith("Hard Score : ")) {
                         otHardScore.add(Long.parseLong(line.substring(13)));
-                        System.out.println("HardScore: " + line.substring(13));
+                        System.out.println("HardScore: " + Math.abs(Integer.parseInt(line.substring(13))));
                         continue;
                     }
 
                     if (line.startsWith("Soft Score : ")) {
                         otSoftScore.add(Long.parseLong(line.substring(13)));
-                        System.out.println("SoftScore: " + line.substring(13));
+                        System.out.println("SoftScore: " + Math.abs(Integer.parseInt(line.substring(13))));
                         continue;
                     }
 
-                    if (cnt++ % 60 == 0) {
+                    if (cnt++ % 120 == 0) {
                         System.out.println(line);
                     }
                 }
@@ -77,13 +77,13 @@ public class Main {
 
                     if (line.startsWith("Hard Score : ")) {
                         rlHardScore.add(Long.parseLong(line.substring(13)));
-                        System.out.println("HardScore: " + line.substring(13));
+                        System.out.println("HardScore: " + Math.abs(Integer.parseInt(line.substring(13))));
                         continue;
                     }
 
                     if (line.startsWith("Soft Score : ")) {
                         rlSoftScore.add(Long.parseLong(line.substring(13)));
-                        System.out.println("SoftScore: " + line.substring(13));
+                        System.out.println("SoftScore: " + Math.abs(Integer.parseInt(line.substring(13))));
                         continue;
                     }
 
@@ -104,8 +104,8 @@ public class Main {
 
         for (int i = 0; i < otHardScore.size(); i++) {
             // 인덱스와 같이 Hard, Soft 점수 출력
-            System.out.print("[ OT - " + i + " ] " + "Hard Score : " + otHardScore.get(i) + ", Soft Score : " + otSoftScore.get(i) + "  ");
-            System.out.println("[ RL - " + i + " ] " + "Hard Score : " + rlHardScore.get(i) + ", Soft Score : " + rlSoftScore.get(i));
+            System.out.print("[ OT - " + i + " ] " + "Hard Score : " + Math.abs(otHardScore.get(i)) + ", Soft Score : " + Math.abs(otSoftScore.get(i)) + "  ");
+            System.out.println("[ RL - " + i + " ] " + "Hard Score : " + Math.abs(rlHardScore.get(i)) + ", Soft Score : " + Math.abs(rlSoftScore.get(i)));
         }
     }
 }
