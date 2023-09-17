@@ -123,8 +123,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     (int) row.getCell(2).getNumericCellValue(),
                     (int) row.getCell(3).getNumericCellValue(),
                     (int) row.getCell(4).getNumericCellValue(),
-                    (int) row.getCell(5).getNumericCellValue(),
-                    (int) row.getCell(6).getNumericCellValue());
+                    (int) row.getCell(5).getNumericCellValue());
 
             log.info("Complete Read Time Data");
         }

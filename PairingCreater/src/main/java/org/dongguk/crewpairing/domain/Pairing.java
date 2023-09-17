@@ -5,6 +5,7 @@ import org.dongguk.common.domain.AbstractPersistable;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.variable.PlanningListVariable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -26,21 +27,17 @@ public class Pairing extends AbstractPersistable {
     private static int restTime;
     private static int LayoverTime;
     private static int QuickTurnaroundTime;
-    private static int hotelTime;
-    private static int hotelMinTime = 720;
     private static int checkContinueTime = 60 * 10;
     private static int continueMaxTime = 14 * 60;
     private static int workMaxTime = 8 * 60;
 
     public static void setStaticTime(int briefingTime, int debriefingTime,
-                                     int restTime, int LayoverTime, int QuickTurnaroundTime,
-                                     int hotelTime) {
+                                     int restTime, int LayoverTime, int QuickTurnaroundTime) {
         Pairing.briefingTime = briefingTime;
         Pairing.debriefingTime = debriefingTime;
         Pairing.restTime = restTime;
         Pairing.LayoverTime = LayoverTime;
         Pairing.QuickTurnaroundTime = QuickTurnaroundTime;
-        Pairing.hotelTime = hotelTime;
     }
 
     @Builder
@@ -253,23 +250,23 @@ public class Pairing extends AbstractPersistable {
      * @return sum(hotel cost) / 100
      */
     public Integer getHotelCost() {
-        // 페어링의 총 길이가 1개 이하라면 LayoverCost 없음
+        // 페어링의 총 길이가 1개 이하라면 HotelCost 없음
         if(pair.size() <= 1) return 0;
 
         int cost = 0;
         for (int i = 0; i < pair.size() - 1; i++) {
-            // 만약 비행편 간격이 하나라도 음수라면 유효한 페어링이 아님
-            if (getFlightGap(i) <= 0) return 0;
-
+            // 만약 비행편 간격이 하나라도 0이라면 유효한 페어링이 아님
             int flightGap = getFlightGap(i);
-            // 음수가 아니라면 유효한 페어링이므로 HotelCost 계산
-            if (flightGap >= hotelMinTime) {
-                cost += (pair.get(i + 1).getOriginAirport().getHotelCost()
+            if (flightGap == 0) return 0;
+
+            LocalDate layoverStartTime = LocalDate.from(pair.get(i).getDestTime());
+            LocalDate layoverFinishTime = LocalDate.from(pair.get(i+1).getOriginTime());
+
+            //layover가 발생했으면 일단 1회 발생, 이후 날짜가 바뀔 때 마다 1회씩 발생
+            if (flightGap >= LayoverTime) {
+                cost += pair.get(i).getDestAirport().getHotelCost()
                         * getMaxCrewNum()
-                        * (int) (1 + (int) Math.floor(((float) flightGap - (float) hotelMinTime) / (float) hotelTime)));
-                        //이 부분을 숫자를 지정하는건 어떨까요. 휴식 시간이 3일이 넘어갈 일이 없으니
-                        //8~15시간: 1일 / ~25시간 :2일 / ~33시간: 3일
-                        //이런식으로 지정하면 수정도 쉽고 더 명확할 것 같아요.
+                        * (1 + Math.max(0, ChronoUnit.DAYS.between(layoverStartTime, layoverFinishTime) - 1));
             }
         }
 
