@@ -21,11 +21,13 @@ public class PairingApp extends CommonApp<PairingSolution> {
     public static void main(String[] args) {
         String dataDirPath = args.length > 0 ? args[0] : null;
         String dataDirName = args.length > 1 ? args[1] : null;
-        String informationXlsxFile = args.length > 2 ? args[2] : null;
-        String pairingXlsxFile = args.length > 3 ? args[3] : null;
+        String flightSize = args.length > 2 ? args[2] : null;
+        String informationXlsxFile = args.length > 3 ? args[3] : null;
+        String pairingXlsxFile = args.length > 4 ? args[4] : null;
 
+        assert flightSize != null;
         SolutionBusiness<PairingSolution, ?> business = new PairingApp(dataDirPath, dataDirName, informationXlsxFile)
-                .init().getSolutionBusiness();
+                .init(Integer.valueOf(flightSize)).getSolutionBusiness();
 
         // Input Information Xlsx File
         business.openSolution(

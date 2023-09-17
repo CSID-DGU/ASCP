@@ -51,20 +51,22 @@ public abstract class CommonApp<Solution_> extends LoggingMain {
     }
 
     // 초기화 함수
-    public CommonApp<Solution_> init() {
-        init(null, true);
+    public CommonApp<Solution_> init(Integer flightSize) {
+        init(null, true, flightSize);
         return this;
     }
 
-    public void init(Component centerForComponent, boolean exitOnClose) {
-        solutionBusiness = createSolutionBusiness();
+    public void init(Component centerForComponent, boolean exitOnClose, Integer flightSize) {
+        solutionBusiness = createSolutionBusiness(flightSize);
     }
 
-    private SolutionBusiness<Solution_, ?> createSolutionBusiness() {
+    private SolutionBusiness<Solution_, ?> createSolutionBusiness(Integer flightSize) {
         // SolverConfig.xml을 읽어서 SolverConfig 객체를 생성 및 종료 조건 설정
         SolverConfig solverConfig = SolverConfig.createFromXmlResource(solverConfigResource);
         solverConfig.withTerminationConfig(
-                new TerminationConfig().withUnimprovedSecondsSpentLimit(100L).withSecondsSpentLimit(180L));
+                new TerminationConfig()
+                        .withUnimprovedSecondsSpentLimit((long) (8.0 * Math.max(1.0, Math.log10(flightSize))))
+                        .withSecondsSpentLimit((long) (45.0 * Math.max(1.0, Math.log10(flightSize)))));
 
         // SolutionBusiness 객체 생성
         SolutionBusiness<Solution_, ?> solutionBusiness = new SolutionBusiness<>(this,
