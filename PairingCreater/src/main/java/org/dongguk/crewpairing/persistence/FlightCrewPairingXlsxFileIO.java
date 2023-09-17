@@ -7,6 +7,7 @@ import org.apache.poi.xssf.usermodel.*;
 import org.dongguk.common.persistence.AbstractXlsxSolutionFileIO;
 import org.dongguk.crewpairing.app.PairingApp;
 import org.dongguk.crewpairing.domain.*;
+import org.dongguk.crewpairing.domain.factory.DomainFactory;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 
 import java.io.*;
@@ -55,12 +56,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
 
     @Getter
     private static class FlightCrewPairingXlsxReader extends AbstractXlsxReader<PairingSolution, HardSoftScore> {
-        private final List<Aircraft> aircraftList = new ArrayList<>();
-        private final List<Airport> airportList = new ArrayList<>();
-        private final List<Flight> flightList = new ArrayList<>();
-
         private final Map<String, Airport> airportMap = new HashMap<>();
-        private int exchangeRate;
 
         public FlightCrewPairingXlsxReader(XSSFWorkbook workbook) {
             super(workbook, PairingApp.SOLVER_CONFIG);
@@ -79,9 +75,9 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             readFlight();
             log.debug("Complete Read Flight Data");
             return PairingSolution.builder()
-                    .aircraftList(aircraftList)
-                    .airportList(airportList)
-                    .flightList(flightList)
+                    .aircraftList(DomainFactory.getAircraftList())
+                    .airportList(DomainFactory.getAirportList())
+                    .flightList(DomainFactory.getFlightList())
                     .pairingList(createEntities()).build();
         }
 
@@ -133,18 +129,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
             log.info("Complete Read Time Data");
         }
 
-        private void readExchangeRate() {
-            nextSheet("User_Cost");       // Sheet 고르기
-            currentRowIterator.next();              // 주제목 스킵
-            currentRowIterator.next();              // 빈 행 스킵
-
-            exchangeRate = (int) currentRowIterator.next().getCell(12).getNumericCellValue();
-
-            log.info("Complete Read Exchange Rate");
-        }
-
         private void readAircraft() {
-            aircraftList.clear();
             nextSheet("Program_Cost");    // Sheet 고르기
             currentRowIterator.next();              // 주제목 스킵
             currentRowIterator.next();              // Header 스킵
@@ -154,7 +139,7 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 XSSFRow row = (XSSFRow) currentRowIterator.next();
 
                 try {
-                    aircraftList.add(Aircraft.builder()
+                    DomainFactory.addAircraft(Aircraft.builder()
                             .id(indexCnt++)
                             .type(row.getCell(0).getStringCellValue())
                             .crewNum((int) row.getCell(1).getNumericCellValue())
@@ -168,8 +153,6 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     throw new RuntimeException(e);
                 }
             }
-
-            log.info("Complete Read Aircraft Data");
         }
 
         private void readAirport() {
@@ -205,7 +188,6 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
         }
 
         private void readDeadhead() {
-            airportList.clear();
             nextSheet("User_Deadhead");    // Sheet 고르기
             currentRowIterator.next();  // 주제목 스킵
             currentRowIterator.next();  // 빈 행 스킵
@@ -232,12 +214,11 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 }
             }
 
-            airportList.addAll(airportMap.values());
+            DomainFactory.addAllAirport(airportMap);
             log.info("Complete Read Deadhead Data");
         }
 
         private void readFlight() {
-            flightList.clear();
             nextSheet("User_Flight");    // Sheet 고르기
             currentRowIterator.next();  // 주제목 스킵
             currentRowIterator.next();  // 빈 행 스킵
@@ -248,15 +229,15 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                 XSSFRow row = (XSSFRow) currentRowIterator.next();
 
                 try {
-                    flightList.add(Flight.builder()
+                    DomainFactory.addFlight(Flight.builder()
                             .id(indexCnt++)
                             .serialNumber(row.getCell(0).getStringCellValue())
                             .tailNumber(row.getCell(1).getStringCellValue())
-                            .originAirport(Airport.of(airportList, row.getCell(2).getStringCellValue()))
+                            .originAirport(DomainFactory.getAirport(row.getCell(2).getStringCellValue()))
                             .originTime(row.getCell(3).getLocalDateTimeCellValue())
-                            .destAirport(Airport.of(airportList, row.getCell(4).getStringCellValue()))
+                            .destAirport(DomainFactory.getAirport(row.getCell(4).getStringCellValue()))
                             .destTime(row.getCell(5).getLocalDateTimeCellValue())
-                            .aircraft(Aircraft.of(aircraftList, row.getCell(6).getStringCellValue())).build());
+                            .aircraft(DomainFactory.getAircraft(row.getCell(6).getStringCellValue())).build());
                 } catch (IllegalStateException e) {
                     log.info("Finish Read Flight File");
                     break;
@@ -265,11 +246,11 @@ public class FlightCrewPairingXlsxFileIO extends AbstractXlsxSolutionFileIO<Pair
                     throw new RuntimeException(e);
                 }
             }
-
-            log.info("Complete Read Flight Data");
         }
 
         private List<Pairing> createEntities() {
+            List<Flight> flightList = DomainFactory.getFlightList();
+
             //초기 페어링 Set 구성 어차피 [solver]가 바꿔버려서 의미 없음 아무것도 안넣으면 오류나서 넣는 것
             List<Pairing> pairingList = new ArrayList<>();
             for (int i = 0; i < flightList.size(); i++) {
