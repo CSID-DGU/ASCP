@@ -1,14 +1,14 @@
 package org.dongguk;
 
 public class CommandUtil {
-    public static ProcessBuilder getJavaCommand(String inputFileName, String pairingFileName) {
+    public static ProcessBuilder getJavaCommand(String flightSize, String inputFileName, String pairingFileName) {
         if (pairingFileName != null) {
             return new ProcessBuilder("java", "-jar", "crew-pairing.jar",
-                    "data/", "crewpairing/" ,
+                    "data/", "crewpairing/" , flightSize,
                     inputFileName, pairingFileName);
         } else {
             return new ProcessBuilder("java", "-jar", "crew-pairing.jar",
-                    "data/", "crewpairing/",
+                    "data/", "crewpairing/", flightSize,
                     inputFileName);
         }
     }
