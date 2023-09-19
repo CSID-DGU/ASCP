@@ -2,6 +2,7 @@ import gym
 import numpy as np
 import random
 import pandas as pd
+from copy import deepcopy
 from gym import spaces
 from Scorecalculator import ScoreCalculator
 from Factory import ASCPFactory
@@ -87,8 +88,8 @@ class CrewPairingEnv(gym.Env):
         after_pairing_idx = after_idx // num_flights # after_pairing_idx: 바꿀 대상 플라이트가 속해있는 페어링 인덱스
         after_flight_idx = after_idx % num_flights # after_flight_idx : 바꿀 대상 플라이트의 페어링 속 플라이트 인덱스
 
-        before_pairing_set = self.pairing_set.copy() # 현재 클래스변수 pairing_set을 얕은복사로 가져옴
-        after_pairing_set = self.pairing_set.copy() # 현재 클래스변수 pairing_set을 얕은복사로 가져옴
+        before_pairing_set = self.pairing_set # 현재 클래스변수 pairing_set을 얕은복사로 가져옴
+        after_pairing_set = deepcopy(self.pairing_set) # 현재 클래스변수 pairing_set을 얕은복사로 가져옴
 
         # flight 교환 이전, 처음 선택한 flight가 속해있는 pairing의 cost 계산
         src_last_hard, src_last_soft = self.calculateScore(
