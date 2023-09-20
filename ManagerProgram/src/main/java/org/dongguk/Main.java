@@ -53,6 +53,10 @@ public class Main {
                         continue;
                     }
 
+                    if (line.startsWith("Constraint: ")) {
+                        continue;
+                    }
+
                     if (cnt++ % 120 == 0) {
                         System.out.println(line);
                     }
@@ -85,10 +89,6 @@ public class Main {
                     if (line.startsWith("Soft Score : ")) {
                         rlSoftScore.add(Long.parseLong(line.substring(13)));
                         System.out.println("SoftScore: " + Math.abs(Integer.parseInt(line.substring(13))));
-                        continue;
-                    }
-
-                    if (line.startsWith("Constraint: ")) {
                         continue;
                     }
 
