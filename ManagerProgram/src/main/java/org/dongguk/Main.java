@@ -12,8 +12,9 @@ public class Main {
     public static void main(String[] args) {
         // 총 사이클 횟수와 informationFile 이름을 입력받는다.
         int count = args.length > 0 ? Integer.parseInt(args[0]) : 1;
-        String inputFileName = args.length > 1 ? args[1] : "input_base.xlsx";
-        String pairingFileName = args.length > 2 ? args[2] : null;
+        String flightSize = args.length > 1 ? args[1] : "657";
+        String inputFileName = args.length > 2 ? args[2] : "input_base.xlsx";
+        String pairingFileName = args.length > 3 ? args[3] : null;
 
         // Hard, Soft 점수를 저장할 리스트 생성
         List<Long> otHardScore = new ArrayList<>();
@@ -26,7 +27,7 @@ public class Main {
         for (int i = 0; i < count; i++) {
             // Half Cycle: OptaPlanner 실행
             try {
-                ProcessBuilder pb = CommandUtil.getJavaCommand(inputFileName, pairingFileName);
+                ProcessBuilder pb = CommandUtil.getJavaCommand(flightSize, inputFileName, pairingFileName);
 
                 System.out.println("Running " + pb.command());
                 Process p = pb.start();
@@ -49,6 +50,10 @@ public class Main {
                     if (line.startsWith("Soft Score : ")) {
                         otSoftScore.add(Long.parseLong(line.substring(13)));
                         System.out.println("SoftScore: " + Math.abs(Integer.parseInt(line.substring(13))));
+                        continue;
+                    }
+
+                    if (line.startsWith("Constraint: ")) {
                         continue;
                     }
 
