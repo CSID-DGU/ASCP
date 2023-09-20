@@ -169,32 +169,8 @@ class CrewPairingEnv(gym.Env):
     def calculateScore(self, pairing):
 
         calculator = ScoreCalculator(pairing)
-
-        pair_hard_score = 0
-        pair_soft_score = 0
-        # 비행일정의 선후관계 만족 여부 -> 어기는 경우 1000점씩 부여
-        pair_hard_score = calculator.airportPossible()
-        # 선행 비행 도착지와 후행 비행 출발지 동일 여부 -> 어기는 경우 1000점씩 부여
-        pair_hard_score = calculator.timePossible()
-        # 선행 비행 기종과 후행 비행 기종 동일 여부 -> 어기는 경우 1000점씩 부여
-        pair_hard_score = calculator.aircraftType()
-        # 비행 횟수 제약: 비행 횟수가 4회 이상일 시 -> 하드스코어 부여(총 비행횟수 * 100) 제외
-        pair_hard_score = calculator.landingTimes()
-        # 비행 일수 제약: 페어링 총 기간이 7일 이상일 시 -> 하드스코어 부여((총 길이-7) * 100) 제외
-        # pair_hard_score = calculator.pairLength()
-        pair_hard_score = calculator.continuityPossible()  # 왜 얘만 자바에 두개들어가있는지 모르겠음
-        # deadhead cost 계산(Base diff): 출발공항과 도착 공항이 다를 경우 소프트 점수 부여
-        pair_soft_score = calculator.baseDiff()
-        # 두 비행 사이 간격이 6시간 이상인 경우, 해당 시간만큼의 layover salary를 score를 추가해줌.
-        pair_soft_score = calculator.layoverCost()
-        # 총 이동근무 cost 계산(MovingWork cost):페어링 길이가 2 이상일 시 - > 소프트스코어 부여(MovingWork cost 발생 시 cost+)
-        pair_soft_score = calculator.movingWorkCost()
-        # 선행 비행 도착시간과 후행 비행 출발시간의 차이가 1시간 이상인지 여부 -> 어기는 경우 100점씩 부여
-        pair_soft_score = calculator.quickTurnCost()
-        # 총 호텔숙박비 cost 계산(Hotel cost): 페어링 길이가 2 이상일 시 - > 소프트스코어 부여(Hotel cost 발생 시 cost+)
-        pair_soft_score = calculator.hotelCost()
-        # 두 비행 사이 간격이 3시간 이하인 경우, 만족도 하락 -> min(0,(180-휴식 시간)*1000) 의 합을 score에 추가해줌. -> 이게 무슨 의미인지 잘 모르겠음.
-        pair_soft_score = calculator.satisCost()
+        pair_hard_score,pair_soft_score=calculator.calculateScore
+       
 
         return pair_hard_score, pair_soft_score
 
