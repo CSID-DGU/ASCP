@@ -13,7 +13,8 @@ class Pairing:
     hotelTime = 18 * 60
     hotelMinTime = 720
     checkContinueTime = 60 * 10
-    continueMaxTime = 14 * 60  # 14시간
+    continueMaxTime = 14 * 60# 14시간
+    workMaxTime = 8 * 60
     # 8시간 짜리 하나 만들어야됨
 
     def __init__(self, id, pair: List['Flight']):
@@ -41,67 +42,132 @@ class Pairing:
         Pairing.QuickTurnaroundTime = quickTurnaroundTime
 
     def getTimeImpossible(self):
+        """
+            /**
+            * pairing의 실행 가능 여부 확인(불가능한 경우:true)
+            * / 앞 비행이 도착하지 않았는데 이후 비행이 출발했을 경우 판단
+            * @return boolean
+            */
+        """
+
         for i in range(len(self.pair) - 1):
             if self.pair[i].destTime > self.pair[i + 1].originTime:
                 return True
         return False
 
-    def getSatisCost(self):
-        satisScore = 0
-        for i in range(len(self.pair) - 1):
-            if self.checkBreakTime(i) <= 180:
-                satisScore += 1000 * (180 - self.checkBreakTime(i))
-        return satisScore
-
-    def getContinuityImpossible(self):  # 휴식시간 포함 14시간, 휴식시간 빼고 8시간 둘 다 지켜져야함.
-        time = self.pair[0].flightTime
-
-        for i in range(1, len(self.pair)):
-            if self.checkBreakTime(i-1) < self.checkContinueTime:
-                time += self.pair[i].flightTime + self.checkBreakTime(i-1)
-            else:
-                time = self.pair[i].flightTime
-
-            if time > self.continueMaxTime:
-                return True
-        return False
-
     def getAirportImpossible(self):
+        """
+            /**
+            * 동일 공항 출발 여부 확인
+            * / 도착 공항과 출발 공항이 다를 시 true 반환
+            * @return boolean
+            */
+        """
         for i in range(len(self.pair) - 1):
             if self.pair[i].destAirport.name != self.pair[i + 1].originAirport.name:
                 return True
         return False
+    
+    def getContinuityImpossible(self):  # 휴식시간 포함 14시간, 휴식시간 빼고 8시간 둘 다 지켜져야함.
+        """
+            /**
+            * 페어링의 최소 휴식시간 보장 여부 검증
+            * / 연속되는 비행이 14시간 이상일 시 true 반환(연속: breakTime이 10시간 이하)
+            * @return boolean
+            */
+        """
+        totalTime = self.pair[0].flightTime
+        workTime = self.pair[0].flightTime
+
+        for i in range(1, len(self.pair)):
+            if self.__checkBreakTime(i-1) < self.checkContinueTime:
+                totalTime += self.pair[i].flightTime + self.__checkBreakTime(i-1)
+                workTime += self.pair[i].flightTime
+            else:
+                totalTime = self.pair[i].flightTime
+                workTime = self.pair[i].flightTime
+
+            if totalTime > self.continueMaxTime:
+                return True
+            if workTime > self.workMaxTime:
+                return True
+        return False
 
     def getAircraftDiff(self):
+        """
+            /**
+            * pairing의 동일 항공기 여부 검증
+            * / 비행들의 항공기가 동일하지 않을 시 true 반환
+            * @return boolean
+            */
+        """
         for i in range(len(self.pair) - 1):
             if self.pair[i].aircraft.type != self.pair[i + 1].aircraft.type:
                 return True
         return False
 
-    def getMovingWorkCost(self):
-        maxCrewNum = 0
-        movingWorkCost = 0
+    def equalBase(self):
+        """
+            /**
+            * 처음과 끝 공항의 동일 여부 확인
+            * / 처음 출발 공항과 마지막 도착 공항이 다를 시 true
+            * @return boolean
+            */
+        """
+        return self.pair[0].originAirport != self.pair[-1].destAirport
 
-        for flight in self.pair:
-            maxCrewNum = max(maxCrewNum, flight.aircraft.crewNum)
-
-        for flight in self.pair:
-            movingWorkCost += (maxCrewNum -
-                               flight.aircraft.crewNum) * flight.flightTime * 10
-
-        return movingWorkCost
+    def getSatisCost(self):
+        """
+            /**
+            * 페어링의 총 SatisCost 반환
+            * / breakTime이 180보다 작은 경우 발생
+            * @return 퀵턴코스트/(시간-퀵턴 기준 시간)
+            */
+        """
+        satisScore = 0
+        for i in range(len(self.pair) - 1):
+            if self.__checkBreakTime(i) <= 180:
+                satisScore += 1000 * (180 - self.__checkBreakTime(i))
+        return satisScore
 
     def getTotalLength(self):
+        """
+            /**
+            * 페어링의 총 갈아 반환 (일)
+            * @return 마지막 비행 도착시간 - 처음 비행 시작시간
+            */
+        """
         startTime = self.pair[0].originTime
         endTime = self.pair[-1].destTime
         totalLength = (endTime - startTime).days
         return totalLength
 
-    def equalBase(self):
-        return self.pair[0].originAirport != self.pair[-1].destAirport
+    def getMovingWorkCost(self):
+        """
+            /**
+            * 페어링의 총 이동근무 cost 반환
+            * / 페어링 인원보다 요구 승무원이 적은 비행일 시 발생(maxCrewNum이 기준)
+            * @return sum((maxCrewNum - 요구 승무원) * (해당 항공편의 시작 공항 -> 종료 공항에 해당하는 Deadhead Cost))
+            */
+        """
+        movingWorkCost = 0
+
+        for flight in self.pair:
+            presentCrewNum = flight.aircraft.crewNum
+
+            movingWorkCost += ((self.__getMaxCrewNum() - presentCrewNum)
+                               * flight.originAirport().getDeadheadCost(flight.destAirport))
+
+        return movingWorkCost
 
     def getDeadheadCost(self):
-
+        """
+            /**
+            * 페어링의 deadhead cost 반환
+            * / 마지막 도착 공항에서 처음 공항으로 가는데 필요한 deadhead cost 사용
+            * @return deadhead cost / 2
+            */
+        """
         if self.pair[0].id == -1:
             return 0
         else:
@@ -114,59 +180,117 @@ class Pairing:
                 # 출발공항에 대하여, 도착 공항이 어디인지를 인자로 넘겨주어, 해당하는 deadhead cost를 불러옴.
                 deadhead = origin.getDeadheadCost(dest)
 
-            return deadhead
+            return deadhead * self.__getMaxCrewNum()
 
-    def getLayoverCost(self):  # LayoverTime 빠짐!!  # 가장 인원이 많이 타는 비행기를 찾아서 걔를 부여
+    def getLayoverCost(self):
+        """
+            /**
+            * 페어링의 총 LayoverCost 반환
+            * 비행편간 간격이 LayoverTime 보다 크거나 같은 경우에만 LayoverCost 발생
+            * @return sum(LayoverCost) / 100
+            */
+        """
         if len(self.pair) <= 1:
             return 0
+        
+        maxLayoverCost = self.pair[0].aircraft.layoverCost
+        ## pair에 있는 flight 중 최대 maxLayoverCost를 찾음
+        for flight in self.pair:
+            maxLayoverCost = max(maxLayoverCost, flight.aircraft.layoverCost)
 
         cost = 0
         for i in range(len(self.pair) - 1):
-            if self.checkBreakTime(i) <= 0:
+            if self.__checkBreakTime(i) <= 0:
                 return 0
 
-            if self.checkBreakTime(i) >= self.LayoverTime:
-                cost += (self.checkBreakTime(i) -
-                         self.LayoverTime) * self.pair[0].aircraft.layoverCost
+            ## if (getFlightGap(i) >= LayoverTime) {
+            ##    cost += (getFlightGap(i) - LayoverTime) * maxLayoverCost;
+            ##}
+            ## 위 자바 코드 파이썬으로 바꿈
+            
+            if self.__checkBreakTime(i) >= self.LayoverTime:
+                cost += (self.__checkBreakTime(i) - self.LayoverTime) * maxLayoverCost
 
         return cost // 100
 
-    def checkBreakTime(self, index):
-        breakTime = (self.pair[index+1].originTime -
-                     self.pair[index].destTime).total_seconds() // 60
-        return max(0, breakTime)
-
-    def getQuickTurnCost(self):  # 가장 인원이 많이 타는 비행기를 찾아서 걔를 부여
+    def getQuickTurnCost(self):
+        """
+            /**
+            * 페어링의 총 QuickTurnCost 반환
+            * 비행편간 간격이 QuickTurnaroundTime 보다 작은 경우에만 QuickTurnCost 발생
+            * @return sum(QuickTurnCost) / 100
+            */
+        """
         if len(self.pair) <= 1:
             return 0
-
+        
         cost = 0
         for i in range(len(self.pair) - 1):
-            if self.checkBreakTime(i) <= 0:
+            if self.__checkBreakTime(i) <= 0:
                 return 0
+            
+            if self.pair[i].aircraft.type != self.pair[i+1].aircraft.type:
+                cost += 0
+                continue
 
-            if self.checkBreakTime(i) < self.QuickTurnaroundTime:
-                cost += (self.QuickTurnaroundTime - self.checkBreakTime(i)
-                         ) * self.pair[0].aircraft.getQuickTurnCost()
+            if self.__checkBreakTime(i) < self.QuickTurnaroundTime:
+                cost += self.pair[i].aircraft.getQuickTurnCost()
 
         return cost // 100
 
-    def getHotelCost(self):  # hoteltime, hotelMinTime 빠짐!!!!!!!!!  # 가장 인원이 많이 타는 비행기를 찾아서 걔를 부여
+    def get_hotel_cost(self):
+        """
+            /**
+            * 페어링의 총 HotelCost 반환
+            * / 총 인원수를 곱하는 이유 : Flight Cost, Layover Cost, QuickTurn Cost 모두 총 인원에 대한 값으로 계산된 후 입력받음
+            * / 휴식시간이 12시간 이상일 경우 1일 숙박,이후 18시간 이상 남을 시 1일 추가 반복
+            * @return sum(hotel cost) / 100
+            */
+        """
+        # 페어링의 총 길이가 1개 이하라면 HotelCost 없음
         if len(self.pair) <= 1:
             return 0
 
         cost = 0
         for i in range(len(self.pair) - 1):
-            if self.checkBreakTime(i) <= 0:
+            # 만약 비행편 간격이 하나라도 0이라면 유효한 페어링이 아님
+            flight_gap = self.pair(i)
+            if flight_gap == 0:
                 return 0
 
-            flightGap = self.checkBreakTime(i)
+            layover_start_time = self.pair[i].dest_time.toLocalDate()
+            layover_finish_time = self.pair[i + 1].origin_time.toLocalDate()
 
-            if flightGap >= self.hotelMinTime:
+            # layover가 발생했으면 일단 1회 발생, 이후 날짜가 바뀔 때마다 1회씩 발생
+            if flight_gap >= self.LayoverTime:
                 cost += (
-                    self.pair[i + 1].originAirport.hotelCost *
-                    self.pair[0].aircraft.crewNum *
-                    (1 + floor((flightGap - self.hotelMinTime) / self.hotelTime))
+                    self.pair[i].dest_airport.hotel_cost
+                    * self.__getMaxCrewNum()
+                    * (1 + max(0, (layover_finish_time - layover_start_time).days - 1))
                 )
 
         return cost // 100
+
+    
+    def __checkBreakTime(self, index):
+        """
+            /**
+            * 비행 사이의 쉬는 시간 계산
+            * @return (int) Math.max(0,breakTime)
+            */
+        """
+        breakTime = (self.pair[index+1].originTime -
+                     self.pair[index].destTime).total_seconds() // 60
+        return max(0, breakTime)
+    
+    def __getMaxCrewNum(self):
+        """
+            /**
+            * pairing의 인원을 구하는 메서드
+            * @return maxCrewNum
+            */
+        """
+        maxCrewNum = 0
+        for flight in self.pair:
+            maxCrewNum = max(maxCrewNum, flight.aircraft.crewNum)
+        return maxCrewNum
