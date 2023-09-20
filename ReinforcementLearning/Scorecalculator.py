@@ -23,16 +23,6 @@ class ScoreCalculator:
 
 
     # Hard 조건
-    # 시간적 선후관계 판단. 틀리다면 Hard score 1000점 부여
-    def timePossible(pairing):
-        score=0
-        for pair in pairing:
-            if pair.getTimeImpossible()==True:
-                score=score+1000
-        return score
-
-
-    # Hard 조건
     # 공간적 선후관계 판단. 틀리다면 Hard score 1000점 부여
     def airportPossible(self):
         score = 0
