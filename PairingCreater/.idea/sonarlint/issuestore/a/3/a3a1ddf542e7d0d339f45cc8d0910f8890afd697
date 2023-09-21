@@ -1,0 +1,9 @@
+
+c	java:S119"IRename this generic name to match the regular expression '^[A-Z][0-9]?$'.(ş±Çÿÿÿÿÿ
+`
+java:S1172;"JRemove these unused method parameters "centerForComponent", "exitOnClose".(ñÂ·‰
+V
+java:S1117A"@Rename "solverConfig" which hides the field declared at line 28.(ÜÂï«
+_
+java:S1117F"DRename "solutionBusiness" which hides the field declared at line 27.(ğÂ–ûÿÿÿÿ
+Q	java:S125R"<This block of commented-out lines of code should be removed.(´†È„

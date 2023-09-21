@@ -21,7 +21,6 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 quickTurnCost(constraintFactory),
                 hotelCost(constraintFactory),
                 satisCost(constraintFactory),
-//                testCost(constraintFactory),
         };
     }
 

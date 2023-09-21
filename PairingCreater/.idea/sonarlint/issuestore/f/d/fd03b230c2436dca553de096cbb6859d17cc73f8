@@ -1,11 +1,11 @@
 
-k	java:S117#"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(úôš´úÿÿÿÿ
-k	java:S117#"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(úôš´úÿÿÿÿ
-q
-java:S3008"VRename this field "LayoverTime" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¶¢‡€ùÿÿÿÿ
-y
-java:S3008"^Rename this field "QuickTurnaroundTime" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(·Ãêıÿÿÿÿ
-=
-java:S1905÷"&Remove this unnecessary cast to "int".(ÜˆÇ˜
-?
-java:S1905÷"(Remove this unnecessary cast to "float".(ÜˆÇ˜
+m	java:S117#"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ş‡êƒ8ŸéÙ†«1
+m	java:S117#"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ş‡êƒ8ŸéÙ†«1
+m	java:S117\"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(å”¯ 8ŸéÙ†«1
+r	java:S117]"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(©óøîøÿÿÿÿ8ŸéÙ†«1
+x
+java:S3008"VRename this field "LayoverTime" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¶¢‡€ùÿÿÿÿ8ÄíÙ†«1
+€
+java:S3008"^Rename this field "QuickTurnaroundTime" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(·Ãêıÿÿÿÿ8ÄíÙ†«1
+D
+java:S1905’"&Remove this unnecessary cast to "int".(¾º”8òÀÚ†«1
