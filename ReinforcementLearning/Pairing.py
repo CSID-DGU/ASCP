@@ -51,7 +51,7 @@ class Pairing:
         """
 
         for i in range(len(self.pair) - 1):
-            if self.pair[i].destTime > self.pair[i + 1].originTime:
+            if self.pair[i].destTime > self.pair[i + 1].originTime and self.pair[i+1].id != -1: # 단, 이후 비행기가 dummyFlight면 무효
                 return True
         return False
 
@@ -64,7 +64,7 @@ class Pairing:
             */
         """
         for i in range(len(self.pair) - 1):
-            if self.pair[i].destAirport.name != self.pair[i + 1].originAirport.name:
+            if self.pair[i].destAirport.name != self.pair[i + 1].originAirport.name and self.pair[i+1].id != -1: # 이후 비행기가 dummyFlight면 무효
                 return True
         return False
     
@@ -114,7 +114,12 @@ class Pairing:
             * @return boolean
             */
         """
-        return self.pair[0].originAirport != self.pair[-1].destAirport
+        dest = None
+        for i in range(len(self.pair)):
+            if self.pair[i].id == -1:  # dummyFlihgt 고려.
+                break
+            dest = self.pair[i].destAirport.name
+        return self.pair[0].originAirport.name != dest
 
     def getSatisCost(self):
         """
@@ -153,10 +158,13 @@ class Pairing:
         movingWorkCost = 0
 
         for flight in self.pair:
+            if flight.id==-1: #dummyFlight 만날 시 break
+                break
+
             presentCrewNum = flight.aircraft.crewNum
 
             movingWorkCost += ((self.__getMaxCrewNum() - presentCrewNum)
-                               * flight.originAirport().getDeadheadCost(flight.destAirport))
+                               * flight.originAirport.getDeadheadCost(flight.destAirport))
 
         return movingWorkCost
 
@@ -168,7 +176,7 @@ class Pairing:
             * @return deadhead cost / 2
             */
         """
-        if self.pair[0].id == -1:
+        if self.pair[0].id == -1:  # 빈 페어링의 경우 0 반환. 만약 페어링이 비어있더라도 equalBase()가 True 나오므로 필요.
             return 0
         else:
             dest = None
@@ -176,11 +184,10 @@ class Pairing:
             for i in range(len(self.pair)):
                 if self.pair[i].id != -1:
                     dest = self.pair[i].destAirport
-            if dest is not None:
-                # 출발공항에 대하여, 도착 공항이 어디인지를 인자로 넘겨주어, 해당하는 deadhead cost를 불러옴.
-                deadhead = origin.getDeadheadCost(dest)
+            # 출발공항에 대하여, 도착 공항이 어디인지를 인자로 넘겨주어, 해당하는 deadhead cost를 불러옴.
+            deadhead = origin.getDeadheadCost(dest)
 
-            return deadhead * self.__getMaxCrewNum()
+        return deadhead * self.__getMaxCrewNum()
 
     def getLayoverCost(self):
         """
@@ -189,10 +196,7 @@ class Pairing:
             * 비행편간 간격이 LayoverTime 보다 크거나 같은 경우에만 LayoverCost 발생
             * @return sum(LayoverCost) / 100
             */
-        """
-        if len(self.pair) <= 1:
-            return 0
-        
+        """        
         maxLayoverCost = self.pair[0].aircraft.layoverCost
         ## pair에 있는 flight 중 최대 maxLayoverCost를 찾음
         for flight in self.pair:
@@ -200,7 +204,7 @@ class Pairing:
 
         cost = 0
         for i in range(len(self.pair) - 1):
-            if self.__checkBreakTime(i) <= 0:
+            if self.__checkBreakTime(i) <= 0 and self.pair[i].id!=-1: # 단순 dummyFlight라서 return 0이 되는 경우 없게 만듦.
                 return 0
 
             ## if (getFlightGap(i) >= LayoverTime) {
@@ -221,24 +225,21 @@ class Pairing:
             * @return sum(QuickTurnCost) / 100
             */
         """
-        if len(self.pair) <= 1:
-            return 0
-        
         cost = 0
         for i in range(len(self.pair) - 1):
-            if self.__checkBreakTime(i) <= 0:
+            if self.__checkBreakTime(i) <= 0 and self.pair[i].id!=-1: # 단순히 dummyFlight여서 return 0 되는 것 방지
                 return 0
             
-            if self.pair[i].aircraft.type != self.pair[i+1].aircraft.type:
+            if self.pair[i].aircraft.type != self.pair[i+1].aircraft.type: #이게 멀까... cost+=0...?  09.20 동겸 작성
                 cost += 0
                 continue
 
             if self.__checkBreakTime(i) < self.QuickTurnaroundTime:
-                cost += self.pair[i].aircraft.getQuickTurnCost()
+                cost += self.pair[i].aircraft.quickTurnCost
 
-        return cost // 100
+        return cost // 100 
 
-    def get_hotel_cost(self):
+    def getHotelCost(self): # !!!!!!!!!!!!!!!!!!추가적인 수정 필요
         """
             /**
             * 페어링의 총 HotelCost 반환
@@ -247,12 +248,9 @@ class Pairing:
             * @return sum(hotel cost) / 100
             */
         """
-        # 페어링의 총 길이가 1개 이하라면 HotelCost 없음
-        if len(self.pair) <= 1:
-            return 0
-
         cost = 0
         for i in range(len(self.pair) - 1):
+
             # 만약 비행편 간격이 하나라도 0이라면 유효한 페어링이 아님
             flight_gap = self.pair(i)
             if flight_gap == 0:
@@ -279,6 +277,9 @@ class Pairing:
             * @return (int) Math.max(0,breakTime)
             */
         """
+        if self.pair[index].id == -1 or self.pair[index+1].id == -1:  # dummy flight인 경우 고려
+            return 0
+
         breakTime = (self.pair[index+1].originTime -
                      self.pair[index].destTime).total_seconds() // 60
         return max(0, breakTime)
