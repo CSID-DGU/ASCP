@@ -1,29 +1,29 @@
 
 S
-java:S1155I">Use isEmpty() to check whether the collection is empty or not.(¬ÎäV
+java:S1155H">Use isEmpty() to check whether the collection is empty or not.(¬ÎäV
 _
-java:S6355–"HAdd 'since' and/or 'forRemoval' arguments to the @Deprecated annotation.(õˆúš
+java:S6355•"HAdd 'since' and/or 'forRemoval' arguments to the @Deprecated annotation.(õˆúš
 L
-java:S1133—"5Do not forget to remove this deprecated code someday.(‡”µ¨
+java:S1133–"5Do not forget to remove this deprecated code someday.(‡”µ¨
 ?
-java:S1123—"(Add the missing @deprecated Javadoc tag.(‡”µ¨
+java:S1123–"(Add the missing @deprecated Javadoc tag.(‡”µ¨
 U
-java:S1155™">Use isEmpty() to check whether the collection is empty or not.(ªõ¤à
+java:S1155˜">Use isEmpty() to check whether the collection is empty or not.(ªõ¤à
 _
-java:S6355£"HAdd 'since' and/or 'forRemoval' arguments to the @Deprecated annotation.(õˆúš
+java:S6355¢"HAdd 'since' and/or 'forRemoval' arguments to the @Deprecated annotation.(õˆúš
 Q
-java:S1133¤"5Do not forget to remove this deprecated code someday.(©ôÀëùÿÿÿÿ
+java:S1133£"5Do not forget to remove this deprecated code someday.(©ôÀëùÿÿÿÿ
 D
-java:S1123¤"(Add the missing @deprecated Javadoc tag.(©ôÀëùÿÿÿÿ
+java:S1123£"(Add the missing @deprecated Javadoc tag.(©ôÀëùÿÿÿÿ
 _
-java:S6355°"HAdd 'since' and/or 'forRemoval' arguments to the @Deprecated annotation.(õˆúš
+java:S6355¯"HAdd 'since' and/or 'forRemoval' arguments to the @Deprecated annotation.(õˆúš
 Q
-java:S1133±"5Do not forget to remove this deprecated code someday.(™„ Êýÿÿÿÿ
+java:S1133°"5Do not forget to remove this deprecated code someday.(™„ Êýÿÿÿÿ
 D
-java:S1123±"(Add the missing @deprecated Javadoc tag.(™„ Êýÿÿÿÿ
+java:S1123°"(Add the missing @deprecated Javadoc tag.(™„ Êýÿÿÿÿ
 _
-java:S6355½"HAdd 'since' and/or 'forRemoval' arguments to the @Deprecated annotation.(õˆúš
+java:S6355¼"HAdd 'since' and/or 'forRemoval' arguments to the @Deprecated annotation.(õˆúš
 Q
-java:S1133¾"5Do not forget to remove this deprecated code someday.(ëÁöþûÿÿÿÿ
+java:S1133½"5Do not forget to remove this deprecated code someday.(ëÁöþûÿÿÿÿ
 D
-java:S1123¾"(Add the missing @deprecated Javadoc tag.(ëÁöþûÿÿÿÿ
+java:S1123½"(Add the missing @deprecated Javadoc tag.(ëÁöþûÿÿÿÿ

@@ -144,9 +144,9 @@ public class Pairing extends AbstractPersistable {
     public Integer getSatisCost(){
         int satisScore = 0;
         for(int i=0; i<pair.size()-1; i++){
-            if(getFlightGap(i) < 180 && getFlightGap(i) > QuickTurnaroundTime){
-                int startCost = pair.get(i).getAircraft().getQuickTurnCost()*2;
-                satisScore += (startCost/(180-QuickTurnaroundTime))*(-getFlightGap(i)+180);
+            if(getFlightGap(i) < LayoverTime && getFlightGap(i) > QuickTurnaroundTime){
+                int startCost = (int) pair.get(i).getAircraft().getQuickTurnCost();
+                satisScore += (startCost/(LayoverTime-QuickTurnaroundTime))*(-getFlightGap(i)+LayoverTime);
                 //(30,퀵턴)-(180,0)을 지나는 일차함수
             }
         }
