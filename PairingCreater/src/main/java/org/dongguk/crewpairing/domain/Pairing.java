@@ -146,7 +146,8 @@ public class Pairing extends AbstractPersistable {
         for(int i=0; i<pair.size()-1; i++){
             if(getFlightGap(i) < LayoverTime && getFlightGap(i) > QuickTurnaroundTime){
                 int startCost = (int) pair.get(i).getAircraft().getQuickTurnCost();
-                satisScore += (startCost/(LayoverTime-QuickTurnaroundTime))*(-getFlightGap(i)+LayoverTime);
+                int plusScore = (startCost/(LayoverTime-QuickTurnaroundTime))*(-getFlightGap(i)+LayoverTime);
+                satisScore += plusScore;
                 //(30,퀵턴)-(180,0)을 지나는 일차함수
             }
         }
@@ -160,13 +161,14 @@ public class Pairing extends AbstractPersistable {
      */
     public int getMovingWorkCost(){
         int movingWorkCost = 0;
-
+        int idx=0;
         for (Flight flight : pair) {
             int presentCrewNum = flight.getAircraft().getCrewNum();
             Map<String, Integer> deadheadsOfCurrentAirport = flight.getOriginAirport().getDeadheadCost();
             String nextAirportName = flight.getDestAirport().getName();
 
-            movingWorkCost += (getMaxCrewNum() - presentCrewNum) * deadheadsOfCurrentAirport.get(nextAirportName);
+            int plusScore= (getMaxCrewNum() - presentCrewNum) * deadheadsOfCurrentAirport.get(nextAirportName);
+            movingWorkCost += plusScore;
         }
 
         return movingWorkCost / 100;
@@ -229,12 +231,16 @@ public class Pairing extends AbstractPersistable {
 
         int cost = 0;
         for (int i = 1; i < pair.size() - 1; i++) {
+            Aircraft presentAircraft= pair.get(i).getAircraft();
+            Aircraft beforeAircraft= pair.get(i-1).getAircraft();
             // 만약 비행편 간격이 하나라도 음수라면 유효한 페어링이 아님
             if (getFlightGap(i) <= 0) return 0;
-            if (!pair.get(i).getAircraft().equals(pair.get(i-1).getAircraft())) return 0;
-            // 음수가 아니라면 유효한 페어링이므로 QuickTurnCost 계산
-            if (getFlightGap(i) < QuickTurnaroundTime) {
-                cost += pair.get(i).getAircraft().getQuickTurnCost();
+            //비행기가 같을 때만 수행
+            if (presentAircraft.equals(beforeAircraft)) {
+                // 음수가 아니라면 유효한 페어링이므로 QuickTurnCost 계산
+                if (getFlightGap(i) < QuickTurnaroundTime) {
+                    cost += presentAircraft.getQuickTurnCost();
+                }
             }
         }
 

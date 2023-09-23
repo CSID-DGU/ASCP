@@ -1,10 +1,14 @@
 package org.dongguk.crewpairing.score;
 
+import org.dongguk.crewpairing.domain.Aircraft;
+import org.dongguk.crewpairing.domain.Flight;
 import org.dongguk.crewpairing.domain.Pairing;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 import org.optaplanner.core.api.score.stream.Constraint;
 import org.optaplanner.core.api.score.stream.ConstraintFactory;
 import org.optaplanner.core.api.score.stream.ConstraintProvider;
+
+import java.util.List;
 
 public class ParingConstraintProvider implements ConstraintProvider {
 
@@ -192,4 +196,5 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 .penalize(HardSoftLongScore.ONE_HARD, pairing -> (int) (Math.floor(((double) pairing.getTotalLength() - 7)) * 100))
                 .asConstraint("Max length");
     }
+
 }

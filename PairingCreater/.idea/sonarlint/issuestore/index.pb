@@ -25,3 +25,5 @@ t
 Dsrc/main/java/org/dongguk/common/business/ProblemFileComparator.java,6/4/64a068435c43f4221ca325425a341f8405cf6aa3
 i
 9src/main/java/org/dongguk/crewpairing/domain/Airport.java,c/3/c3a1d0c8945c364edfe883e13244b57d8736b0e7
+p
+@src/main/java/org/dongguk/common/domain/AbstractPersistable.java,8/6/86d93a1b97f55dde744d7bbd6db02b12f5f4b227

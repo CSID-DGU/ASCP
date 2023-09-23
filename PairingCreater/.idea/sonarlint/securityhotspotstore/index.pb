@@ -25,3 +25,5 @@ o
 ?src/main/java/org/dongguk/common/business/SolutionBusiness.java,f/4/f418c5e5bf691bb9b6c410ff13779ebba3a80ab3
 q
 Asrc/main/java/org/dongguk/crewpairing/util/ViewAllConstraint.java,1/6/1612311b12e0e33284949c8e2ade7a5a0703f494
+p
+@src/main/java/org/dongguk/common/domain/AbstractPersistable.java,8/6/86d93a1b97f55dde744d7bbd6db02b12f5f4b227
