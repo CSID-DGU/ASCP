@@ -1,11 +1,19 @@
 
-k	java:S117#"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(úôš´úÿÿÿÿ
-k	java:S117#"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(úôš´úÿÿÿÿ
-q
-java:S3008"VRename this field "LayoverTime" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¶¢‡€ùÿÿÿÿ
-y
-java:S3008"^Rename this field "QuickTurnaroundTime" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(·Ãêıÿÿÿÿ
-=
-java:S1905÷"&Remove this unnecessary cast to "int".(ÜˆÇ˜
-?
-java:S1905÷"(Remove this unnecessary cast to "float".(ÜˆÇ˜
+L
+java:S1066ï"/Merge this if statement with the enclosing one.(¦‘Ò#8¯½ì·«1
+m	java:S117#"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ş‡êƒ8¯½ì·«1
+m	java:S117#"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ş‡êƒ8¯½ì·«1
+m	java:S117]"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(å”¯ 8¯½ì·«1
+r	java:S117^"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(©óøîøÿÿÿÿ8¯½ì·«1
+x
+java:S3008"VRename this field "LayoverTime" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¶¢‡€ùÿÿÿÿ8‘¿ì·«1
+€
+java:S3008"^Rename this field "QuickTurnaroundTime" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(·Ãêıÿÿÿÿ8‘¿ì·«1
+e
+java:S6355s"HAdd 'since' and/or 'forRemoval' arguments to the @Deprecated annotation.(õˆúš8–¿ì·«1
+R
+java:S1133t"5Do not forget to remove this deprecated code someday.(ß“Ä¸8–¿ì·«1
+E
+java:S1123t"(Add the missing @deprecated Javadoc tag.(ß“Ä¸8–¿ì·«1
+D
+java:S1905”"&Remove this unnecessary cast to "int".(Ó”ü8˜¿ì·«1
