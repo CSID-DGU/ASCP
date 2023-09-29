@@ -45,6 +45,4 @@ public class ViewAllConstraint {
         String summary = explain.getSummary();
         System.out.println(summary);
     }
-
-
 }

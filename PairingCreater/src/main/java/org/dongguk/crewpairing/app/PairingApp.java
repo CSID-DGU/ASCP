@@ -62,8 +62,6 @@ public class PairingApp extends CommonApp<PairingSolution> {
         ViewAllConstraint.viewAll(constraintMatchTotalMap, solution);
 //        ViewAllConstraint.pairingScore(explain);
 
-
-
         System.exit(0);
     }
 

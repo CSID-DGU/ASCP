@@ -161,7 +161,7 @@ public class Pairing extends AbstractPersistable {
      */
     public int getMovingWorkCost(){
         int movingWorkCost = 0;
-        int idx=0;
+
         for (Flight flight : pair) {
             int presentCrewNum = flight.getAircraft().getCrewNum();
             Map<String, Integer> deadheadsOfCurrentAirport = flight.getOriginAirport().getDeadheadCost();
@@ -230,17 +230,15 @@ public class Pairing extends AbstractPersistable {
         if(pair.size() <= 1) return 0;
 
         int cost = 0;
-        for (int i = 1; i < pair.size() - 1; i++) {
-            Aircraft presentAircraft= pair.get(i).getAircraft();
-            Aircraft beforeAircraft= pair.get(i-1).getAircraft();
+        for (int i = 0; i < pair.size() - 1; i++) {
+            Aircraft presentAircraft = pair.get(i).getAircraft();
+            Aircraft nextAircraft = pair.get(i + 1).getAircraft();
             // 만약 비행편 간격이 하나라도 음수라면 유효한 페어링이 아님
             if (getFlightGap(i) <= 0) return 0;
+
             //비행기가 같을 때만 수행
-            if (presentAircraft.equals(beforeAircraft)) {
-                // 음수가 아니라면 유효한 페어링이므로 QuickTurnCost 계산
-                if (getFlightGap(i) < QuickTurnaroundTime) {
-                    cost += presentAircraft.getQuickTurnCost();
-                }
+            if (presentAircraft.equals(nextAircraft) && getFlightGap(i) < QuickTurnaroundTime) {
+                cost += presentAircraft.getQuickTurnCost();
             }
         }
 
@@ -299,13 +297,12 @@ public class Pairing extends AbstractPersistable {
 
         return maxCrewNum;
     }
+
     private int getMaxLayoverCost(){
         int maxLayoverCost = pair.get(0).getAircraft().getLayoverCost();
-        for(int i =0;i< pair.size();i++){
-            int presentLayoverCost = pair.get(i).getAircraft().getLayoverCost();
-            if (maxLayoverCost > presentLayoverCost) {
-                maxLayoverCost = presentLayoverCost;
-            }
+        for (Flight flight : pair) {
+            int presentLayoverCost = flight.getAircraft().getLayoverCost();
+            maxLayoverCost = Math.max(maxLayoverCost, presentLayoverCost);
         }
         return maxLayoverCost;
     }
