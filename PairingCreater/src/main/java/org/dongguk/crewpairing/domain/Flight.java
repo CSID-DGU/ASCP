@@ -26,10 +26,6 @@ public class Flight extends AbstractPersistable {
     //운항시간
     private int flightTime;
 
-    public String getIndex() {
-        return "F" + id;
-    }
-
     @Override
     public String toString() {
         return "F"+ id;
