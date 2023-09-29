@@ -2,6 +2,7 @@ from math import floor
 from typing import List
 from Flight import Flight
 import pandas as pd
+import math
 
 
 class Pairing:
@@ -9,11 +10,11 @@ class Pairing:
     debriefingTime = 0
     restTime = 0
     LayoverTime = 6 * 60
-    QuickTurnaroundTime = 0
+    QuickTurnaroundTime = 30
     hotelTime = 18 * 60
     hotelMinTime = 720
     checkContinueTime = 60 * 10
-    continueMaxTime = 14 * 60# 14시간
+    continueMaxTime = 14 * 60  # 14시간
     workMaxTime = 8 * 60
     # 8시간 짜리 하나 만들어야됨
 
@@ -51,7 +52,8 @@ class Pairing:
         """
 
         for i in range(len(self.pair) - 1):
-            if self.pair[i].destTime > self.pair[i + 1].originTime and self.pair[i+1].id != -1: # 단, 이후 비행기가 dummyFlight면 무효
+            # 단, 이후 비행기가 dummyFlight면 무효
+            if self.pair[i].destTime > self.pair[i + 1].originTime and self.pair[i+1].id != -1:
                 return True
         return False
 
@@ -64,10 +66,11 @@ class Pairing:
             */
         """
         for i in range(len(self.pair) - 1):
-            if self.pair[i].destAirport.name != self.pair[i + 1].originAirport.name and self.pair[i+1].id != -1: # 이후 비행기가 dummyFlight면 무효
+            # 이후 비행기가 dummyFlight면 무효
+            if self.pair[i].destAirport.name != self.pair[i + 1].originAirport.name and self.pair[i+1].id != -1:
                 return True
         return False
-    
+
     def getContinuityImpossible(self):  # 휴식시간 포함 14시간, 휴식시간 빼고 8시간 둘 다 지켜져야함.
         """
             /**
@@ -81,7 +84,8 @@ class Pairing:
 
         for i in range(1, len(self.pair)):
             if self.__checkBreakTime(i-1) < self.checkContinueTime:
-                totalTime += self.pair[i].flightTime + self.__checkBreakTime(i-1)
+                totalTime += self.pair[i].flightTime + \
+                    self.__checkBreakTime(i-1)
                 workTime += self.pair[i].flightTime
             else:
                 totalTime = self.pair[i].flightTime
@@ -130,9 +134,16 @@ class Pairing:
             */
         """
         satisScore = 0
+
         for i in range(len(self.pair) - 1):
-            if self.__checkBreakTime(i) <= 180:
-                satisScore += 1000 * (180 - self.__checkBreakTime(i))
+            if self.__isLastFlight(i):
+                break
+            flight_gap = self.__checkBreakTime(i)
+            if flight_gap < self.LayoverTime and flight_gap > self.QuickTurnaroundTime:
+                start_cost = self.pair[i].aircraft.quickTurnCost
+                plus_score = (start_cost // (self.LayoverTime - self.QuickTurnaroundTime)) * (-flight_gap + self.LayoverTime)
+                satisScore += plus_score
+
         return satisScore
 
     def getTotalLength(self):
@@ -158,7 +169,7 @@ class Pairing:
         movingWorkCost = 0
 
         for flight in self.pair:
-            if flight.id==-1: #dummyFlight 만날 시 break
+            if flight.id == -1:  # dummyFlight 만날 시 break
                 break
 
             presentCrewNum = flight.aircraft.crewNum
@@ -166,7 +177,7 @@ class Pairing:
             movingWorkCost += ((self.__getMaxCrewNum() - presentCrewNum)
                                * flight.originAirport.getDeadheadCost(flight.destAirport))
 
-        return movingWorkCost
+        return movingWorkCost//100
 
     def getDeadheadCost(self):
         """
@@ -187,7 +198,7 @@ class Pairing:
             # 출발공항에 대하여, 도착 공항이 어디인지를 인자로 넘겨주어, 해당하는 deadhead cost를 불러옴.
             deadhead = origin.getDeadheadCost(dest)
 
-        return deadhead * self.__getMaxCrewNum()
+        return (deadhead * self.__getMaxCrewNum())//100
 
     def getLayoverCost(self):
         """
@@ -196,25 +207,26 @@ class Pairing:
             * 비행편간 간격이 LayoverTime 보다 크거나 같은 경우에만 LayoverCost 발생
             * @return sum(LayoverCost) / 100
             */
-        """        
+        """
         maxLayoverCost = self.pair[0].aircraft.layoverCost
-        ## pair에 있는 flight 중 최대 maxLayoverCost를 찾음
+        # pair에 있는 flight 중 최대 maxLayoverCost를 찾음
         for flight in self.pair:
             maxLayoverCost = max(maxLayoverCost, flight.aircraft.layoverCost)
 
         cost = 0
+        flightGapSum=0
         for i in range(len(self.pair) - 1):
-            if self.__checkBreakTime(i) <= 0 and self.pair[i].id!=-1: # 단순 dummyFlight라서 return 0이 되는 경우 없게 만듦.
+
+            if self.__isLastFlight(i):
+                break
+            # 단순 dummyFlight라서 return 0이 되는 경우 없게 만듦.
+            if self.__checkBreakTime(i) <= 0:
                 return 0
 
-            ## if (getFlightGap(i) >= LayoverTime) {
-            ##    cost += (getFlightGap(i) - LayoverTime) * maxLayoverCost;
-            ##}
-            ## 위 자바 코드 파이썬으로 바꿈
-            
             if self.__checkBreakTime(i) >= self.LayoverTime:
-                cost += (self.__checkBreakTime(i) - self.LayoverTime) * maxLayoverCost
-
+                flightGapSum+=self.__checkBreakTime(i)-self.LayoverTime
+                cost += (self.__checkBreakTime(i) -
+                         self.LayoverTime) * maxLayoverCost
         return cost // 100
 
     def getQuickTurnCost(self):
@@ -227,19 +239,17 @@ class Pairing:
         """
         cost = 0
         for i in range(len(self.pair) - 1):
-            if self.__checkBreakTime(i) <= 0 and self.pair[i].id!=-1: # 단순히 dummyFlight여서 return 0 되는 것 방지
+            if self.__isLastFlight(i):
+                break
+            if self.__checkBreakTime(i) <= 0:
                 return 0
-            
-            if self.pair[i].aircraft.type != self.pair[i+1].aircraft.type: #이게 멀까... cost+=0...?  09.20 동겸 작성
-                cost += 0
-                continue
 
-            if self.__checkBreakTime(i) < self.QuickTurnaroundTime:
+            if self.pair[i].aircraft.type == self.pair[i+1].aircraft.type and self.__checkBreakTime(i) < self.QuickTurnaroundTime:
                 cost += self.pair[i].aircraft.quickTurnCost
 
-        return cost // 100 
+        return cost // 100
 
-    def getHotelCost(self): # !!!!!!!!!!!!!!!!!!추가적인 수정 필요
+    def getHotelCost(self):  
         """
             /**
             * 페어링의 총 HotelCost 반환
@@ -250,26 +260,26 @@ class Pairing:
         """
         cost = 0
         for i in range(len(self.pair) - 1):
-
+            
+            if self.__isLastFlight(i):
+                break
             # 만약 비행편 간격이 하나라도 0이라면 유효한 페어링이 아님
-            flight_gap = self.pair(i)
-            if flight_gap == 0:
+            if self.__checkBreakTime(i) <= 0:
                 return 0
-
-            layover_start_time = self.pair[i].dest_time.toLocalDate()
-            layover_finish_time = self.pair[i + 1].origin_time.toLocalDate()
+        
+            layover_start_time = self.pair[i].destTime
+            layover_finish_time = self.pair[i + 1].originTime
 
             # layover가 발생했으면 일단 1회 발생, 이후 날짜가 바뀔 때마다 1회씩 발생
-            if flight_gap >= self.LayoverTime:
+            if self.__checkBreakTime(i)>= self.LayoverTime:
                 cost += (
-                    self.pair[i].dest_airport.hotel_cost
+                    self.pair[i].destAirport.hotelCost
                     * self.__getMaxCrewNum()
-                    * (1 + max(0, (layover_finish_time - layover_start_time).days - 1))
-                )
+                    * (1 + max(0, (layover_finish_time.date() - layover_start_time.date()).days - 1))
+                )     
 
         return cost // 100
 
-    
     def __checkBreakTime(self, index):
         """
             /**
@@ -277,13 +287,11 @@ class Pairing:
             * @return (int) Math.max(0,breakTime)
             */
         """
-        if self.pair[index].id == -1 or self.pair[index+1].id == -1:  # dummy flight인 경우 고려
-            return 0
 
         breakTime = (self.pair[index+1].originTime -
                      self.pair[index].destTime).total_seconds() // 60
         return max(0, breakTime)
-    
+
     def __getMaxCrewNum(self):
         """
             /**
@@ -295,3 +303,6 @@ class Pairing:
         for flight in self.pair:
             maxCrewNum = max(maxCrewNum, flight.aircraft.crewNum)
         return maxCrewNum
+
+    def __isLastFlight(self, index):
+        return self.pair[index].id == -1 or self.pair[index+1].id == -1
