@@ -82,6 +82,7 @@ public class Pairing extends AbstractPersistable {
     /**
      * 페어링의 최소 휴식시간 보장 여부 검증
      * / 연속되는 비행이 14시간 이상일 시 true 반환(연속: breakTime이 10시간 이하)
+     * / 또는 순수 비행 시간의 합이 8시간 이상일 시 true 반환
      * @return boolean
      */
     public boolean isImpossibleContinuity(){
@@ -107,16 +108,17 @@ public class Pairing extends AbstractPersistable {
     }
 
     /**
-     * pairing의 동일 항공기 여부 검증
+     * pairing의 동일 항공기 여부 검증(현재 사용 x)
      * / 비행들의 항공기가 동일하지 않을 시 true 반환
      * @return boolean
      */
+    @Deprecated
     public boolean isDifferentAircraft() {
         for (int i = 0; i < pair.size() - 1; i++) {
-            if (!pair.get(i).getAircraft().getType()
-                    .equals(pair.get(i + 1).getAircraft().getType())) {
-                return true;
-            }
+            String beforeAircraft = pair.get(i).getAircraft().getType();
+            String afterAircraft = pair.get(i+1).getAircraft().getType();
+
+            if (!beforeAircraft.equals(afterAircraft)) return true;
         }
         return false;
     }
@@ -135,15 +137,18 @@ public class Pairing extends AbstractPersistable {
 
     /**
      * 페어링의 총 SatisCost 반환
-     * / breakTime이 180보다 작은 경우 발생
-     * @return 퀵턴코스트/(시간-퀵턴 기준 시간)
+     * / breakTime이 30보다 크고 180보다 작은 경우 발생
+     * / (30,퀵턴)-(180,0)을 지나는 일차함수 형태로 작성
+     * @return 퀵턴코스트의 합
      */
     public Integer getSatisCost(){
         int satisScore = 0;
         for(int i=0; i<pair.size()-1; i++){
-            if(getFlightGap(i) < 180 && getFlightGap(i) > QuickTurnaroundTime){
-                int startRange = pair.get(i).getAircraft().getQuickTurnCost();
-                satisScore += startRange/(getFlightGap(i)-QuickTurnaroundTime);
+            if(getFlightGap(i) < LayoverTime && getFlightGap(i) > QuickTurnaroundTime){
+                int startCost = (int) pair.get(i).getAircraft().getQuickTurnCost();
+                int plusScore = (startCost/(LayoverTime-QuickTurnaroundTime))*(-getFlightGap(i)+LayoverTime);
+                satisScore += plusScore;
+                //(30,퀵턴)-(180,0)을 지나는 일차함수
             }
         }
         return (int) satisScore;
@@ -156,13 +161,14 @@ public class Pairing extends AbstractPersistable {
      */
     public int getMovingWorkCost(){
         int movingWorkCost = 0;
-
+        int idx=0;
         for (Flight flight : pair) {
             int presentCrewNum = flight.getAircraft().getCrewNum();
             Map<String, Integer> deadheadsOfCurrentAirport = flight.getOriginAirport().getDeadheadCost();
             String nextAirportName = flight.getDestAirport().getName();
 
-            movingWorkCost += (getMaxCrewNum() - presentCrewNum) * deadheadsOfCurrentAirport.get(nextAirportName);
+            int plusScore= (getMaxCrewNum() - presentCrewNum) * deadheadsOfCurrentAirport.get(nextAirportName);
+            movingWorkCost += plusScore;
         }
 
         return movingWorkCost / 100;
@@ -196,20 +202,14 @@ public class Pairing extends AbstractPersistable {
     public Integer getLayoverCost(){
         // 페어링의 총 길이가 1개 이하라면 LayoverCost 없음
         if(pair.size() <= 1) return 0;
-        // 최대 layover cost 계산
-        int maxLayoverCost = pair.get(0).getAircraft().getLayoverCost();
-        for(int i =0;i< pair.size();i++){
-            if (maxLayoverCost > pair.get(i).getAircraft().getLayoverCost()){
-                maxLayoverCost = pair.get(i).getAircraft().getLayoverCost();
-            }
-        }
+
+        int maxLayoverCost = getMaxLayoverCost();
         int cost = 0;
         for (int i = 0; i < pair.size() - 1; i++) {
             // 만약 비행편 간격이 하나라도 음수라면 유효한 페어링이 아님
             if (getFlightGap(i) <= 0) {
                 return 0;
             }
-
             // 음수가 아니라면 유효한 페어링이므로 LayoverCost 계산
             if (getFlightGap(i) >= LayoverTime) {
                 cost += (getFlightGap(i) - LayoverTime) * maxLayoverCost;
@@ -222,6 +222,7 @@ public class Pairing extends AbstractPersistable {
     /**
      * 페어링의 총 QuickTurnCost 반환
      * 비행편간 간격이 QuickTurnaroundTime 보다 작은 경우에만 QuickTurnCost 발생
+     * 퀵턴의 경우 같은 비행기를 사용
      * @return sum(QuickTurnCost) / 100
      */
     public Integer getQuickTurnCost() {
@@ -230,12 +231,16 @@ public class Pairing extends AbstractPersistable {
 
         int cost = 0;
         for (int i = 1; i < pair.size() - 1; i++) {
+            Aircraft presentAircraft= pair.get(i).getAircraft();
+            Aircraft beforeAircraft= pair.get(i-1).getAircraft();
             // 만약 비행편 간격이 하나라도 음수라면 유효한 페어링이 아님
             if (getFlightGap(i) <= 0) return 0;
-            if (!pair.get(i).getAircraft().equals(pair.get(i-1).getAircraft())) return 0;
-            // 음수가 아니라면 유효한 페어링이므로 QuickTurnCost 계산
-            if (getFlightGap(i) < QuickTurnaroundTime) {
-                cost += pair.get(i).getAircraft().getQuickTurnCost();
+            //비행기가 같을 때만 수행
+            if (presentAircraft.equals(beforeAircraft)) {
+                // 음수가 아니라면 유효한 페어링이므로 QuickTurnCost 계산
+                if (getFlightGap(i) < QuickTurnaroundTime) {
+                    cost += presentAircraft.getQuickTurnCost();
+                }
             }
         }
 
@@ -293,6 +298,16 @@ public class Pairing extends AbstractPersistable {
         }
 
         return maxCrewNum;
+    }
+    private int getMaxLayoverCost(){
+        int maxLayoverCost = pair.get(0).getAircraft().getLayoverCost();
+        for(int i =0;i< pair.size();i++){
+            int presentLayoverCost = pair.get(i).getAircraft().getLayoverCost();
+            if (maxLayoverCost > presentLayoverCost) {
+                maxLayoverCost = presentLayoverCost;
+            }
+        }
+        return maxLayoverCost;
     }
 
     @Override

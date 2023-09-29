@@ -2,7 +2,8 @@ package org.dongguk.crewpairing.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dongguk.crewpairing.domain.PairingSolution;
-import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
+import org.optaplanner.core.api.score.Score;
+import org.optaplanner.core.api.score.ScoreExplanation;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 import org.optaplanner.core.api.score.constraint.ConstraintMatchTotal;
 
@@ -40,4 +41,10 @@ public class ViewAllConstraint {
         System.out.println("Hard Score : " + solution.getScore().hardScore());
         System.out.println("Soft Score : " + solution.getScore().softScore());
     }
+    public static void pairingScore(ScoreExplanation<PairingSolution, HardSoftLongScore> explain){
+        String summary = explain.getSummary();
+        System.out.println(summary);
+    }
+
+
 }

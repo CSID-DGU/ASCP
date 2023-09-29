@@ -60,6 +60,9 @@ public class PairingApp extends CommonApp<PairingSolution> {
         ScoreExplanation<PairingSolution, HardSoftLongScore> explain = scoreManager.explain(solution);
         Map<String, ConstraintMatchTotal<HardSoftLongScore>> constraintMatchTotalMap = explain.getConstraintMatchTotalMap();
         ViewAllConstraint.viewAll(constraintMatchTotalMap, solution);
+//        ViewAllConstraint.pairingScore(explain);
+
+
 
         System.exit(0);
     }
