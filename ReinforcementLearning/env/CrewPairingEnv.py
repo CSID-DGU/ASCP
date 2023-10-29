@@ -2,10 +2,12 @@ import gym
 import numpy as np
 import random
 import pandas as pd
+import sys
+import os
 from copy import deepcopy
 from gym import spaces
-from Scorecalculator import ScoreCalculator
-from Factory import ASCPFactory
+from env.ScoreCalculator import ScoreCalculator
+from domain.factory.Factory import Factory
 
 class CrewPairingEnv(gym.Env):
     def __init__(self, initial_pairing_set, pairingList, maxFlight):
@@ -24,7 +26,7 @@ class CrewPairingEnv(gym.Env):
         # (페어링 셋의 최대 비행 횟수 -> 들어오는 페어링의 최대 비행 * 2로 수정)
         # 행동 공간 정의를 위해서 필요한 값
         self.max_flights = maxFlight  # len(self.initial_pairing_id_set[0])
-
+        
         # 강화 학습의 action space와 observation space 설정
         self.action_space = spaces.MultiDiscrete(
             [self.n_pairings, self.max_flights, self.n_pairings, self.max_flights])
@@ -48,7 +50,7 @@ class CrewPairingEnv(gym.Env):
     # 이때, 두 비행이 변경되는 경우 [-1, -1, 34, -1]의 예시와 같이 제일 첫번째 값이 빈 값이 되는 경우가 발생할 수 있음.
     # 이를 해결하기 위해 비행의 값들을 왼쪽으로 shift 시켜주는 함수임. [34, -1, -1 ,-1]과 같이.
     def shift_minus_ones(self, pairing_set):
-        dummyFlight = ASCPFactory.dummyFlight
+        dummyFlight = Factory.dummyFlight
         idx_list = []
         pairing_id_set = [[flight.id for flight in pairing.pair] # 객체가 아닌, id만 포함된 페어링 셋
                           for pairing in pairing_set]
@@ -58,7 +60,7 @@ class CrewPairingEnv(gym.Env):
             flight_idx = 0 # 
             for flight_id in pair_id_list: # 해당 페어링의 하나하나의 플라이트에 대하여
                 if flight_id == -1: # 플라이트 id가 -1 이라면
-                    idx_list.append([pairing_idx, flight_idx]) # 해당 플라이트가 속한 페어링 인덱스와 플라이트 인덱슬를 idx_list에 저장
+                    idx_list.append([pairing_idx, flight_idx]) # 해당 플라이트가 속한 페어링 인덱스와 플라이트 인덱스를 idx_list에 저장
                 flight_idx += 1
             pairing_idx += 1
 
@@ -82,15 +84,17 @@ class CrewPairingEnv(gym.Env):
         num_columns = num_flights
         # print('------ 바꾸기 전 pairing set ------')
 
+        
         # 비행의 인덱스를 가지고 페어링 셋의 인덱스로 변환(즉, 특정 비행의 인덱스를 가지고 해당 비행이 들어있는 페어링 셋의 인덱스를 찾음)
         before_pairing_idx = before_idx // num_flights # before_pairing_idx: 처음에 선택한 플라이트가 속해있는 페어링 인덱스
         before_flight_idx = before_idx % num_flights # before_flight_idx : 처음에 선택한 플라이트의 페어링 속 플라이트 인덱스
         after_pairing_idx = after_idx // num_flights # after_pairing_idx: 바꿀 대상 플라이트가 속해있는 페어링 인덱스
         after_flight_idx = after_idx % num_flights # after_flight_idx : 바꿀 대상 플라이트의 페어링 속 플라이트 인덱스
+        
 
         before_pairing_set = self.pairing_set # 현재 클래스변수 pairing_set을 얕은복사로 가져옴
         after_pairing_set = deepcopy(self.pairing_set) # 현재 클래스변수 pairing_set을 얕은복사로 가져옴
-
+        
         # flight 교환 이전, 처음 선택한 flight가 속해있는 pairing의 cost 계산
         src_last_hard, src_last_soft = self.calculateScore(
             before_pairing_set[before_pairing_idx])
@@ -102,7 +106,6 @@ class CrewPairingEnv(gym.Env):
         current_soft = src_last_soft + trg_last_soft
 
         # //////////////////// 위치 서로 바꾸기 ///////////////////
-
         temp_flight = after_pairing_set[before_pairing_idx].pair[before_flight_idx]
         after_pairing_set[before_pairing_idx].pair[before_flight_idx] = after_pairing_set[after_pairing_idx].pair[after_flight_idx]
         after_pairing_set[after_pairing_idx].pair[after_flight_idx] = temp_flight
@@ -169,7 +172,7 @@ class CrewPairingEnv(gym.Env):
     def calculateScore(self, pairing):
 
         calculator = ScoreCalculator(pairing)
-        pair_hard_score,pair_soft_score=calculator.calculateScore
+        pair_hard_score,pair_soft_score=calculator.calculateScore()
        
 
         return pair_hard_score, pair_soft_score

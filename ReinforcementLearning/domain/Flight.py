@@ -1,6 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
-from Airport import Airport
+from . import Airport
 
 
 class Flight:

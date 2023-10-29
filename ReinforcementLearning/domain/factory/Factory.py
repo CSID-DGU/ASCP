@@ -1,12 +1,13 @@
-from Aircraft import Aircraft
-from Airport import Airport
-from Flight import Flight
-from Pairing import Pairing
-from IDProvider import IDProvider
+
 import pandas as pd
+from domain.factory.IDProvider import IDProvider
+from domain.Aircraft import Aircraft
+from domain.Airport import Airport
+from domain.Flight import Flight
+from domain.Pairing import Pairing
 
 
-class ASCPFactory:
+class Factory:
 
     idprovider = IDProvider()
     dummyAircraft=Aircraft(id=-1, type='xxx',crewNum=0,flightCost=0,layoverCost=0,quickTurnCost=0) # dummyFlight에 부여해줄 dummyCraft 생성
@@ -22,7 +23,7 @@ class ASCPFactory:
         for idx, row in df.iterrows():
             aircraft = Aircraft(
                 # 싱글톤인 idprovider 호출하여 aircraft에 id 부여
-                id=ASCPFactory.idprovider.get_aircraft_id(),
+                id=Factory.idprovider.get_aircraft_id(),
                 type=row['AIRCRAFT'],
                 crewNum=row['CREW_NUM(명)'],
                 flightCost=row['Flight Cost(원/분)'],
@@ -46,7 +47,7 @@ class ASCPFactory:
                     destCostList.append([roww['도착 공항'], roww['Deadhead(원)']])
             airport = Airport(
                 # 싱글톤인 idprovider 호출하여 airport에 id 부여
-                id=ASCPFactory.idprovider.get_airport_id(),
+                id=Factory.idprovider.get_airport_id(),
                 name=row['공항 Code'],
                 hotelCost=row['비용(원)'],
                 destCostList=destCostList
@@ -67,7 +68,7 @@ class ASCPFactory:
             aircraft_obj = next(
                 (aircraft for aircraft in aircraftList if aircraft.type == row['AIRCRAFT_TYPE']), None)
             flight = Flight(
-                id=ASCPFactory.idprovider.get_flight_id(),  # 싱글톤인 idprovider 호출하여 flight에 id 부여
+                id=Factory.idprovider.get_flight_id(),  # 싱글톤인 idprovider 호출하여 flight에 id 부여
                 TailNumber=row['T/N'],
                 originAirport=origin_airport_obj,
                 originTime=row['ORIGIN_DATE'],
@@ -76,20 +77,38 @@ class ASCPFactory:
                 aircraft=aircraft_obj
             )
             flightList.append(flight)
-        flightList.append(ASCPFactory.dummyFlight)
+        flightList.append(Factory.dummyFlight)
         return flightList
 
     @staticmethod
-    def createPairing(excel_path, flightList):
+    def createPairing(excel_path, flightList, max_flight):
         pairingList = []  # Pairing Set을 저장할 변수
         # 옵타플래너를 돌려 나온 output.xlsx를 읽어옴
         df = pd.read_excel(excel_path)
         del df['Pairing Data']  # 엑셀에서 필요없는 행 Pairing Data 삭제
         # 엑셀이 가지고있는, 전체 Pairing 중 가장 Flight 수가 많은 Pairing의 Flight 수
-        max_flight = len(df.columns)
-        column = list(range(1, max_flight+1))  # column=[1,2, ... ,max_flight]
-        column_list = [str(item) for item in column]
-        df.columns = column_list  # 읽어온 엑셀파일의 column을 위와 같이 1,2,3,,,, maxflight로 바꾸어줌
+        # max_flight = len(df.columns)
+
+        # 현재 df의 열 수를 확인
+        current_columns = len(df.columns)
+
+        # max_flight개로 늘리기 위한 열 수 계산
+        num_columns_to_add = max_flight - current_columns
+        if max_flight>current_columns:
+            # 각 열을 -1로 초기화하면서 df에 추가
+            for _ in range(num_columns_to_add):
+                df[str(current_columns + 1)] = -1
+                current_columns += 1
+
+        # 열 이름 설정
+        df.columns = [str(i) for i in range(1, max_flight+1)]
+
+
+
+
+        #column = list(range(1, max_flight+1))  # column=[1,2, ... ,max_flight]   column=[1,2,3, ... , 10]
+        #column_list = [str(item) for item in column]
+        #df.columns = column_list  # 읽어온 엑셀파일의 column을 위와 같이 1,2,3,,,, maxflight로 바꾸어줌
         df = df.fillna(-1)  # Nan 자리는 -1로 채움
         pairing_matrix = df.values  # DataFrame을 2차원 배열로 변환
         # m은 행의 수(pairing의 수), n은 열의 수(max_flight).
@@ -111,7 +130,7 @@ class ASCPFactory:
                         pair.append(tempFlight)
                         break
             pairing = Pairing(
-                id=ASCPFactory.idprovider.get_pairing_id(),  # pairing에 id 부여
+                id=Factory.idprovider.get_pairing_id(),  # pairing에 id 부여
                 pair=pair,  # List['Flight'] 형태의 pair
             )
             pairingList.append(pairing)  # pairingList에, 만들어진 pairing을 넣어줌
