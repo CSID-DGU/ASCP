@@ -65,8 +65,9 @@ public abstract class CommonApp<Solution_> extends LoggingMain {
         SolverConfig solverConfig = SolverConfig.createFromXmlResource(solverConfigResource);
         solverConfig.withTerminationConfig(
                 new TerminationConfig()
-                        .withUnimprovedSecondsSpentLimit((long) (8.0 * Math.max(1.0, Math.log10(flightSize))))
-                        .withSecondsSpentLimit((long) (45.0 * Math.max(1.0, Math.log10(flightSize)))));
+                        .withSecondsSpentLimit(420L));
+                        //.withUnimprovedSecondsSpentLimit((long) (8.0 * Math.max(1.0, Math.log10(flightSize))))
+                        //.withSecondsSpentLimit((long) (45.0 * Math.max(1.0, Math.log10(flightSize)))));
 
         // SolutionBusiness 객체 생성
         SolutionBusiness<Solution_, ?> solutionBusiness = new SolutionBusiness<>(this,
