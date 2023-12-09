@@ -22,9 +22,9 @@ https://www.optaplanner.org/xsd/solver/solver.xsd">
         <unimprovedSecondsSpentLimit>60</unimprovedSecondsSpentLimit>
     </termination>
     -->
-    <constructionHeuristic/>
+
     <localSearch>
-        <localSearchType>TABU_SEARCH</localSearchType>
+        <localSearchType>GREAT_DELUGE</localSearchType>
     </localSearch>
     <!--
     <exhaustiveSearch>
