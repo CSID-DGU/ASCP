@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- %L lowers performance, %C and %c break indentation and therefore reduce readability, normal %t is verbose -->
+            <pattern>%d{HH:mm:ss.SSS} %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="fileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/solution.%d{yyyy-MM-dd_HH}.log</fileNamePattern>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- To override the debug log level from the command line, use the VM option "-Dlogback.level.org.optaplanner=trace" -->
+    <logger name="org.optaplanner" level="${logback.level.org.optaplanner:-debug}"/>
+
+    <root level="warn">
+        <appender-ref ref="consoleAppender" />
+        <appender-ref ref="fileAppender" />
+    </root>
+
+</configuration>
