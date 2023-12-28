@@ -1,7 +1,0 @@
-
-^	java:S119""IRename this generic name to match the regular expression '^[A-Z][0-9]?$'.(Ëìö±
-^	java:S119""IRename this generic name to match the regular expression '^[A-Z][0-9]?$'.(Ëìö±
-V	java:S125C"<This block of commented-out lines of code should be removed.(”Û÷¬ùÿÿÿÿ
-i
-java:S6204„"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(â¥
-_	java:S119Á"IRename this generic name to match the regular expression '^[A-Z][0-9]?$'.(–ş­Ê
