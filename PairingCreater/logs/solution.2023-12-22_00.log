@@ -1,8 +1,0 @@
-00:03:36.942 Solving started: time spent (232), best score (0hard/-141433279soft), environment mode (REPRODUCIBLE), move thread count (NONE), random (JDK with seed 0).
-00:03:36.952 Solving ended: time spent (240), best score (0hard/-141433279soft), score calculation speed (4/sec), phase total (1), environment mode (REPRODUCIBLE), move thread count (NONE).
-00:13:25.724 Solving started: time spent (240), best score (0hard/-144466036soft), environment mode (REPRODUCIBLE), move thread count (NONE), random (JDK with seed 0).
-00:13:25.738 Solving ended: time spent (253), best score (0hard/-144466036soft), score calculation speed (3/sec), phase total (1), environment mode (REPRODUCIBLE), move thread count (NONE).
-00:20:14.855 Solving started: time spent (249), best score (0hard/-144466036soft), environment mode (REPRODUCIBLE), move thread count (NONE), random (JDK with seed 0).
-00:20:14.869 Solving ended: time spent (262), best score (0hard/-144466036soft), score calculation speed (3/sec), phase total (1), environment mode (REPRODUCIBLE), move thread count (NONE).
-00:21:11.487 Solving started: time spent (250), best score (0hard/-144466036soft), environment mode (REPRODUCIBLE), move thread count (NONE), random (JDK with seed 0).
-00:21:11.505 Solving ended: time spent (263), best score (0hard/-144466036soft), score calculation speed (3/sec), phase total (1), environment mode (REPRODUCIBLE), move thread count (NONE).
