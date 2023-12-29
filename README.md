@@ -43,7 +43,7 @@ java -jar crew-pairing.jar data/ crewpairing/ 500 input_500.xlsx output.xlsx
 - 나머지 두 명령어를 통해 Optaplanner 실행
 - 아래는 initial set (output.xlsx)이 존재하는 경우 사용. data/crewpairing/output/ 에 initial set 파일 배치
 
-RL을 서버 및 로컬에서 실행하는 방법입니다.
+<br>RL을 서버 및 로컬에서 실행하는 방법입니다.
 - 프로젝트 루트 디렉토리에 dataset 폴더 추가 후, input 파일 배치
 - REINFORCE.py 실행
 
