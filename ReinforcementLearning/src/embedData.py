@@ -9,33 +9,21 @@ example: [int, int, int, [0,1,...,0], [1,0,...,0]]
 
 import sys
 import pandas as pd
+import openpyxl
 from IDProvider import IDProvider
 from Flight import Flight
 from Components import Aircraft, Airport, Hotel
 
-def readXlsx(path):
-    # argv: inputFileDirectory
-    if (len(sys.argv) > 1):
-        informationCsvFileDirectory = sys.argv[1]
-    else:
-        informationCsvFileDirectory = None
-    # argv: inputFileName
-    if (len(sys.argv) > 2):
-        inputFileName = sys.argv[2]
-    else:
-        inputFileName = None
+def readXlsx(path, inputFileName):
 
-    # argv: pairingFileName
-    if (len(sys.argv) > 3):
-        pairingXlsxFile = sys.argv[3]
-    else:
-        pairingXlsxFile = None
-    xls = pd.ExcelFile(informationCsvFileDirectory + inputFileName)  # 엑셀 파일의 모든 시트 읽기
-    sheet_names = xls.sheet_names  # 엑셀 파일 안의 각 시트 이름을 리스트형태(?)로 가져옴
+    print(path)
+
+    xls = pd.ExcelFile(path + inputFileName)  # 엑셀 파일의 모든 시트 읽기
+    sheet_names = xls.sheet_names  # 엑셀 파일 안의 각 시트 이름을 리스트형태로 가져옴
 
     for sheet_name in sheet_names:  # 각 시트를 순회하며 csv파일로 저장
-        df = pd.read_excel(informationCsvFileDirectory+inputFileName, sheet_name=sheet_name)
-        csv_filename = f"{'/home/public/yunairline/ASCP/ReinforcementLearning/dataset'}/{sheet_name}.csv"
+        df = pd.read_excel(path + inputFileName, sheet_name=sheet_name)
+        csv_filename = f"{path}/{sheet_name}.csv"
         df.to_csv(csv_filename, index=False)
 
 # 공항 총 리스트
@@ -59,7 +47,7 @@ def embedFlightData(path): # flight 객체 생성 및 vector로 변환, flight_l
     idprovider = IDProvider() 
     fdf = pd.read_csv(path+'/User_Flight.csv')
     # 200개 행 읽어오기
-    fdf = fdf.head(500)
+    #fdf = fdf.head(200)
     fdf = fdf.drop(fdf.index[0])
     fdf.columns = fdf.iloc[0]
     fdf = fdf.drop(fdf.index[0])
@@ -82,7 +70,6 @@ def embedFlightData(path): # flight 객체 생성 및 vector로 변환, flight_l
     
     airport_total = airportList(fdf['ORIGIN'], fdf['DEST'])
     aircraft_total = aircraftList(fdf['AIRCRAFT_TYPE'])
-
     
     ddf=pd.read_csv(path+'/User_Deadhead.csv')
     ddf = ddf.drop(ddf.index[0])
@@ -115,10 +102,10 @@ def embedFlightData(path): # flight 객체 생성 및 vector로 변환, flight_l
             if aircraft == row['AIRCRAFT']:
                 aircraft_onehot[i] = 1
         cdf.at[idx, 'AIRCRAFT'] = aircraft_onehot
-        Aircraft.add_type(row['AIRCRAFT'], row['CREW_NUM(명)'], int(round(float(row['Layover Cost(원/분)']))), int(round(float(row['Quick Turn Cost(원/회)']))))
+        Aircraft.add_type(row['AIRCRAFT'], row['CREW_NUM(명)'], int(float(row['Layover Cost(원/분)'])), int(float(row['Quick Turn Cost(원/회)'])))
     temp=tuple([0 for _ in range(len(aircraft_total))])
     del Aircraft.dic[temp]
-
+    
     
     hdf=pd.read_csv(path+'/User_Hotel.csv')
     hdf = hdf.drop(hdf.index[0])
@@ -139,10 +126,30 @@ def embedFlightData(path): # flight 객체 생성 및 vector로 변환, flight_l
 
     return flight_list, V_f_list
     
+    
+def print_xlsx(output):
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+
+    # Pairing data 제목 추가
+    sheet.cell(row=1, column=1, value="Pairing data")
+
+    # 데이터를 엑셀에 쓰기
+    for row_index, row_data in enumerate(output, start=2):  # 첫 번째 행은 이미 Pairing data로 사용되었으므로 2부터 시작
+        # 각 행의 첫 열에는 1부터 시작하는 인덱스 추가
+        sheet.cell(row=row_index, column=1, value=row_index - 1)
+
+        # 나머지 데이터 추가
+        for col_index, value in enumerate(row_data, start=2):  # 각 행의 두 번째 열부터 시작
+            sheet.cell(row=row_index, column=col_index, value=value)
+
+    workbook.save("output.xlsx")
+    
+    
 def flatten(index_list, k):
     result_list = [0] * k
 
     for index in index_list:
         result_list[index] = 1
-
+        
     return result_list

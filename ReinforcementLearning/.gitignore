@@ -1,7 +1,9 @@
 # dataset
 dataset
 output
+*.txt
 
 # pyenv
 *.env
+
 *__pycache__/
