@@ -31,10 +31,11 @@ Airline Scheduling Crew Pairing
 
 ## Intro
 <pre>
-```python
-def hello_world():
-    print("Hello, World!")
-```
+./gradlew build
+java -jar crew-pairing.jar data/ crewpairing/ 500 input_500.xlsx
+java -jar crew-pairing.jar data/ crewpairing/ 500 input_500.xlsx output.xlsx
 </pre>
+- 프로젝트 루트 디렉토리에서 실행.
+- 
 
 ## Lisence
