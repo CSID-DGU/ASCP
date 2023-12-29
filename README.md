@@ -38,6 +38,7 @@ java -jar crew-pairing.jar data/ crewpairing/ 500 input_500.xlsx output.xlsx
 </pre>
 - 프로젝트 루트 디렉토리에서 ./gradlew build 실행하면 build/libs에 crew-pairing.jar 파일 생성됨
 - crew-pairing.jar을 프로젝트 루트 디렉토리로 이동
-- 나머지 두 명령어를 통해 Optaplanner 실행 [아래는 initial set (output.xlsx)이 존재하는 경우입니다]
+- 나머지 두 명령어를 통해 Optaplanner 실행
+- 아래는 initial set (output.xlsx)이 존재하는 경우 사용. data/crewpairing/output/ 에 initial set 파일 배치
 
 ## Lisence
