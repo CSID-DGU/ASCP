@@ -29,4 +29,12 @@ Airline Scheduling Crew Pairing
 | 💡     | :bulb                      | 주석 추가/수정           |
 | 🗃      | :card_file_box             | 데이버베이스 관련 수정   |
 
+## Intro
+<pre>
+```python
+def hello_world():
+    print("Hello, World!")
+```
+</pre>
+
 ## Lisence
