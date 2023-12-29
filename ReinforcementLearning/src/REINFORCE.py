@@ -1,4 +1,5 @@
 import gym
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -6,11 +7,10 @@ import torch.optim as optim
 from torch.optim import lr_scheduler
 import numpy as np
 from torch.distributions import Categorical
-from embedData import embedFlightData, flatten
+from embedData import embedFlightData, flatten, print_xlsx, readXlsx
 from functions import *
 from CrewPairingEnv import CrewPairingEnv
 import random
-#import matplotlib.pyplot as plt
 
 #Hyperparameters
 gamma   = 0.98
@@ -60,54 +60,59 @@ class Policy(nn.Module):
         self.data = []
 
 def main():
-    path = '/home/public/yunairline/ASCP/ReinforcementLearning/dataset'
+    current_directory = os.path.dirname(__file__)
+    path = os.path.abspath(os.path.join(current_directory, '../dataset'))
+    readXlsx(path, '/input_500.xlsx')
+
     flight_list, V_f_list = embedFlightData(path)
     
     # Crew Pairing Environment 불러오기
     N_flight = len(flight_list)
     env = CrewPairingEnv(V_f_list)
-    pi = Policy(N_flight=N_flight, learning_rate=0.0005)
+    pi = Policy(N_flight=N_flight, learning_rate=0.0002)
     pi.to(device)
     score = 0
     #scores = []
     bestScore= 99999999999999
+    output = [[] for i in range(N_flight)]
+
+    with open('episode_rewards.txt', 'w') as file:
+        file.write("Episode\tReward\tBest Score\n")
+        file.write("---------------------------------\n")
     
-    for n_epi in range(1000):
-        print("############################ n_epi: ", n_epi, " ############################")
-        s, _ = env.reset()  #현재 플라이트 V_P_list  <- V_f list[0]
-        done = False
-        
-        while not done:            
-            index_list = deflect_hard(env.V_p_list, s)
-            prob = pi(index_list)
-            #print(prob)
+        for n_epi in range(500):
+            print("############################ n_epi: ", n_epi, " ############################")
+            s, _ = env.reset()  #현재 플라이트 V_P_list  <- V_f list[0]
+            done = False
+            output_tmp = [[] for i in range(N_flight)]
             
-            selected_prob = prob[index_list]
-            a = index_list[selected_prob.argmax().item()]
+            while not done:            
+                index_list = deflect_hard(env.V_p_list, s)
+                prob = pi(index_list)
+                
+                selected_prob = prob[index_list]
+                a = index_list[selected_prob.argmax().item()]
+                
+                s_prime, r, done, truncated, info = env.step(action=a, V_f=s)
+                        
+                pi.put_data((r,prob[a]))
+                s = s_prime     #action에 의해 바뀐 flight
+                score += r
+                
+                output_tmp[a].append(flight_list[env.flight_cnt-1].id)
+                
+            pi.train_net()
+            if bestScore>score:
+                bestScore=score
+                output = output_tmp
             
-            s_prime, r, done, truncated, info = env.step(action=a, V_f=s)
-                      
-            pi.put_data((r,prob[a]))
-            s = s_prime     #action에 의해 바뀐 flight
-            score += r
-            
-            if done : print(prob)
-            
-        pi.train_net()
-        if bestScore>score:
-            bestScore=score
-        
-        print(f"current score : {score:.2f} best score : {bestScore:.2f}")
-        #scores.append(score)
-        score=0
+            file.write(f"{n_epi}\t{score:.2f}\t{bestScore:.2f}\n")
+            print(f"current score : {score:.2f} best score : {bestScore:.2f}")
+            score=0
     
     env.close()
     
-    #plt.plot(scores)
-    #plt.xlabel('Episode')
-    #plt.ylabel('Score')
-    #plt.title('Score per Episode')
-    #plt.show()
+    print_xlsx(output)
     
 if __name__ == '__main__':
     main()

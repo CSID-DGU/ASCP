@@ -56,8 +56,6 @@ def get_reward(V_p_list, V_f, idx) :
     flight_gap = V_f[0] - V_p[1]
     reward = 0
     
-    # print(V_p)
-    
     # Deadhead
     # V_p가 [0,0,0,[0],[0],[0]]이면 새로운 dh가 생기는 것이므로 reward에 추가
     if V_p == [0,0,0,[0],[0],[0]] :
@@ -71,23 +69,19 @@ def get_reward(V_p_list, V_f, idx) :
     
     # Layover & Hotel
     if V_p != [0,0,0,[0],[0],[0]] :
-        #print('flihgt_gap: ', flight_gap)
         if flight_gap >= LAYOVER_TIME :
             reward += (flight_gap - LAYOVER_TIME) * Aircraft.get_cost(V_f[5])[1]
             V_p_days = V_p[1]//(24*60)
             V_f_days = V_f[0]//(24*60)
-            reward += (1 + max((V_f_days - V_p_days) - 1, 0)) * Hotel.get_cost(V_f[4])
-        #print('layover & Hotel: ', reward)
+            reward += (1 + max((V_f_days - V_p_days) - 1, 0)) * Hotel.get_cost(V_p[4])
         
         # Quickturn
         if flight_gap <= QUICKTURN_TIME :
             reward += Aircraft.get_cost(V_f[5])[2]
-        #print('quickturn: ', reward)
         
         # Satis
         if QUICKTURN_TIME < flight_gap < LAYOVER_TIME :
             base = Aircraft.get_cost(V_f[5])[2] # (30min = qt cost) : (6h = 0)
-            reward += int(base * (LAYOVER_TIME - flight_gap)/(LAYOVER_TIME - QUICKTURN_TIME))
-        #print('satis: ', reward)
-
-    return reward / 10000000
+            reward += base // (LAYOVER_TIME - QUICKTURN_TIME) * (LAYOVER_TIME - flight_gap)
+        
+    return reward
