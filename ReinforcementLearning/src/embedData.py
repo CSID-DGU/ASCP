@@ -145,7 +145,7 @@ def print_xlsx(output):
 
     workbook.save("output.xlsx")
     
-    
+"""
 def flatten(index_list, k):
     result_list = [0] * k
 
@@ -153,3 +153,11 @@ def flatten(index_list, k):
         result_list[index] = 1
         
     return result_list
+"""
+
+def flatten(V_f):
+    # 2차원 리스트(V_f)에서 4,5,6 번째 요소를 모두 펼쳐서 1차원 리스트로 만들기
+    V_f1d = []
+    V_onehot = V_f[3] + V_f[4] + V_f[5]
+    V_f1d = [V_f[0]/10000000, V_f[1]/10000000, V_f[2]/10000000]+V_onehot
+    return V_f1d
