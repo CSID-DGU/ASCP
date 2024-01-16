@@ -1,0 +1,12 @@
+
+^python:S2208"GImport only needed names or import the module and then use its members.(×»¤M
+ppython:S117"TRename this parameter "N_flight" to match the regular expression ^[_a-z][a-z0-9_]*$.(’—ü¿ıÿÿÿÿ
+;python:S125$"Remove this commented out code.(Úí­Œúÿÿÿÿ
+upython:S117F"YRename this local variable "N_flight" to match the regular expression ^[_a-z][a-z0-9_]*$.(—‘˜¬ıÿÿÿÿ
+ppython:S117C"YRename this local variable "V_f_list" to match the regular expression ^[_a-z][a-z0-9_]*$.(¢ßÛ
+ppython:S117L"ZRename this local variable "bestScore" to match the regular expression ^[_a-z][a-z0-9_]*$.(¨åÑR
+Fpython:S1481`".Replace unused local variable "info" with "_".(Ş”ÂÇ
+Kpython:S1481`"3Replace unused local variable "truncated" with "_".(Ş”ÂÇ
+6python:S125K"Remove this commented out code.(îâÔ©
+<python:S1481M"%Remove the unused local variable "i".(à—Û 
+=python:S1481W"%Remove the unused local variable "i".(‹û˜
