@@ -8,8 +8,8 @@ GoodPairing = [0,0,0,[0],[0],[0]]
 Pairing_list = [[3,0,0,[0],[0],[0]],[3,0,0,[0],[0],[0]]]
 
 
-#DK_Algorithm 함수
-def DK_Algorithm(GoodPairing, Pairing_list, index_list):
+#페어링 리스트에서 이상적인 페어링과 유사한 페어링을 찾는 함수
+def findSimiliar(GoodPairing, Pairing_list, index_list):
     min_destTime = float('inf') # 도착 시간 차이의 최솟값
     min_originTime = float('inf') # 출발 시간 차이의 최솟값
     min_index = index_list[-1]
@@ -33,6 +33,16 @@ def DK_Algorithm(GoodPairing, Pairing_list, index_list):
 
     return min_index
 
-answer= DK_Algorithm(GoodPairing, Pairing_list, [0,1])
+#이상적인 페어링과 flight가 hard 제약을 어기는지 확인하는 함수
+def checkHard(goodPairing, flight):
 
-print(answer)
+    flight_gap = flight[0] - goodPairing[1]
+
+    if flight_gap < 0: return False  # 시간의 선후관계 제약
+    if goodPairing[4] != flight[3]: return False  # 공간 제약
+    if goodPairing[5] != flight[5]: return False  # 항공기 기종 제약
+    if flight_gap < 10 * 60:  # 법적 제약
+        if goodPairing[2] + flight[2] + flight_gap > 14 * 60: return  False
+
+    return True
+
