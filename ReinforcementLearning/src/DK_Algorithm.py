@@ -57,7 +57,7 @@ def find_similar(GoodPairing, Pairing_list, flight):
     return min_index
 
 #이상적인 페어링과 flight가 hard 제약을 어기는지 확인하는 함수
-def checkHard(goodPairing, flight):
+def checkConnection(goodPairing, flight):
 
     flight_gap = flight[0] - goodPairing[1]
 
