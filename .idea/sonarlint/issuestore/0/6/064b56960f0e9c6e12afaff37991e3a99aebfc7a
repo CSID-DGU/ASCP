@@ -1,8 +1,6 @@
 
-upython:S117"WRename this parameter "GoodPairing" to match the regular expression ^[_a-z][a-z0-9_]*$.(ù©ó¼8¢ì²²Ñ1
-vpython:S117"XRename this parameter "Pairing_list" to match the regular expression ^[_a-z][a-z0-9_]*$.(ù©ó¼8¢ì²²Ñ1
-zpython:S117"]Rename this local variable "min_destTime" to match the regular expression ^[_a-z][a-z0-9_]*$.(áËã 8¢ì²²Ñ1
-}python:S117"_Rename this local variable "min_originTime" to match the regular expression ^[_a-z][a-z0-9_]*$.(ýâÙÛ8¢ì²²Ñ1
-qpython:S1542"RRename function "findSimiliar" to match the regular expression ^[a-z_][a-z0-9_]*$.(ù©ó¼8£ì²²Ñ1
-upython:S117%"WRename this parameter "goodPairing" to match the regular expression ^[_a-z][a-z0-9_]*$.(¯Ò’¼8Üû¹²Ñ1
-npython:S1542%"ORename function "checkHard" to match the regular expression ^[a-z_][a-z0-9_]*$.(¯Ò’¼8£ì²²Ñ1
+zpython:S117"WRename this parameter "GoodPairing" to match the regular expression ^[_a-z][a-z0-9_]*$.(ºî©¨üÿÿÿÿ8é÷þ‚Ò1
+{python:S117"XRename this parameter "Pairing_list" to match the regular expression ^[_a-z][a-z0-9_]*$.(ºî©¨üÿÿÿÿ8é÷þ‚Ò1
+xpython:S3776"TRefactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.(ºî©¨üÿÿÿÿ8é÷þ‚Ò1
+upython:S117<"WRename this parameter "goodPairing" to match the regular expression ^[_a-z][a-z0-9_]*$.(¯Ò’¼8µ¦ò‚Ò1
+npython:S1542<"ORename function "checkHard" to match the regular expression ^[a-z_][a-z0-9_]*$.(¯Ò’¼8µ¦ò‚Ò1
