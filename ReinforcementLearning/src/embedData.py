@@ -13,6 +13,7 @@ import openpyxl
 from IDProvider import IDProvider
 from Flight import Flight
 from Components import Aircraft, Airport, Hotel
+import torch
 
 def readXlsx(path, inputFileName):
 
@@ -124,7 +125,11 @@ def embedFlightData(path): # flight 객체 생성 및 vector로 변환, flight_l
     for i in range(len(flight_list)):
         V_f_list.append(flight_list[i].toVector(airport_total, aircraft_total))
 
-    return flight_list, V_f_list
+
+    # Neural net size : (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
+    NN_size = 32 + 2*len(airport_total)
+
+    return flight_list, V_f_list, NN_size
     
     
 def print_xlsx(output):
@@ -155,9 +160,72 @@ def flatten(index_list, k):
     return result_list
 """
 
+def time_to_bin(time):
+    binary_list = []
+
+    while time > 0:
+        binary_list.append(time % 2)
+        time //= 2
+
+    # 리스트를 길이가 16인 배열에 뒤에서부터 채움 (MAX : 약 7년)
+    return [0] * (16 - len(binary_list)) + binary_list[::-1]
+
+
+def bin_to_time(binary_list):
+    decimal_number = 0
+    power = len(binary_list) - 1
+
+    for bit in binary_list:
+        decimal_number += bit * (2 ** power)
+        power -= 1
+
+    return decimal_number
+
+
 def flatten(V_f):
     # 2차원 리스트(V_f)에서 4,5,6 번째 요소를 모두 펼쳐서 1차원 리스트로 만들기
     V_f1d = []
-    V_onehot = V_f[3] + V_f[4] + V_f[5]
-    V_f1d = [V_f[0]/10000000, V_f[1]/10000000, V_f[2]/10000000]+V_onehot
+
+    B_ori = time_to_bin(V_f[0]//60)
+    B_dest = time_to_bin(V_f[1]//60)
+
+    V_f1d = B_ori + B_dest + V_f[3] + V_f[4]
+
     return V_f1d
+
+
+def unflatten(prob, NN_size):
+    onehot_size = (NN_size-32)//2 # onehot 백터의 크기는 prob에서 time을 나타내는 32를 제거 후, 2로 나눈 것
+    prob = prob.tolist()
+
+    ori_time = []
+    for i in range(0, 16) :
+        if(prob[i] > 1/NN_size) : ori_time.append(1)
+        else : ori_time.append(0)
+    ori_time = bin_to_time(ori_time)
+
+    dest_time = []
+    for i in range(16,32) :
+        if(prob[i] > 1/NN_size) : dest_time.append(1)
+        else : dest_time.append(0)
+    dest_time = bin_to_time(dest_time)
+
+    ori_airpot = prob[32:32+onehot_size]
+    print("ori : ",ori_airpot)
+    max_value = max(ori_airpot)
+    print("max : ", max_value)
+    ori_idx = ori_airpot.index(max_value)
+    ori_list = [0] * onehot_size
+    ori_list[ori_idx] = 1
+    
+    dest_airport = prob[32+onehot_size: 32+(onehot_size)*2]
+    print("dest : ", dest_airport)
+    max_value = max(dest_airport)
+    print("max : ", max_value)
+    dest_idx = dest_airport.index(max_value)
+    dest_list = [0] * onehot_size
+    dest_list[dest_idx] = 1
+
+    good_pairing = [ori_time*60] + [dest_time*60] + [0] + [ori_list] + [dest_list] + [0]
+
+    return good_pairing
