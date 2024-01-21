@@ -9,17 +9,22 @@ Pairing_list = [[3,0,0,[0],[0],[0]],[3,0,0,[0],[0],[0]]]
 
 
 #DH 간소화한 함수
-def deflect_hard_v2(pairing, flight):
+def checkConnection(pairing, flight):
+    print("페어링")
+    print(pairing)
+    print("flight")
+    print(flight)
+    if pairing == []: return True
     flight_gap = flight[0] - pairing[1]
-
-    if pairing[4] == pairing[3]: return True  # 완성된 페어링
-    if flight_gap < 0: return True  # 시간의 선후관계 제약
-    if pairing[4] != flight[3]: return True  # 공간 제약
-    if pairing[5] != flight[5]: return True  # 항공기 기종 제약
+    
+    if pairing[4] == pairing[3]: return False  # 완성된 페어링
+    if flight_gap < 0: return False  # 시간의 선후관계 제약
+    if pairing[4] != flight[3]: return False  # 공간 제약
+    # if pairing[5] != flight[5]: return False  # 항공기 기종 제약
     if flight_gap < 10 * 60:  # 법적 제약
-        if pairing[2] + flight[2] + flight_gap > 14 * 60: return True
+        if pairing[2] + flight[2] + flight_gap > 14 * 60: return False
 
-    return False
+    return True
 
 #페어링 리스트에서 이상적인 페어링과 유사한 페어링을 찾는 함수
 def find_similar(GoodPairing, Pairing_list, flight):
@@ -33,8 +38,8 @@ def find_similar(GoodPairing, Pairing_list, flight):
         if Pairing_list[i] == [0, 0, 0, [0], [0], [0]]:
             return i  # 유사 페어링 못 찾으면 빈 페어링에 삽입
 
-        # 하드 제약을 어기는 지 확인
-        if deflect_hard_v2(Pairing_list[i], flight):
+        # 하드 제약을 어기는 지 확인 (어기면 종료)
+        if checkConnection(Pairing_list[i], flight):
             continue
 
         # 유사한 페어링 서치
@@ -55,17 +60,3 @@ def find_similar(GoodPairing, Pairing_list, flight):
                     min_index = i
 
     return min_index
-
-#이상적인 페어링과 flight가 hard 제약을 어기는지 확인하는 함수
-def checkConnection(goodPairing, flight):
-
-    flight_gap = flight[0] - goodPairing[1]
-
-    if flight_gap < 0: return False  # 시간의 선후관계 제약
-    if goodPairing[4] != flight[3]: return False  # 공간 제약
-    if goodPairing[5] != flight[5]: return False  # 항공기 기종 제약
-    if flight_gap < 10 * 60:  # 법적 제약
-        if goodPairing[2] + flight[2] + flight_gap > 14 * 60: return  False
-
-    return True
-

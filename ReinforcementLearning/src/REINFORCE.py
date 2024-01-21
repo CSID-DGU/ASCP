@@ -10,6 +10,7 @@ from torch.distributions import Categorical
 from embedData import embedFlightData, flatten, print_xlsx, readXlsx, unflatten
 from functions import *
 from CrewPairingEnv import CrewPairingEnv
+from DK_Algorithm import *
 import random
 
 #Hyperparameters
@@ -66,7 +67,7 @@ class Policy(nn.Module):
 def main():
     current_directory = os.path.dirname(__file__)
     path = os.path.abspath(os.path.join(current_directory, '../dataset'))
-    readXlsx(path, '/input_97_1.xlsx')
+    readXlsx(path, '/ASCP_Data_Input_873.xlsx')
 
     flight_list, V_f_list, NN_size = embedFlightData(path)
     
@@ -111,7 +112,12 @@ def main():
                 good_pairing = unflatten(prob, NN_size)
                 print("good : ", good_pairing)
 
-                a = 0
+                # good pairing이 현재 flight에 붙을 수 있는 지 검사
+                checkConnection(good_pairing,s) # boolean으로 가능한 지 여부가 나옴
+                
+                # 유사도 검사를 통한 인덱스 반환
+                a = find_similar(good_pairing, Pairing_list = output_tmp, flight = s)
+                print(a)
                 
                 s_prime, r, done, truncated, info = env.step(action=a, V_f=s)
                         
