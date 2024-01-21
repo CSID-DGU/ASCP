@@ -116,7 +116,7 @@ def main():
                 checkConnection(good_pairing,s) # boolean으로 가능한 지 여부가 나옴
                 
                 # 유사도 검사를 통한 인덱스 반환
-                a = find_similar(good_pairing, Pairing_list = output_tmp, flight = s)
+                a = find_similar(good_pairing, Pairing_list = env.V_p_list, flight = s)
                 print(a)
                 
                 s_prime, r, done, truncated, info = env.step(action=a, V_f=s)
