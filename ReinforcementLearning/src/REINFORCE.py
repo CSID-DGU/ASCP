@@ -7,11 +7,12 @@ import torch.optim as optim
 from torch.optim import lr_scheduler
 import numpy as np
 from torch.distributions import Categorical
-from embedData import embedFlightData, flatten, print_xlsx, readXlsx, unflatten
+from embedData import embedFlightData, flatten, print_xlsx, readXlsx, unflatten, print_xlsx_tmp
 from functions import *
 from CrewPairingEnv import CrewPairingEnv
 from DK_Algorithm import *
 import random
+import openpyxl
 
 #Hyperparameters
 gamma   = 0.98
@@ -43,7 +44,7 @@ class Policy(nn.Module):
         x = torch.tensor(x, dtype=torch.float32).to(device) 
         
         x = F.leaky_relu(self.fc1(x))
-        x = F.softmax(self.fc3(x), dim=0)
+        x = F.tanh(self.fc3(x))
 
         print("prob : ", x)
         return x
@@ -82,7 +83,7 @@ def main():
     pi.to(device)
     score = 0
     #scores = []
-    bestScore= 99999999999999
+    bestScore= float('inf')
     output = [[] for i in range(N_flight)]
 
     with open('episode_rewards.txt', 'w') as file:
@@ -98,16 +99,6 @@ def main():
             while not done:
                 print("V_f : ", s)
                 prob = pi(s)
-                
-                """
-                index_list = deflect_hard(env.V_p_list, s)
-                prob = pi(s)
-
-                selected_prob = prob[index_list]
-                a = index_list[selected_prob.argmax().item()]
-
-                액션 선택 코드 다시 짜야함
-                """
 
                 good_pairing = unflatten(prob, NN_size)
                 print("good : ", good_pairing)
@@ -121,7 +112,7 @@ def main():
                 
                 s_prime, r, done, truncated, info = env.step(action=a, V_f=s)
                         
-                pi.put_data((r,prob[a]))
+                pi.put_data((r,prob))
                 s = s_prime     #action에 의해 바뀐 flight
                 score += r
                 
@@ -137,8 +128,14 @@ def main():
             
             file.write(f"{n_epi}\t{score:.2f}\t{bestScore:.2f}\n")
             print(f"current score : {score:.2f} best score : {bestScore:.2f}")
+
+            # 프린트 코드
+            folder_path = "/home/gijeong1000/ASCP_ver3/ReinforcementLearning/dataset/output"
+            epi_number = 100 # 0 episode 부터 n번 주기로 비주얼라이즈
+            print_xlsx_tmp(n_epi,epi_number,output_tmp,folder_path)
+                
             score=0
-    
+
     env.close()
     
     print_xlsx(output)

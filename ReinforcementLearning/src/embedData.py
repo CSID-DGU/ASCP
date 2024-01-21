@@ -14,7 +14,7 @@ from IDProvider import IDProvider
 from Flight import Flight
 from Components import Aircraft, Airport, Hotel
 import torch
-
+import os 
 def readXlsx(path, inputFileName):
 
     print(path)
@@ -149,6 +149,30 @@ def print_xlsx(output):
             sheet.cell(row=row_index, column=col_index, value=value)
 
     workbook.save("output.xlsx")
+    
+def print_xlsx_tmp(n_epi,number,output_tmp,folder_path):
+    if n_epi%number==0:
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+
+        # Pairing data 제목 추가
+        sheet.cell(row=1, column=1, value="Pairing data")
+        sheet.cell(row=1, column=2, value=f"episode_{n_epi}")
+
+        # 데이터를 엑셀에 쓰기
+        for row_index, row_data in enumerate(output_tmp, start=2):  # 첫 번째 행은 이미 Pairing data로 사용되었으므로 2부터 시작
+            # 각 행의 첫 열에는 1부터 시작하는 인덱스 추가
+            sheet.cell(row=row_index, column=1, value=row_index - 1)
+
+            # 나머지 데이터 추가
+            for col_index, value in enumerate(row_data, start=2):  # 각 행의 두 번째 열부터 시작
+                sheet.cell(row=row_index, column=col_index, value=value)
+
+        # 저장
+        file_name = f"output_{n_epi}.xlsx"
+        file_path = os.path.join(folder_path, file_name)
+
+        workbook.save(file_path)
     
 """
 def flatten(index_list, k):

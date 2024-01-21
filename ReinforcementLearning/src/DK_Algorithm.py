@@ -10,10 +10,7 @@ Pairing_list = [[3,0,0,[0],[0],[0]],[3,0,0,[0],[0],[0]]]
 
 #DH 간소화한 함수
 def checkConnection(pairing, flight):
-    print("페어링")
-    print(pairing)
-    print("flight")
-    print(flight)
+    
     if pairing == []: return True
     flight_gap = flight[0] - pairing[1]
     
