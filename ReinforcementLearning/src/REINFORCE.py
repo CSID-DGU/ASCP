@@ -7,7 +7,7 @@ import torch.optim as optim
 from torch.optim import lr_scheduler
 import numpy as np
 from torch.distributions import Categorical
-from embedData import embedFlightData, flatten, print_xlsx, readXlsx
+from embedData import embedFlightData, flatten, print_xlsx, readXlsx, unflatten
 from functions import *
 from CrewPairingEnv import CrewPairingEnv
 import random
@@ -17,19 +17,18 @@ gamma   = 0.98
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Policy(nn.Module):
-    def __init__(self, N_flight, V_f, learning_rate):
+    def __init__(self, N_flight, NN_size, learning_rate):
         super(Policy, self).__init__()
         self.data = []
 
         self.N_flight = N_flight
-        self.V_f = V_f
-        self.V_f_size = len(flatten(V_f))
+        self.NN_size = NN_size
         self.to(device)
         print("N_flight: ", self.N_flight)
 
         # 신경망 레이어 정의
-        self.fc1 = nn.Linear(self.V_f_size, 64)
-        self.fc3 = nn.Linear(64, self.N_flight)
+        self.fc1 = nn.Linear(self.NN_size, 64)
+        self.fc3 = nn.Linear(64, self.NN_size)
         
         torch.nn.init.kaiming_uniform_(self.fc1.weight, mode='fan_in', nonlinearity='relu')
         
@@ -39,10 +38,13 @@ class Policy(nn.Module):
 
     def forward(self, x):
         x = flatten(x)
+        print("flatten : ", x)
         x = torch.tensor(x, dtype=torch.float32).to(device) 
         
         x = F.leaky_relu(self.fc1(x))
         x = F.softmax(self.fc3(x), dim=0)
+
+        print("prob : ", x)
         return x
       
     def put_data(self, item):
@@ -66,12 +68,12 @@ def main():
     path = os.path.abspath(os.path.join(current_directory, '../dataset'))
     readXlsx(path, '/input_97_1.xlsx')
 
-    flight_list, V_f_list = embedFlightData(path)
+    flight_list, V_f_list, NN_size = embedFlightData(path)
     
     # Crew Pairing Environment 불러오기
     N_flight = len(flight_list)
     env = CrewPairingEnv(V_f_list)
-    pi = Policy(N_flight=N_flight, V_f=V_f_list[0], learning_rate=0.0002)
+    pi = Policy(N_flight=N_flight, NN_size=NN_size, learning_rate=0.0002)
 
     # 저장한 모델 불러오기
     #load_model(pi, 'saved_model')
@@ -92,12 +94,24 @@ def main():
             done = False
             output_tmp = [[] for i in range(N_flight)]
             
-            while not done:            
-                index_list = deflect_hard(env.V_p_list, s)
+            while not done:
+                print("V_f : ", s)
                 prob = pi(s)
                 
+                """
+                index_list = deflect_hard(env.V_p_list, s)
+                prob = pi(s)
+
                 selected_prob = prob[index_list]
                 a = index_list[selected_prob.argmax().item()]
+
+                액션 선택 코드 다시 짜야함
+                """
+
+                good_pairing = unflatten(prob, NN_size)
+                print("good : ", good_pairing)
+
+                a = 0
                 
                 s_prime, r, done, truncated, info = env.step(action=a, V_f=s)
                         
