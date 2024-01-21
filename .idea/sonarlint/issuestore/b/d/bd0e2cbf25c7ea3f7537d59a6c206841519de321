@@ -1,0 +1,15 @@
+
+kpython:S117"ORename this parameter "V_f" to match the regular expression ^[_a-z][a-z0-9_]*$.(óÈÄÏøÿÿÿÿ
+ppython:S117"TRename this local variable "V_p" to match the regular expression ^[_a-z][a-z0-9_]*$.(»Ò·‡ıÿÿÿÿ
+ppython:S117"TRename this parameter "V_p_list" to match the regular expression ^[_a-z][a-z0-9_]*$.(óÈÄÏøÿÿÿÿ
+qpython:S3776"TRefactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.(óÈÄÏøÿÿÿÿ
+;python:S125"Remove this commented out code.(õÙ‘üÿÿÿÿ
+fpython:S117 "ORename this parameter "V_f" to match the regular expression ^[_a-z][a-z0-9_]*$.(¸§•µ
+tpython:S117""XRename this local variable "V_f_tmp" to match the regular expression ^[_a-z][a-z0-9_]*$.(¸ßç±üÿÿÿÿ
+ppython:S117!"TRename this local variable "V_p" to match the regular expression ^[_a-z][a-z0-9_]*$.(ßÂŸœıÿÿÿÿ
+kpython:S117 "TRename this parameter "V_p_list" to match the regular expression ^[_a-z][a-z0-9_]*$.(¸§•µ
+kpython:S1174"ORename this parameter "V_f" to match the regular expression ^[_a-z][a-z0-9_]*$.(ßÎÌÏùÿÿÿÿ
+ppython:S117K"YRename this local variable "V_f_days" to match the regular expression ^[_a-z][a-z0-9_]*$.(Í”„­
+kpython:S1177"TRename this local variable "V_p" to match the regular expression ^[_a-z][a-z0-9_]*$.(Å’ó
+upython:S117J"YRename this local variable "V_p_days" to match the regular expression ^[_a-z][a-z0-9_]*$.(‚²°ıÿÿÿÿ
+ppython:S1174"TRename this parameter "V_p_list" to match the regular expression ^[_a-z][a-z0-9_]*$.(ßÎÌÏùÿÿÿÿ

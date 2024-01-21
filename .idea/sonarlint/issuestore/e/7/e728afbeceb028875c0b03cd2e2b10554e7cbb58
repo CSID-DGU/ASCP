@@ -1,0 +1,6 @@
+
+^python:S2208"GImport only needed names or import the module and then use its members.(×»¤M
+ppython:S117K"TRename this parameter "V_f_list" to match the regular expression ^[_a-z][a-z0-9_]*$.(²«€ôûÿÿÿÿ
+=python:S1481P"%Remove the unused local variable "i".(§õˆã
+kpython:S117W"ORename this parameter "V_f" to match the regular expression ^[_a-z][a-z0-9_]*$.(öœÆûÿÿÿÿ
+=python:S1481k"%Remove the unused local variable "i".(§õˆã
