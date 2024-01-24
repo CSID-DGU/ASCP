@@ -127,7 +127,7 @@ def embedFlightData(path): # flight 객체 생성 및 vector로 변환, flight_l
 
 
     # Neural net size : (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
-    NN_size = (32 + 2*len(airport_total)) * 2
+    NN_size = (2 + 2*len(airport_total)) * 2
 
     return flight_list, V_f_list, NN_size
     
@@ -174,41 +174,15 @@ def print_xlsx_tmp(n_epi,number,output_tmp,folder_path):
 
         workbook.save(file_path)
     
-"""
-def flatten(index_list, k):
-    result_list = [0] * k
-
-    for index in index_list:
-        result_list[index] = 1
-        
-    return result_list
-"""
-
-def time_to_bin(time):
-    binary_list = []
-
-    while time > 0:
-        binary_list.append(time % 2)
-        time //= 2
-
-    # 리스트를 길이가 16인 배열에 뒤에서부터 채움 (MAX : 약 7년)
-    return [0] * (16 - len(binary_list)) + binary_list[::-1]
-
 
 def flatten(V_p, V_f):
-    p_ori = time_to_bin(V_p[0]//60)
-    p_dest = time_to_bin(V_p[1]//60)
-
     V_p3 = V_p[3]
     V_p4 = V_p[4]
+    
     if V_p[3] == [0] :
         V_p3 = [0] * len(V_f[3])
         V_p4 = [0] * len(V_f[4])
 
-    # 2차원 리스트(V_f)에서 4,5,6 번째 요소를 모두 펼쳐서 1차원 리스트로 만들기
-    f_ori = time_to_bin(V_f[0]//60)
-    f_dest = time_to_bin(V_f[1]//60)
-
-    nn_input = p_ori + p_dest + V_p3 + V_p4 + f_ori + f_dest + V_f[3] + V_f[4]
+    nn_input = [V_p[0]//100000] + [V_p[1]//100000] + V_p3 + V_p4 + [V_f[0]//100000] + [V_f[1]//100000] + V_f[3] + V_f[4]
 
     return nn_input
