@@ -27,8 +27,8 @@ class Policy(nn.Module):
         self.to(device)
 
         # 신경망 레이어 정의
-        self.fc1 = nn.Linear(self.NN_size, 64)
-        self.fc3 = nn.Linear(64, 2)
+        self.fc1 = nn.Linear(self.NN_size, 32)
+        self.fc3 = nn.Linear(32, 2)
         
         torch.nn.init.kaiming_uniform_(self.fc1.weight, mode='fan_in', nonlinearity='relu')
         
@@ -43,7 +43,7 @@ class Policy(nn.Module):
         x = F.leaky_relu(self.fc1(x))
         x = F.softmax(self.fc3(x))
 
-        print("prob : ", x)
+        #print("prob : ", x)
         return x
       
     def put_data(self, item):
@@ -54,7 +54,7 @@ class Policy(nn.Module):
         self.optimizer.zero_grad()
         for r, prob in self.data[::-1]:
             R = r + gamma * R
-            loss = -torch.log(prob) * R
+            loss = torch.log(prob) * R
             
             loss.backward()
         
@@ -65,10 +65,10 @@ class Policy(nn.Module):
 def main():
     current_directory = os.path.dirname(__file__)
     path = os.path.abspath(os.path.join(current_directory, '../dataset'))
-    readXlsx(path, '/input_97_1.xlsx')
+    readXlsx(path, '/input_873.xlsx')
 
     flight_list, V_f_list, NN_size = embedFlightData(path)
-    print("size: ", NN_size)
+    #print("size: ", NN_size)
     
     # Crew Pairing Environment 불러오기
     N_flight = len(flight_list)
@@ -111,7 +111,7 @@ def main():
                     if flag :
                         s = s_prime     #action에 의해 바뀐 flight
                         score += r
-                        output_tmp[a].append(flight_list[env.flight_cnt-1].id)
+                        output_tmp[idx].append(flight_list[env.flight_cnt-1].id)
                         break
 
                 
