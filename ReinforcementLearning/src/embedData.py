@@ -127,7 +127,7 @@ def embedFlightData(path): # flight 객체 생성 및 vector로 변환, flight_l
 
 
     # Neural net size : (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
-    NN_size = 32 + 2*len(airport_total)
+    NN_size = (32 + 2*len(airport_total)) * 2
 
     return flight_list, V_f_list, NN_size
     
@@ -195,61 +195,20 @@ def time_to_bin(time):
     return [0] * (16 - len(binary_list)) + binary_list[::-1]
 
 
-def bin_to_time(binary_list):
-    decimal_number = 0
-    power = len(binary_list) - 1
+def flatten(V_p, V_f):
+    p_ori = time_to_bin(V_p[0]//60)
+    p_dest = time_to_bin(V_p[1]//60)
 
-    for bit in binary_list:
-        decimal_number += bit * (2 ** power)
-        power -= 1
+    V_p3 = V_p[3]
+    V_p4 = V_p[4]
+    if V_p[3] == [0] :
+        V_p3 = [0] * len(V_f[3])
+        V_p4 = [0] * len(V_f[4])
 
-    return decimal_number
-
-
-def flatten(V_f):
     # 2차원 리스트(V_f)에서 4,5,6 번째 요소를 모두 펼쳐서 1차원 리스트로 만들기
-    V_f1d = []
+    f_ori = time_to_bin(V_f[0]//60)
+    f_dest = time_to_bin(V_f[1]//60)
 
-    B_ori = time_to_bin(V_f[0]//60)
-    B_dest = time_to_bin(V_f[1]//60)
+    nn_input = p_ori + p_dest + V_p3 + V_p4 + f_ori + f_dest + V_f[3] + V_f[4]
 
-    V_f1d = B_ori + B_dest + V_f[3] + V_f[4]
-
-    return V_f1d
-
-
-def unflatten(prob, NN_size):
-    onehot_size = (NN_size-32)//2 # onehot 백터의 크기는 prob에서 time을 나타내는 32를 제거 후, 2로 나눈 것
-    prob = prob.tolist()
-
-    ori_time = []
-    for i in range(0, 16) :
-        if(prob[i] > 1/NN_size) : ori_time.append(1)
-        else : ori_time.append(0)
-    ori_time = bin_to_time(ori_time)
-
-    dest_time = []
-    for i in range(16,32) :
-        if(prob[i] > 1/NN_size) : dest_time.append(1)
-        else : dest_time.append(0)
-    dest_time = bin_to_time(dest_time)
-
-    ori_airpot = prob[32:32+onehot_size]
-    print("ori : ",ori_airpot)
-    max_value = max(ori_airpot)
-    print("max : ", max_value)
-    ori_idx = ori_airpot.index(max_value)
-    ori_list = [0] * onehot_size
-    ori_list[ori_idx] = 1
-    
-    dest_airport = prob[32+onehot_size: 32+(onehot_size)*2]
-    print("dest : ", dest_airport)
-    max_value = max(dest_airport)
-    print("max : ", max_value)
-    dest_idx = dest_airport.index(max_value)
-    dest_list = [0] * onehot_size
-    dest_list[dest_idx] = 1
-
-    good_pairing = [ori_time*60] + [dest_time*60] + [0] + [ori_list] + [dest_list] + [0]
-
-    return good_pairing
+    return nn_input
