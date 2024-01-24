@@ -7,7 +7,7 @@ import torch.optim as optim
 from torch.optim import lr_scheduler
 import numpy as np
 from torch.distributions import Categorical
-from embedData import embedFlightData, flatten, print_xlsx, readXlsx, unflatten, print_xlsx_tmp
+from embedData import embedFlightData, flatten, print_xlsx, readXlsx, print_xlsx_tmp
 from functions import *
 from CrewPairingEnv import CrewPairingEnv
 from DK_Algorithm import *
@@ -19,18 +19,16 @@ gamma   = 0.98
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Policy(nn.Module):
-    def __init__(self, N_flight, NN_size, learning_rate):
+    def __init__(self, NN_size, learning_rate):
         super(Policy, self).__init__()
         self.data = []
 
-        self.N_flight = N_flight
         self.NN_size = NN_size
         self.to(device)
-        print("N_flight: ", self.N_flight)
 
         # 신경망 레이어 정의
         self.fc1 = nn.Linear(self.NN_size, 64)
-        self.fc3 = nn.Linear(64, self.NN_size)
+        self.fc3 = nn.Linear(64, 2)
         
         torch.nn.init.kaiming_uniform_(self.fc1.weight, mode='fan_in', nonlinearity='relu')
         
@@ -38,13 +36,12 @@ class Policy(nn.Module):
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
         #self.scheduler = lr_scheduler.ExponentialLR(self.optimizer, gamma=0.99)
 
-    def forward(self, x):
-        x = flatten(x)
-        print("flatten : ", x)
-        x = torch.tensor(x, dtype=torch.float32).to(device) 
+    def forward(self, a, b):
+        x = flatten(a, b)
+        x = torch.tensor(x, dtype=torch.float32).to(device)
         
         x = F.leaky_relu(self.fc1(x))
-        x = F.tanh(self.fc3(x))
+        x = F.softmax(self.fc3(x))
 
         print("prob : ", x)
         return x
@@ -57,7 +54,7 @@ class Policy(nn.Module):
         self.optimizer.zero_grad()
         for r, prob in self.data[::-1]:
             R = r + gamma * R
-            loss = torch.log(prob) * R
+            loss = -torch.log(prob) * R
             
             loss.backward()
         
@@ -68,14 +65,15 @@ class Policy(nn.Module):
 def main():
     current_directory = os.path.dirname(__file__)
     path = os.path.abspath(os.path.join(current_directory, '../dataset'))
-    readXlsx(path, '/ASCP_Data_Input_873.xlsx')
+    readXlsx(path, '/input_97_1.xlsx')
 
     flight_list, V_f_list, NN_size = embedFlightData(path)
+    print("size: ", NN_size)
     
     # Crew Pairing Environment 불러오기
     N_flight = len(flight_list)
     env = CrewPairingEnv(V_f_list)
-    pi = Policy(N_flight=N_flight, NN_size=NN_size, learning_rate=0.0002)
+    pi = Policy(NN_size=NN_size, learning_rate=0.002)
 
     # 저장한 모델 불러오기
     #load_model(pi, 'saved_model')
@@ -91,32 +89,31 @@ def main():
         file.write("---------------------------------\n")
     
         for n_epi in range(1000):
-            print("############################ n_epi: ", n_epi, " ############################")
+            print("########################## n_epi: ", n_epi, " ############################")
             s, _ = env.reset()  #현재 플라이트 V_P_list  <- V_f list[0]
             done = False
             output_tmp = [[] for i in range(N_flight)]
             
             while not done:
-                print("V_f : ", s)
-                prob = pi(s)
+                index_list = deflect_hard(env.V_p_list, s)
 
-                good_pairing = unflatten(prob, NN_size)
-                print("good : ", good_pairing)
+                for idx in index_list:
+                    prob = pi(env.V_p_list[idx], s)
 
-                # good pairing이 현재 flight에 붙을 수 있는 지 검사
-                checkConnection(good_pairing,s) # boolean으로 가능한 지 여부가 나옴
-                
-                # 유사도 검사를 통한 인덱스 반환
-                a = find_similar(good_pairing, Pairing_list = env.V_p_list, flight = s)
-                print(a)
-                
-                s_prime, r, done, truncated, info = env.step(action=a, V_f=s)
-                        
-                pi.put_data((r,prob))
-                s = s_prime     #action에 의해 바뀐 flight
-                score += r
-                
-                output_tmp[a].append(flight_list[env.flight_cnt-1].id)
+                    if idx == index_list[-1] : a = 1
+                    elif prob.argmax().item() == 1 : a = 1
+                    else : a = 0
+
+                    s_prime, r, done, truncated, info, flag = env.step(action=a, V_f=s, idx=idx)
+
+                    pi.put_data((r,prob[a]))
+
+                    if flag :
+                        s = s_prime     #action에 의해 바뀐 flight
+                        score += r
+                        output_tmp[a].append(flight_list[env.flight_cnt-1].id)
+                        break
+
                 
             pi.train_net()
             if bestScore>score:
@@ -129,8 +126,7 @@ def main():
             file.write(f"{n_epi}\t{score:.2f}\t{bestScore:.2f}\n")
             print(f"current score : {score:.2f} best score : {bestScore:.2f}")
 
-            # 프린트 코드
-            folder_path = "/home/gijeong1000/ASCP_ver3/ReinforcementLearning/dataset/output"
+            folder_path = "./dataset/output"
             epi_number = 100 # 0 episode 부터 n번 주기로 비주얼라이즈
             print_xlsx_tmp(n_epi,epi_number,output_tmp,folder_path)
                 

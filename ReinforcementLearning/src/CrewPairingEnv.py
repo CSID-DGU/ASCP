@@ -84,19 +84,23 @@ class CrewPairingEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         self.action_space = spaces.Discrete(self.N_flight)
         self.steps_beyond_terminated = None # step() 함수가 호출되었을 때, terminated가 True인 경우를 의미함.
 
-    def step(self, action, V_f):
-        idx = action
+    def step(self, action, V_f, idx):
+        yn = action
+
+        if yn == 0 :
+            return self.state, 0, self.terminated, False, {}, False
         
-        reward = get_reward(self.V_p_list, V_f, idx)
-        update_state(self.V_p_list, V_f, idx)
-        
-        self.flight_cnt += 1
-        if self.flight_cnt == self.N_flight :
-            self.terminated = True
         else :
-            self.state = self.V_f_list[self.flight_cnt]
-        
-        return self.state, reward, self.terminated, False, {}
+            reward = get_reward(self.V_p_list, V_f, idx)
+            update_state(self.V_p_list, V_f, idx)
+            
+            self.flight_cnt += 1
+            if self.flight_cnt == self.N_flight :
+                self.terminated = True
+            else :
+                self.state = self.V_f_list[self.flight_cnt]
+            
+            return self.state, reward, self.terminated, False, {}, True
 
     def reset(self):
         # number of flights
