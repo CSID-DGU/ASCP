@@ -14,7 +14,7 @@ def deflect_hard(V_p_list, V_f):
 
         i += 1
         flight_gap = V_f[0] - V_p[1]
-        
+        if V_p[1]-V_p[0]>7*24*60: continue       # 총 비행시간 일주일로 설정
         if V_p[4] == V_p[3] : continue           # 완성된 페어링
         if flight_gap < 0 : continue             # 시간의 선후관계 제약
         if V_p[4] != V_f[3] : continue           # 공간 제약
