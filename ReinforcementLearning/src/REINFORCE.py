@@ -1,4 +1,3 @@
-import gym
 import os
 import torch
 import torch.nn as nn
@@ -13,10 +12,12 @@ from CrewPairingEnv import CrewPairingEnv
 from DK_Algorithm import *
 import random
 import openpyxl
+from datetime import datetime
 
 #Hyperparameters
 gamma   = 0.98
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 
 class Policy(nn.Module):
     def __init__(self, NN_size, learning_rate):
@@ -41,7 +42,7 @@ class Policy(nn.Module):
         x = torch.tensor(x, dtype=torch.float32).to(device)
         
         x = F.leaky_relu(self.fc1(x))
-        x = F.softmax(self.fc3(x))
+        x = F.softmax(self.fc3(x), dim=0)
 
         #print("prob : ", x)
         return x
@@ -65,7 +66,7 @@ class Policy(nn.Module):
 def main():
     current_directory = os.path.dirname(__file__)
     path = os.path.abspath(os.path.join(current_directory, '../dataset'))
-    readXlsx(path, '/input_873.xlsx')
+    readXlsx(path, '/input_50000.xlsx')
 
     flight_list, V_f_list, NN_size = embedFlightData(path)
     #print("size: ", NN_size)
@@ -73,8 +74,8 @@ def main():
     # Crew Pairing Environment 불러오기
     N_flight = len(flight_list)
     env = CrewPairingEnv(V_f_list)
-    pi = Policy(NN_size=NN_size, learning_rate=0.002)
-
+    pi = Policy(NN_size=NN_size, learning_rate=0.005)
+    print(N_flight)
     # 저장한 모델 불러오기
     #load_model(pi, 'saved_model')
 
@@ -87,20 +88,23 @@ def main():
     with open('episode_rewards.txt', 'w') as file:
         file.write("Episode\tReward\tBest Score\n")
         file.write("---------------------------------\n")
+        time = datetime.now()
     
-        for n_epi in range(1000):
-            print("########################## n_epi: ", n_epi, " ############################")
+        for n_epi in range(1):
+            print("########################## n_epi: ", n_epi, " ############################  ", datetime.now()-time)
             s, _ = env.reset()  #현재 플라이트 V_P_list  <- V_f list[0]
             done = False
             output_tmp = [[] for i in range(N_flight)]
             
             while not done:
-                index_list = deflect_hard(env.V_p_list, s)
+                for idx in range(len(env.V_p_list)):
+                    V_p=env.V_p_list[idx]
+                    if checkConnection(V_p,s)==False:
+                        # print(idx)
+                        continue
+                    prob = pi(V_p, s)
 
-                for idx in index_list:
-                    prob = pi(env.V_p_list[idx], s)
-
-                    if idx == index_list[-1] : a = 1
+                    if V_p == [0,0,0,[0],[0],[0]] : a = 1
                     elif prob.argmax().item() == 1 : a = 1
                     else : a = 0
 
@@ -109,6 +113,7 @@ def main():
                     pi.put_data((r,prob[a]))
 
                     if flag :
+                        # print(asd)
                         s = s_prime     #action에 의해 바뀐 flight
                         score += r
                         output_tmp[idx].append(flight_list[env.flight_cnt-1].id)
@@ -123,12 +128,8 @@ def main():
                 # best score를 갱신하였으면 모델 저장
                 #torch.save(pi.state_dict(), "saved_model")
             
-            file.write(f"{n_epi}\t{score:.2f}\t{bestScore:.2f}\n")
+            file.write(f"{n_epi}\t{score:.2f}\t{bestScore:.2f}\t{datetime.now()-time}\n")
             print(f"current score : {score:.2f} best score : {bestScore:.2f}")
-
-            folder_path = "./dataset/output"
-            epi_number = 100 # 0 episode 부터 n번 주기로 비주얼라이즈
-            print_xlsx_tmp(n_epi,epi_number,output_tmp,folder_path)
                 
             score=0
 

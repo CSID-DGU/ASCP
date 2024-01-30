@@ -166,7 +166,7 @@ public class Pairing extends AbstractPersistable {
         Map<String, Integer> deadheads = pair.get(pair.size() - 1).getDestAirport().getDeadheadCost();
         String origin = pair.get(0).getOriginAirport().getName();
 
-        return deadheads.getOrDefault(origin, 0);
+        return deadheads.getOrDefault(origin, 0) *3;
     }
 
     /**

@@ -90,17 +90,17 @@ class CrewPairingEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         if yn == 0 :
             return self.state, 0, self.terminated, False, {}, False
         
+        reward = get_reward(self.V_p_list, V_f, idx)
+        update_state(self.V_p_list, V_f, idx)
+        
+        self.flight_cnt += 1
+        print(self.flight_cnt)
+        if self.flight_cnt == self.N_flight :
+            self.terminated = True
         else :
-            reward = get_reward(self.V_p_list, V_f, idx)
-            update_state(self.V_p_list, V_f, idx)
-            
-            self.flight_cnt += 1
-            if self.flight_cnt == self.N_flight :
-                self.terminated = True
-            else :
-                self.state = self.V_f_list[self.flight_cnt]
-            
-            return self.state, reward, self.terminated, False, {}, True
+            self.state = self.V_f_list[self.flight_cnt]
+        
+        return self.state, reward, self.terminated, False, {}, True
 
     def reset(self):
         # number of flights

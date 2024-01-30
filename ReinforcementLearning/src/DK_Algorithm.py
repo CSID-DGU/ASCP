@@ -11,13 +11,13 @@ Pairing_list = [[3,0,0,[0],[0],[0]],[3,0,0,[0],[0],[0]]]
 #DH 간소화한 함수
 def checkConnection(pairing, flight):
     
-    if pairing == []: return True
+    if pairing == [0,0,0,[0],[0],[0]] : return True
     flight_gap = flight[0] - pairing[1]
     
     if pairing[4] == pairing[3]: return False  # 완성된 페어링
     if flight_gap < 0: return False  # 시간의 선후관계 제약
     if pairing[4] != flight[3]: return False  # 공간 제약
-    # if pairing[5] != flight[5]: return False  # 항공기 기종 제약
+    if pairing[5] != flight[5]: return False  # 항공기 기종 제약
     if flight_gap < 10 * 60:  # 법적 제약
         if pairing[2] + flight[2] + flight_gap > 14 * 60: return False
 

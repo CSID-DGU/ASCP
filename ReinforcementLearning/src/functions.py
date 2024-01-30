@@ -59,12 +59,12 @@ def get_reward(V_p_list, V_f, idx) :
     # Deadhead
     # V_p가 [0,0,0,[0],[0],[0]]이면 새로운 dh가 생기는 것이므로 reward에 추가
     if V_p == [0,0,0,[0],[0],[0]] :
-        reward += Airport.get_cost(V_f[4], V_f[3])  # 새 dh 비용 생김
+        reward += Airport.get_cost(V_f[4], V_f[3]) *3 # 새 dh 비용 생김
     elif V_p[3] == V_f[4] :
-        reward -= Airport.get_cost(V_p[4], V_p[3])  # dh 비용 사라짐
+        reward -= Airport.get_cost(V_p[4], V_p[3]) *3 # dh 비용 사라짐
     else :
-        reward -= Airport.get_cost(V_p[4], V_p[3])
-        reward += Airport.get_cost(V_f[4], V_p[3])  # 원래 dh비용 대신 새 dh비용
+        reward -= Airport.get_cost(V_p[4], V_p[3]) *3
+        reward += Airport.get_cost(V_f[4], V_p[3]) *3 # 원래 dh비용 대신 새 dh비용
     #print('dh: ', reward)
     
     # Layover & Hotel
