@@ -16,6 +16,7 @@ from Components import Aircraft, Airport, Hotel
 import torch
 import os 
 import random
+from sklearn.cluster import KMeans
 def readXlsx(path, inputFileName):
 
     print(path)
@@ -311,6 +312,107 @@ def embedFlightData_Interval(path, interval=2):
     NN_size = (2 + 2*len(airport_total)) * 2
 
     return flight_list, V_f_list, NN_size
+
+def embedFlightData_Stratified(path, interval=2):
+    idprovider = IDProvider()
+    flight_list = []  # flight 객체를 저장할 리스트
+    V_f_list = []  # flight 객체를 vector로 변환하여 저장할 리스트
+    
+    # Read User_Flight.csv
+    fdf = pd.read_csv(path + '/User_Flight.csv')
+    fdf = fdf.drop(fdf.index[0])
+    fdf.columns = fdf.iloc[0]
+    fdf = fdf.drop(fdf.index[0])
+    
+    # Drop unnecessary rows and columns
+    fdf = fdf.iloc[1:, 1:]
+    
+    flight_list = [
+        Flight(
+            idx=idprovider.get_flight_id(),
+            TailNumber=row['T/N'],
+            originAirport=row['ORIGIN'],
+            originTime=row['ORIGIN_DATE'],
+            destAirport=row['DEST'],
+            destTime=row['DEST_DATE'],
+            aircraft=row['AIRCRAFT_TYPE']
+        ) for idx, row in fdf.iterrows()
+    ]
+
+    # Sort flight objects by originTime and destTime
+    flight_list.sort()
+
+    # Filter and stratify the flight data
+    sampled_data = stratifiedSampling(fdf, interval)
+
+    airport_total = airportList(sampled_data['ORIGIN'], sampled_data['DEST'])
+    aircraft_total = aircraftList(sampled_data['AIRCRAFT_TYPE'])
+
+    # Read User_Deadhead.csv and create Airport edges
+    ddf=pd.read_csv(path+'/User_Deadhead.csv')
+    ddf = ddf.drop(ddf.index[0])
+    ddf.columns = ddf.iloc[0]
+    ddf = ddf.drop(ddf.index[0])
+    for idx, row in ddf.iterrows():
+        airport_origin_onehot = [1 if airport == row['출발 공항'] else 0 for airport in airport_total]
+        airport_dest_onehot = [1 if airport == row['도착 공항'] else 0 for airport in airport_total]
+        ddf.at[idx, '출발 공항'] = airport_origin_onehot
+        ddf.at[idx, '도착 공항'] = airport_dest_onehot
+        Airport.add_edge(row['출발 공항'], row['도착 공항'], row['Deadhead(원)'])
+
+    # Read Program_Cost.csv and create Aircraft types
+    cdf=pd.read_csv(path+'/Program_Cost.csv')
+    cdf.columns = cdf.iloc[0]
+    cdf = cdf.drop(cdf.index[0])
+    for idx, row in cdf.iterrows():
+        aircraft_onehot = [1 if aircraft == row['AIRCRAFT'] else 0 for aircraft in aircraft_total]
+        cdf.at[idx, 'AIRCRAFT'] = aircraft_onehot
+        Aircraft.add_type(row['AIRCRAFT'], row['CREW_NUM(명)'], int(float(row['Layover Cost(원/분)'])),
+                           int(float(row['Quick Turn Cost(원/회)'])))
+
+    temp = tuple([0 for _ in range(len(aircraft_total))])
+    del Aircraft.dic[temp]
+
+    # Read User_Hotel.csv and create Hotel data
+    hdf=pd.read_csv(path+'/User_Hotel.csv')
+    hdf = hdf.drop(hdf.index[0])
+    hdf.columns = hdf.iloc[0]
+    hdf=hdf.drop(hdf.index[0])
+    hdf = hdf.dropna(subset=[hdf.columns[0]])
+    for idx, row in hdf.iterrows():
+        airport_onehot = [1 if airport == row['공항 Code'] else 0 for airport in airport_total]
+        hdf.at[idx, '공항 Code'] = airport_onehot
+        Hotel.add_hotel(row['공항 Code'], row['비용(원)'])
+
+    flight_list = [
+        Flight(
+            idx=idprovider.get_flight_id(),
+            TailNumber=row['T/N'],
+            originAirport=row['ORIGIN'],
+            originTime=row['ORIGIN_DATE'],
+            destAirport=row['DEST'],
+            destTime=row['DEST_DATE'],
+            aircraft=row['AIRCRAFT_TYPE']
+        ) for idx, row in sampled_data.iterrows()
+    ]
+
+    # Vectorize flight data
+    V_f_list = [flight.toVector(airport_total, aircraft_total) for flight in flight_list]
+
+    # Neural net size: (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
+    NN_size = (2 + 2 * len(airport_total)) * 2
+
+    return flight_list, V_f_list, NN_size
+
+def stratifiedSampling(data, interval):
+    # Group data by originAirport and destAirport
+    grouped_data = data.groupby(['ORIGIN', 'DEST'])
+
+    # Stratified sampling for each group
+    sampled_data = pd.concat([systematicSampling(group_data, interval) for _, group_data in grouped_data])
+    print(sampled_data)
+    return sampled_data
+
 def print_xlsx(output):
     workbook = openpyxl.Workbook()
     sheet = workbook.active
@@ -374,3 +476,4 @@ def systematicSampling(data, interval):
     sampled_data = data.iloc[start_index::interval]
     
     return sampled_data
+

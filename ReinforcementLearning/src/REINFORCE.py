@@ -70,7 +70,10 @@ def main():
 
     # flight_list, V_f_list, NN_size = embedFlightData(path)
     # flight_list, V_f_list, NN_size = embedFlightData_Random(path,sample_size=500) # 랜덤 샘플링
-    flight_list, V_f_list, NN_size = embedFlightData_Interval(path) # 시스테믹 샘플링
+    # flight_list, V_f_list, NN_size = embedFlightData_Interval(path, interval=2) # 시스테믹 샘플링
+    flight_list, V_f_list, NN_size = embedFlightData_Stratified(path) # 출발공항+ 도착공항으로 계층화 -> 이후 시스테믹 샘플링
+    
+    
     #print("size: ", NN_size)
     
     # Crew Pairing Environment 불러오기
