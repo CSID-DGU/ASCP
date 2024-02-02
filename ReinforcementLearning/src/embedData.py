@@ -15,6 +15,7 @@ from Flight import Flight
 from Components import Aircraft, Airport, Hotel
 import torch
 import os 
+import random
 def readXlsx(path, inputFileName):
 
     print(path)
@@ -218,6 +219,98 @@ def embedFlightData_Random(path, sample_size=None):
     NN_size = (2 + 2*len(airport_total)) * 2
 
     return flight_list, V_f_list, NN_size
+
+def embedFlightData_Interval(path, interval=2): 
+    idprovider = IDProvider() 
+    fdf = pd.read_csv(path+'/User_Flight.csv')
+    fdf = fdf.drop(fdf.index[0])
+    fdf.columns = fdf.iloc[0]
+    fdf = fdf.drop(fdf.index[0])
+    # 시간순서대로 정렬
+    fdf['ORIGIN_DATE'] = pd.to_datetime(fdf['ORIGIN_DATE'])
+    fdf = fdf.sort_values(by='ORIGIN_DATE')
+
+    # 시스템적 샘플링 적용
+    fdf = systematicSampling(fdf, interval)
+
+    
+    flight_list=[] 
+    V_f_list = [] 
+
+    for idx, row in fdf.iterrows(): 
+        flight = Flight(
+            idx=idprovider.get_flight_id(),
+            TailNumber=row['T/N'],
+            originAirport=row['ORIGIN'],
+            originTime=row['ORIGIN_DATE'],
+            destAirport=row['DEST'],
+            destTime=row['DEST_DATE'],
+            aircraft=row['AIRCRAFT_TYPE']
+        )
+        flight_list.append(flight)
+    
+    flight_list = sorted(flight_list)
+    
+    airport_total = airportList(fdf['ORIGIN'], fdf['DEST'])
+    aircraft_total = aircraftList(fdf['AIRCRAFT_TYPE'])
+    
+    ddf=pd.read_csv(path+'/User_Deadhead.csv')
+    ddf = ddf.drop(ddf.index[0])
+    ddf.columns = ddf.iloc[0]
+    ddf = ddf.drop(ddf.index[0])
+    
+
+    for idx, row in ddf.iterrows():
+        airport_origin_onehot = [0 for _ in range(len(airport_total))]
+        airport_dest_onehot = [0 for _ in range(len(airport_total))]
+
+        for i, airport in enumerate(airport_total):
+            if airport == row['출발 공항']:
+                airport_origin_onehot[i] = 1
+            if airport == row['도착 공항']:
+                airport_dest_onehot[i] = 1
+
+        ddf.at[idx, '출발 공항'] = airport_origin_onehot
+        ddf.at[idx, '도착 공항'] = airport_dest_onehot
+        Airport.add_edge(row['출발 공항'], row['도착 공항'], row['Deadhead(원)'])
+
+    
+    cdf=pd.read_csv(path+'/Program_Cost.csv')
+    cdf.columns = cdf.iloc[0]
+    cdf = cdf.drop(cdf.index[0])
+    for idx,row in cdf.iterrows():
+        aircraft_onehot = [0 for _ in range(len(aircraft_total))]
+        
+        for i,aircraft in enumerate(aircraft_total):
+            if aircraft == row['AIRCRAFT']:
+                aircraft_onehot[i] = 1
+        cdf.at[idx, 'AIRCRAFT'] = aircraft_onehot
+        Aircraft.add_type(row['AIRCRAFT'], row['CREW_NUM(명)'], int(float(row['Layover Cost(원/분)'])), int(float(row['Quick Turn Cost(원/회)'])))
+    temp=tuple([0 for _ in range(len(aircraft_total))])
+    del Aircraft.dic[temp]
+    
+    
+    hdf=pd.read_csv(path+'/User_Hotel.csv')
+    hdf = hdf.drop(hdf.index[0])
+    hdf.columns = hdf.iloc[0]
+    hdf=hdf.drop(hdf.index[0])
+    hdf = hdf.dropna(subset=[hdf.columns[0]])
+    for idx,row in hdf.iterrows():
+        airport_onehot = [0 for i in range(len(airport_total))]
+        
+        for i,airport in enumerate(airport_total):
+            if airport == row['공항 Code']:
+                airport_onehot[i] = 1
+        hdf.at[idx, '공항 Code'] = airport_onehot
+        Hotel.add_hotel(row['공항 Code'], row['비용(원)'])
+    
+    for i in range(len(flight_list)):
+        V_f_list.append(flight_list[i].toVector(airport_total, aircraft_total))
+        
+    # Neural net size : (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
+    NN_size = (2 + 2*len(airport_total)) * 2
+
+    return flight_list, V_f_list, NN_size
 def print_xlsx(output):
     workbook = openpyxl.Workbook()
     sheet = workbook.active
@@ -272,3 +365,12 @@ def flatten(V_p, V_f):
     nn_input = [V_p[0]//100000] + [V_p[1]//100000] + V_p3 + V_p4 + [V_f[0]//100000] + [V_f[1]//100000] + V_f[3] + V_f[4]
 
     return nn_input
+
+def systematicSampling(data, interval):
+    # 시작 인덱스 랜덤 선택
+    start_index = random.randint(0, interval - 1)
+    
+    # 데이터프레임에서 샘플 추출
+    sampled_data = data.iloc[start_index::interval]
+    
+    return sampled_data

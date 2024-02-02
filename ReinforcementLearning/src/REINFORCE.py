@@ -6,7 +6,7 @@ import torch.optim as optim
 from torch.optim import lr_scheduler
 import numpy as np
 from torch.distributions import Categorical
-from embedData import embedFlightData, flatten, print_xlsx, readXlsx, print_xlsx_tmp, embedFlightData_Random
+from embedData import *
 from functions import *
 from CrewPairingEnv import CrewPairingEnv
 from DK_Algorithm import *
@@ -69,7 +69,8 @@ def main():
     readXlsx(path, '/input_873.xlsx')
 
     # flight_list, V_f_list, NN_size = embedFlightData(path)
-    flight_list, V_f_list, NN_size = embedFlightData_Random(path,sample_size=500)
+    # flight_list, V_f_list, NN_size = embedFlightData_Random(path,sample_size=500) # 랜덤 샘플링
+    flight_list, V_f_list, NN_size = embedFlightData_Interval(path) # 시스테믹 샘플링
     #print("size: ", NN_size)
     
     # Crew Pairing Environment 불러오기
