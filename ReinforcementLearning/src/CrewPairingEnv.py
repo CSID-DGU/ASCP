@@ -94,7 +94,7 @@ class CrewPairingEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         update_state(self.V_p_list, V_f, idx)
         
         self.flight_cnt += 1
-        print(self.flight_cnt)
+
         if self.flight_cnt == self.N_flight :
             self.terminated = True
         else :

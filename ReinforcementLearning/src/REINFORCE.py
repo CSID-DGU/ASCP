@@ -6,7 +6,7 @@ import torch.optim as optim
 from torch.optim import lr_scheduler
 import numpy as np
 from torch.distributions import Categorical
-from embedData import embedFlightData, flatten, print_xlsx, readXlsx, print_xlsx_tmp
+from embedData import embedFlightData, flatten, print_xlsx, readXlsx, print_xlsx_tmp, embedFlightData_Random
 from functions import *
 from CrewPairingEnv import CrewPairingEnv
 from DK_Algorithm import *
@@ -66,9 +66,10 @@ class Policy(nn.Module):
 def main():
     current_directory = os.path.dirname(__file__)
     path = os.path.abspath(os.path.join(current_directory, '../dataset'))
-    readXlsx(path, '/input_50000.xlsx')
+    readXlsx(path, '/input_873.xlsx')
 
-    flight_list, V_f_list, NN_size = embedFlightData(path)
+    # flight_list, V_f_list, NN_size = embedFlightData(path)
+    flight_list, V_f_list, NN_size = embedFlightData_Random(path,sample_size=500)
     #print("size: ", NN_size)
     
     # Crew Pairing Environment 불러오기
@@ -90,7 +91,7 @@ def main():
         file.write("---------------------------------\n")
         time = datetime.now()
     
-        for n_epi in range(1):
+        for n_epi in range(100):
             print("########################## n_epi: ", n_epi, " ############################  ", datetime.now()-time)
             s, _ = env.reset()  #현재 플라이트 V_P_list  <- V_f list[0]
             done = False
