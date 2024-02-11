@@ -27,9 +27,8 @@ class Policy(nn.Module):
 
         # 신경망 레이어 정의
         self.fc1 = nn.Linear(self.N_flight, 64)
+        self.fc2 = nn.Linear(64, 64)
         self.fc3 = nn.Linear(64, self.N_flight)
-        
-        torch.nn.init.kaiming_uniform_(self.fc1.weight, mode='fan_in', nonlinearity='relu')
         
         # 옵티마이저 정의
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
@@ -40,7 +39,9 @@ class Policy(nn.Module):
         x = torch.tensor(x, dtype=torch.float32).to(device) 
         
         x = F.leaky_relu(self.fc1(x))
-        x = F.softmax(self.fc3(x), dim=0)
+        x = F.leaky_relu(self.fc2(x))
+        x = self.fc3(x)
+
         return x
       
     def put_data(self, item):
@@ -62,14 +63,14 @@ class Policy(nn.Module):
 def main():
     current_directory = os.path.dirname(__file__)
     path = os.path.abspath(os.path.join(current_directory, '../dataset'))
-    readXlsx(path, '/input_500.xlsx')
+    readXlsx(path, '/input_873.xlsx')
 
     flight_list, V_f_list = embedFlightData(path)
     
     # Crew Pairing Environment 불러오기
     N_flight = len(flight_list)
     env = CrewPairingEnv(V_f_list)
-    pi = Policy(N_flight=N_flight, learning_rate=0.0002)
+    pi = Policy(N_flight=N_flight, learning_rate=0.002)
     pi.to(device)
     score = 0
     #scores = []
