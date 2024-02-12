@@ -5,18 +5,18 @@ import copy
 
 #Aircraft['[0,0,1]'] = [crewnum, layover, quickturn]
 
-def checkConnection(pairing, flight):
+def checkConnection(V_p, V_f):
     
-    if pairing == [0,0,0,[0],[0],[0]] : return True
-    flight_gap = flight[0] - pairing[1]
+    if V_p == [0,0,0,[0],[0],[0]] : return True
+    flight_gap = V_f[0] - V_p[1]
     
-    if pairing[4] == pairing[3]: return False  # 완성된 페어링
-    if pairing[1]-pairing[0] > 7*24*60: return False
+    if V_p[4] == V_p[3]: return False  # 완성된 페어링
+    if V_p[1]-V_p[0] > 7*24*60: return False
     if flight_gap < 0: return False  # 시간의 선후관계 제약
-    if pairing[4] != flight[3]: return False  # 공간 제약
-    if pairing[5] != flight[5]: return False  # 항공기 기종 제약
+    if V_p[4] != V_f[3]: return False  # 공간 제약
+    if V_p[5] != V_f[5]: return False  # 항공기 기종 제약
     if flight_gap < 10 * 60:  # 법적 제약
-        if pairing[2] + flight[2] + flight_gap > 14 * 60: return False
+        if V_p[2] + V_f[2] + flight_gap > 14 * 60: return False
 
     return True
 

@@ -86,7 +86,7 @@ def train(q, q_target, memory, optimizer):
 def main():
     current_directory = os.path.dirname(__file__)
     path = os.path.abspath(os.path.join(current_directory, '../dataset'))
-    readXlsx(path, '/input_873.xlsx')
+    readXlsx(path, '/input_2000.xlsx')
 
     flight_list, V_f_list, NN_size = embedFlightData(path)
 
