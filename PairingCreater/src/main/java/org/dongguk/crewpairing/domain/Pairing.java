@@ -79,6 +79,10 @@ public class Pairing extends AbstractPersistable {
         return false;
     }
 
+    public boolean isImpossiblePairLength(){
+        return ChronoUnit.MINUTES.between(pair.get(0).getOriginTime(), pair.get(pair.size()-1).getDestTime()) > 7 * 24 * 60;
+    }
+
     /**
      * 페어링의 최소 휴식시간 보장 여부 검증
      * / 연속되는 비행이 14시간 이상일 시 true 반환(연속: breakTime이 10시간 이하)

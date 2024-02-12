@@ -21,6 +21,7 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 airportPossible(constraintFactory),
                 aircraftPossible(constraintFactory),
                 continuityPossible(constraintFactory),
+                pairLengthPossible(constraintFactory),
                 deadHeadCost(constraintFactory),
                 layoverCost(constraintFactory),
                 quickTurnCost(constraintFactory),
@@ -71,6 +72,14 @@ public class ParingConstraintProvider implements ConstraintProvider {
                 .filter(Pairing::isImpossibleContinuity)
                 .penalize(HardSoftLongScore.ofHard(1000))
                 .asConstraint("law possible");
+    }
+
+    private Constraint pairLengthPossible(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Pairing.class)
+                .filter(pairing -> pairing.getPair().size() >= 2)
+                .filter(Pairing::isImpossiblePairLength)
+                .penalize(HardSoftLongScore.ofHard(1000))
+                .asConstraint("length possible");
     }
 
     /**
