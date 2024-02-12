@@ -129,7 +129,7 @@ def embedFlightData(path): # flight 객체 생성 및 vector로 변환, flight_l
 
 
     # Neural net size : (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
-    NN_size = (2 + 2*len(airport_total)) * 2
+    NN_size = len(airport_total) * 2
 
     return flight_list, V_f_list, NN_size
     
@@ -217,7 +217,7 @@ def embedFlightData_Random(path, sample_size=None):
     for i in range(len(flight_list)):
         V_f_list.append(flight_list[i].toVector(airport_total, aircraft_total))
     # Neural net size : (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
-    NN_size = (2 + 2*len(airport_total)) * 2
+    NN_size = 2*len(airport_total) * 2
 
     return flight_list, V_f_list, NN_size
 
@@ -309,7 +309,8 @@ def embedFlightData_Interval(path, interval=2):
         V_f_list.append(flight_list[i].toVector(airport_total, aircraft_total))
         
     # Neural net size : (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
-    NN_size = (2 + 2*len(airport_total)) * 2
+    #NN_size = (2 + 2*len(airport_total)) * 2
+    NN_size = len(airport_total) * 2
 
     return flight_list, V_f_list, NN_size
 
@@ -400,7 +401,8 @@ def embedFlightData_Stratified(path, interval=2):
     V_f_list = [flight.toVector(airport_total, aircraft_total) for flight in flight_list]
 
     # Neural net size: (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
-    NN_size = (2 + 2 * len(airport_total)) * 2
+    #NN_size = (2 + 2 * len(airport_total)) * 2
+    NN_size = len(airport_total) * 2
 
     return flight_list, V_f_list, NN_size
 
@@ -455,18 +457,6 @@ def print_xlsx_tmp(n_epi,number,output_tmp,folder_path):
 
         workbook.save(file_path)
     
-
-def flatten(V_p, V_f):
-    V_p3 = V_p[3]
-    V_p4 = V_p[4]
-    
-    if V_p[3] == [0] :
-        V_p3 = [0] * len(V_f[3])
-        V_p4 = [0] * len(V_f[4])
-
-    nn_input = [V_p[0]//100000] + [V_p[1]//100000] + V_p3 + V_p4 + [V_f[0]//100000] + [V_f[1]//100000] + V_f[3] + V_f[4]
-
-    return nn_input
 
 def systematicSampling(data, interval):
     # 시작 인덱스 랜덤 선택

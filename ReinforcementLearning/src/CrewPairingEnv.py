@@ -68,39 +68,51 @@ class CrewPairingEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
     No additional arguments are currently supported.
     """
-    V_p_list = []
-    V_f_list = []
-    state = []
-    
-    def __init__(self, V_f_list):
+
+    def __init__(self, V_f_list, flight_list):
         # number of flights
         self.V_f_list = V_f_list
+        self.flight_list = flight_list
         self.N_flight = len(V_f_list)
         self.flight_cnt = 0
+        self.V_p_cnt = 0
         self.V_p_list = [[0,0,0,[0],[0],[0]] for i in range(self.N_flight)]
+        self.output = [[] for i in range(self.N_flight)]
         self.state = self.V_f_list[0]
         self.terminated = False
         
         self.action_space = spaces.Discrete(self.N_flight)
         self.steps_beyond_terminated = None # step() 함수가 호출되었을 때, terminated가 True인 경우를 의미함.
+    
 
-    def step(self, action, V_f, idx):
-        yn = action
+    def step(self, action):
+        V_f = self.V_f_list[self.flight_cnt]
+        if action == 1 :
+            #print("flight cnt : ", self.flight_cnt)
+            #print("V_p : ", self.V_p_list[self.V_p_cnt])
+            #print("V_f : ", V_f)
+            reward = get_reward(self.V_p_list, V_f, self.V_p_cnt)
+            update_state(self.V_p_list, V_f, self.V_p_cnt)
+            self.output[self.V_p_cnt].append(self.flight_list[self.flight_cnt].id)
 
-        if yn == 0 :
-            return self.state, 0, self.terminated, False, {}, False
-        
-        reward = get_reward(self.V_p_list, V_f, idx)
-        update_state(self.V_p_list, V_f, idx)
-        
-        self.flight_cnt += 1
+            self.flight_cnt += 1
+            self.V_p_cnt = 0
+
+            if self.flight_cnt == self.N_flight :
+                self.terminated = True
+                return self.state, reward, self.terminated, False, {}, self.output
+        else : 
+            reward = 0
+            self.V_p_cnt += 1
+
+        V_f = self.auto_insert(self.V_f_list[self.flight_cnt])
+        self.state = self.V_p_list[self.V_p_cnt][3] + V_f[4]
 
         if self.flight_cnt == self.N_flight :
             self.terminated = True
-        else :
-            self.state = self.V_f_list[self.flight_cnt]
         
-        return self.state, reward, self.terminated, False, {}, True
+        return self.state, reward, self.terminated, False, {}, self.output
+
 
     def reset(self):
         # number of flights
@@ -109,8 +121,30 @@ class CrewPairingEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
  
         self.steps_beyond_terminated = None
         self.V_p_list = [[0,0,0,[0],[0],[0]] for i in range(self.N_flight)]
-        self.state = self.V_f_list[0]
+        self.output = [[] for i in range(self.N_flight)]
         self.flight_cnt = 0
         self.terminated = False
+
+        V_f = self.auto_insert(self.V_f_list[0])
+        self.state = self.V_p_list[self.V_p_cnt][3] + V_f[4] # V_p 출발공항 + V_f 도착공항
         
         return self.state, {}
+    
+
+    def auto_insert(self, V_f) :
+        while True :
+            if self.V_p_list[self.V_p_cnt] == [0,0,0,[0],[0],[0]] :
+                self.V_p_list[self.V_p_cnt] = V_f
+                self.output[self.V_p_cnt].append(self.flight_list[self.flight_cnt].id)
+                
+                self.flight_cnt += 1
+                if self.flight_cnt == self.N_flight : break
+                V_f = self.V_f_list[self.flight_cnt]
+
+                self.V_p_cnt = 0
+            
+            elif checkConnection(self.V_p_list[self.V_p_cnt], V_f) == False :
+                self.V_p_cnt += 1
+
+            else : break
+        return V_f

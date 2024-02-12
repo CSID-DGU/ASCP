@@ -1,28 +1,0 @@
-
-opython:S116"SRename this field "_TailNumber" to match the regular expression ^[_a-z][_a-z0-9]*$.(•…íÀüÿÿÿÿ
-mpython:S116	"VRename this field "_originAirport" to match the regular expression ^[_a-z][_a-z0-9]*$.(ÏñÙ¬
-jpython:S116"SRename this field "_originTime" to match the regular expression ^[_a-z][_a-z0-9]*$.(…¿‘‘
-kpython:S116
-"TRename this field "_destAirport" to match the regular expression ^[_a-z][_a-z0-9]*$.(©¹¼Ë
-hpython:S116"QRename this field "_destTime" to match the regular expression ^[_a-z][_a-z0-9]*$.(Œåßî
-mpython:S117"VRename this parameter "TailNumber" to match the regular expression ^[_a-z][a-z0-9_]*$.(è™ÊÙ
-npython:S117"WRename this parameter "destAirport" to match the regular expression ^[_a-z][a-z0-9_]*$.(è™ÊÙ
-kpython:S117"TRename this parameter "destTime" to match the regular expression ^[_a-z][a-z0-9_]*$.(è™ÊÙ
-ppython:S117"YRename this parameter "originAirport" to match the regular expression ^[_a-z][a-z0-9_]*$.(è™ÊÙ
-mpython:S117"VRename this parameter "originTime" to match the regular expression ^[_a-z][a-z0-9_]*$.(è™ÊÙ
-hpython:S100"LRename method "toVector" to match the regular expression ^[a-z_][a-z0-9_]*$.(ŸİÛÿÿÿÿÿ
-=python:S1481!"%Remove the unused local variable "i".(íˆµÕ
-=python:S1481""%Remove the unused local variable "i".(³ÜÍ‹
-Bpython:S1481*"%Remove the unused local variable "i".(àî—Æşÿÿÿÿ
-cpython:S1008"LRename method "findByID" to match the regular expression ^[a-z_][a-z0-9_]*$.(¥ÅœÙ
-epython:S100?"NRename method "TailNumber" to match the regular expression ^[a-z_][a-z0-9_]*$.(àÍ ã
-jpython:S100C"NRename method "TailNumber" to match the regular expression ^[a-z_][a-z0-9_]*$.(êı‡öıÿÿÿÿ
-mpython:S100G"QRename method "originAirport" to match the regular expression ^[a-z_][a-z0-9_]*$.(ĞŸ´Ãûÿÿÿÿ
-hpython:S100K"QRename method "originAirport" to match the regular expression ^[a-z_][a-z0-9_]*$.(å‰¨
-jpython:S100O"NRename method "originTime" to match the regular expression ^[a-z_][a-z0-9_]*$.(ÿ†£éıÿÿÿÿ
-jpython:S100S"NRename method "originTime" to match the regular expression ^[a-z_][a-z0-9_]*$.(–³±ıøÿÿÿÿ
-kpython:S100W"ORename method "destAirport" to match the regular expression ^[a-z_][a-z0-9_]*$.(©Ì«àıÿÿÿÿ
-kpython:S100["ORename method "destAirport" to match the regular expression ^[a-z_][a-z0-9_]*$.(ƒ³Åïøÿÿÿÿ
-hpython:S100_"LRename method "destTime" to match the regular expression ^[a-z_][a-z0-9_]*$.(î¨×¤şÿÿÿÿ
-hpython:S100c"LRename method "destTime" to match the regular expression ^[a-z_][a-z0-9_]*$.(İ˜±øÿÿÿÿ
-hpython:S100r"LRename method "getIndex" to match the regular expression ^[a-z_][a-z0-9_]*$.(ö¦Øüÿÿÿÿ

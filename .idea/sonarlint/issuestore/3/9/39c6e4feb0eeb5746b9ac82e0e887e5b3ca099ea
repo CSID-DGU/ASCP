@@ -1,17 +1,0 @@
-
-fpython:S1192U"NDefine a constant instead of duplicating this literal 'ì¶œë°œ ê³µí•­' 3 times.(ò‘Ì÷
-kpython:S1192W"NDefine a constant instead of duplicating this literal 'ë„ì°© ê³µí•­' 3 times.(¥îäÿÿÿÿÿ
-ipython:S1192w"LDefine a constant instead of duplicating this literal 'ê³µí•­ Code' 3 times.(Î×áüÿÿÿÿ
-upython:S117"YRename this parameter "inputFileName" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ç™êÙûÿÿÿÿ
-kpython:S1542"NRename function "readXlsx" to match the regular expression ^[a-z_][a-z0-9_]*$.(Ç™êÙûÿÿÿÿ
-hpython:S117"RRename this parameter "A_dest" to match the regular expression ^[_a-z][a-z0-9_]*$.(úà!
-jpython:S117"TRename this parameter "A_origin" to match the regular expression ^[_a-z][a-z0-9_]*$.(úà!
-opython:S117 "XRename this local variable "A_total" to match the regular expression ^[_a-z][a-z0-9_]*$.(°Øç²
-hpython:S1542"QRename function "airportList" to match the regular expression ^[a-z_][a-z0-9_]*$.(úà!
-ppython:S117&"TRename this parameter "Aircraft" to match the regular expression ^[_a-z][a-z0-9_]*$.(†µçŞøÿÿÿÿ
-{python:S117("_Rename this local variable "Aircraft_total" to match the regular expression ^[_a-z][a-z0-9_]*$.(¥Àâ–ıÿÿÿÿ
-opython:S1542&"RRename function "aircraftList" to match the regular expression ^[a-z_][a-z0-9_]*$.(†µçŞøÿÿÿÿ
-opython:S1177"YRename this local variable "V_f_list" to match the regular expression ^[_a-z][a-z0-9_]*$.(ïÔÓ,
-mpython:S1542."URename function "embedFlightData" to match the regular expression ^[a-z_][a-z0-9_]*$.(Ş°ÌÆ
-lpython:S3776."TRefactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed.(Ş°ÌÆ
-Bpython:S1481t"%Remove the unused local variable "i".(ıÖØûÿÿÿÿ
