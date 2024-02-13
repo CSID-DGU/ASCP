@@ -47,27 +47,33 @@ def aircraftList(Aircraft):
     return Aircraft_total
 
 def embedFlightData(path): # flight 객체 생성 및 vector로 변환, flight_list, V_f_list 반환
-    idprovider = IDProvider() 
-    fdf = pd.read_csv(path+'/User_Flight.csv')
-    # 200개 행 읽어오기
-    #fdf = fdf.head(200)
+    flight_list = []  # flight 객체를 저장할 리스트
+    V_f_list = []  # flight 객체를 vector로 변환하여 저장할 리스트
+    
+    # Read User_Flight.csv
+    fdf = pd.read_csv(path + '/User_Flight.csv')
     fdf = fdf.drop(fdf.index[0])
     fdf.columns = fdf.iloc[0]
     fdf = fdf.drop(fdf.index[0])
-    flight_list=[] # flight 객체를 저장할 리스트
-    V_f_list = [] # flight 객체를 vector로 변환하여 저장할 리스트
+    # 'new_index' 칼럼 추가 및 숫자 부여
+    fdf['new_index'] = range(len(fdf))
 
-    for idx, row in fdf.iterrows(): # flight 객체 생성
-        flight = Flight(
-            idx=idprovider.get_flight_id(),  # 싱글톤인 idprovider 호출하여 flight에 id 부여
+    # 순서 변경 (가장 뒤로 보내기)
+    fdf = fdf[['S/N(자동 입력)', 'T/N', 'ORIGIN', 'ORIGIN_DATE', 'DEST', 'DEST_DATE', 'AIRCRAFT_TYPE', 'new_index']]
+    # 칼럼 이름을 "new_index"로 변경
+    
+    
+    flight_list = [
+        Flight(
+            idx=row['new_index'],
             TailNumber=row['T/N'],
             originAirport=row['ORIGIN'],
             originTime=row['ORIGIN_DATE'],
             destAirport=row['DEST'],
             destTime=row['DEST_DATE'],
             aircraft=row['AIRCRAFT_TYPE']
-        )
-        flight_list.append(flight)
+        ) for idx, row in fdf.iterrows()
+    ]
     
     flight_list=sorted(flight_list) # originTime 기준으로 정렬(originTime이 같다면 destTime 기준으로 정렬)
     
@@ -129,7 +135,7 @@ def embedFlightData(path): # flight 객체 생성 및 vector로 변환, flight_l
 
 
     # Neural net size : (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
-    NN_size = len(airport_total) * 2
+    NN_size = (2 + 2*len(airport_total)) * 2
 
     return flight_list, V_f_list, NN_size
     
@@ -217,7 +223,7 @@ def embedFlightData_Random(path, sample_size=None):
     for i in range(len(flight_list)):
         V_f_list.append(flight_list[i].toVector(airport_total, aircraft_total))
     # Neural net size : (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
-    NN_size = 2*len(airport_total) * 2
+    NN_size = (2 + 2*len(airport_total)) * 2
 
     return flight_list, V_f_list, NN_size
 
@@ -309,13 +315,11 @@ def embedFlightData_Interval(path, interval=2):
         V_f_list.append(flight_list[i].toVector(airport_total, aircraft_total))
         
     # Neural net size : (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
-    #NN_size = (2 + 2*len(airport_total)) * 2
-    NN_size = len(airport_total) * 2
+    NN_size = (2 + 2*len(airport_total)) * 2
 
     return flight_list, V_f_list, NN_size
 
 def embedFlightData_Stratified(path, interval=2):
-    idprovider = IDProvider()
     flight_list = []  # flight 객체를 저장할 리스트
     V_f_list = []  # flight 객체를 vector로 변환하여 저장할 리스트
     
@@ -324,13 +328,20 @@ def embedFlightData_Stratified(path, interval=2):
     fdf = fdf.drop(fdf.index[0])
     fdf.columns = fdf.iloc[0]
     fdf = fdf.drop(fdf.index[0])
+    # 'new_index' 칼럼 추가 및 숫자 부여
+    fdf['new_index'] = range(len(fdf))
+
+    # 순서 변경 (가장 뒤로 보내기)
+    fdf = fdf[['S/N(자동 입력)', 'T/N', 'ORIGIN', 'ORIGIN_DATE', 'DEST', 'DEST_DATE', 'AIRCRAFT_TYPE', 'new_index']]
+    # 칼럼 이름을 "new_index"로 변경
     
-    # Drop unnecessary rows and columns
-    fdf = fdf.iloc[1:, 1:]
+    # 시간순서대로 정렬
+    fdf['ORIGIN_DATE'] = pd.to_datetime(fdf['ORIGIN_DATE'])
+    fdf = fdf.sort_values(by='ORIGIN_DATE')
     
     flight_list = [
         Flight(
-            idx=idprovider.get_flight_id(),
+            idx=row['new_index'],
             TailNumber=row['T/N'],
             originAirport=row['ORIGIN'],
             originTime=row['ORIGIN_DATE'],
@@ -340,8 +351,8 @@ def embedFlightData_Stratified(path, interval=2):
         ) for idx, row in fdf.iterrows()
     ]
 
-    # Sort flight objects by originTime and destTime
-    flight_list.sort()
+    # originTime 기준으로 정렬(originTime이 같다면 destTime 기준으로 정렬)
+    flight_list=sorted(flight_list) 
 
     # Filter and stratify the flight data
     sampled_data = stratifiedSampling(fdf, interval)
@@ -387,7 +398,7 @@ def embedFlightData_Stratified(path, interval=2):
 
     flight_list = [
         Flight(
-            idx=idprovider.get_flight_id(),
+            idx = row['new_index'],
             TailNumber=row['T/N'],
             originAirport=row['ORIGIN'],
             originTime=row['ORIGIN_DATE'],
@@ -401,8 +412,7 @@ def embedFlightData_Stratified(path, interval=2):
     V_f_list = [flight.toVector(airport_total, aircraft_total) for flight in flight_list]
 
     # Neural net size: (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
-    #NN_size = (2 + 2 * len(airport_total)) * 2
-    NN_size = len(airport_total) * 2
+    NN_size = (2 + 2 * len(airport_total)) * 2
 
     return flight_list, V_f_list, NN_size
 
@@ -457,6 +467,18 @@ def print_xlsx_tmp(n_epi,number,output_tmp,folder_path):
 
         workbook.save(file_path)
     
+
+def flatten(V_p, V_f):
+    V_p3 = V_p[3]
+    V_p4 = V_p[4]
+    
+    if V_p[3] == [0] :
+        V_p3 = [0] * len(V_f[3])
+        V_p4 = [0] * len(V_f[4])
+
+    nn_input = [V_p[0]//100000] + [V_p[1]//100000] + V_p3 + V_p4 + [V_f[0]//100000] + [V_f[1]//100000] + V_f[3] + V_f[4]
+
+    return nn_input
 
 def systematicSampling(data, interval):
     # 시작 인덱스 랜덤 선택
