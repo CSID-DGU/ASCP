@@ -47,33 +47,27 @@ def aircraftList(Aircraft):
     return Aircraft_total
 
 def embedFlightData(path): # flight 객체 생성 및 vector로 변환, flight_list, V_f_list 반환
-    flight_list = []  # flight 객체를 저장할 리스트
-    V_f_list = []  # flight 객체를 vector로 변환하여 저장할 리스트
-    
-    # Read User_Flight.csv
-    fdf = pd.read_csv(path + '/User_Flight.csv')
+    idprovider = IDProvider() 
+    fdf = pd.read_csv(path+'/User_Flight.csv')
+    # 200개 행 읽어오기
+    #fdf = fdf.head(200)
     fdf = fdf.drop(fdf.index[0])
     fdf.columns = fdf.iloc[0]
     fdf = fdf.drop(fdf.index[0])
-    # 'new_index' 칼럼 추가 및 숫자 부여
-    fdf['new_index'] = range(len(fdf))
+    flight_list=[] # flight 객체를 저장할 리스트
+    V_f_list = [] # flight 객체를 vector로 변환하여 저장할 리스트
 
-    # 순서 변경 (가장 뒤로 보내기)
-    fdf = fdf[['S/N(자동 입력)', 'T/N', 'ORIGIN', 'ORIGIN_DATE', 'DEST', 'DEST_DATE', 'AIRCRAFT_TYPE', 'new_index']]
-    # 칼럼 이름을 "new_index"로 변경
-    
-    
-    flight_list = [
-        Flight(
-            idx=row['new_index'],
+    for idx, row in fdf.iterrows(): # flight 객체 생성
+        flight = Flight(
+            idx=idprovider.get_flight_id(),  # 싱글톤인 idprovider 호출하여 flight에 id 부여
             TailNumber=row['T/N'],
             originAirport=row['ORIGIN'],
             originTime=row['ORIGIN_DATE'],
             destAirport=row['DEST'],
             destTime=row['DEST_DATE'],
             aircraft=row['AIRCRAFT_TYPE']
-        ) for idx, row in fdf.iterrows()
-    ]
+        )
+        flight_list.append(flight)
     
     flight_list=sorted(flight_list) # originTime 기준으로 정렬(originTime이 같다면 destTime 기준으로 정렬)
     
@@ -135,7 +129,7 @@ def embedFlightData(path): # flight 객체 생성 및 vector로 변환, flight_l
 
 
     # Neural net size : (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
-    NN_size = (2 + 2*len(airport_total)) * 2
+    NN_size = len(airport_total) * 2
 
     return flight_list, V_f_list, NN_size
     
@@ -412,7 +406,7 @@ def embedFlightData_Stratified(path, interval=2):
     V_f_list = [flight.toVector(airport_total, aircraft_total) for flight in flight_list]
 
     # Neural net size: (시간 2진수 배열 -> 16bit)*2 + (공항 Onehot 배열 size)*2
-    NN_size = (2 + 2 * len(airport_total)) * 2
+    NN_size = len(airport_total) * 2
 
     return flight_list, V_f_list, NN_size
 
