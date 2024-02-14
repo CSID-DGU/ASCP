@@ -32,11 +32,10 @@ Airline Scheduling Crew Pairing
 ## Intro
 Optaplanner를 서버에서 실행하는 방법입니다.
 <pre>
-cd ASCP/PairingCreater
 ./gradlew build
-cp build/libs/crew-pairing.jar ~/ASCP/PairingCreater/
-java -jar crew-pairing.jar data/ crewpairing/ {datasize} input_{datasize}.xlsx
-java -jar crew-pairing.jar data/ crewpairing/ {datasize} input_{datasize}.xlsx output.xlsx
+cp crew-pairing.jar ~/ASCP/PairingCreater/
+java -jar crew-pairing.jar data/ crewpairing/ 500 input_500.xlsx
+java -jar crew-pairing.jar data/ crewpairing/ 500 input_500.xlsx output.xlsx
 </pre>
 - 프로젝트 루트 디렉토리에서 ./gradlew build 실행하면 build/libs에 crew-pairing.jar 파일 생성됨
 - crew-pairing.jar을 프로젝트 루트 디렉토리로 이동
