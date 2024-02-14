@@ -1,0 +1,46 @@
+
+hpython:S1192w"PDefine a constant instead of duplicating this literal '/User_Hotel.csv' 4 times.(€Ñµ
+spython:S1192r"VDefine a constant instead of duplicating this literal 'Layover Cost(ì›/ë¶„)' 4 times.(ÚÁ¾şÿÿÿÿ
+kpython:S1192r"NDefine a constant instead of duplicating this literal 'CREW_NUM(ëª…)' 4 times.(ÚÁ¾şÿÿÿÿ
+jpython:S1192ƒ"LDefine a constant instead of duplicating this literal 'ë¹„ìš©(ì›)' 4 times.(İßéˆûÿÿÿÿ
+kpython:S1192S"SDefine a constant instead of duplicating this literal '/User_Deadhead.csv' 4 times.(“¹öØ
+gpython:S1192^"ODefine a constant instead of duplicating this literal 'ì¶œë°œ ê³µí•­' 12 times.(ò‘Ì÷
+jpython:S1192h"RDefine a constant instead of duplicating this literal '/Program_Cost.csv' 4 times.(§üÆˆ
+kpython:S1192e"NDefine a constant instead of duplicating this literal 'Deadhead(ì›)' 4 times.(ó«¼Ëøÿÿÿÿ
+lpython:S1192`"ODefine a constant instead of duplicating this literal 'ë„ì°© ê³µí•­' 12 times.(¥îäÿÿÿÿÿ
+vpython:S1192r"YDefine a constant instead of duplicating this literal 'Quick Turn Cost(ì›/íšŒ)' 4 times.(ÚÁ¾şÿÿÿÿ
+npython:S11926"QDefine a constant instead of duplicating this literal '/User_Flight.csv' 4 times.(»‘¬Şúÿÿÿÿ
+kpython:S1192€"MDefine a constant instead of duplicating this literal 'ê³µí•­ Code' 12 times.(Î×áüÿÿÿÿ
+upython:S117"YRename this parameter "inputFileName" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ç™êÙûÿÿÿÿ
+kpython:S1542"NRename function "readXlsx" to match the regular expression ^[a-z_][a-z0-9_]*$.(Ç™êÙûÿÿÿÿ
+hpython:S117!"RRename this parameter "A_dest" to match the regular expression ^[_a-z][a-z0-9_]*$.(úà!
+jpython:S117!"TRename this parameter "A_origin" to match the regular expression ^[_a-z][a-z0-9_]*$.(úà!
+opython:S117#"XRename this local variable "A_total" to match the regular expression ^[_a-z][a-z0-9_]*$.(°Øç²
+hpython:S1542!"QRename function "airportList" to match the regular expression ^[a-z_][a-z0-9_]*$.(úà!
+ppython:S117)"TRename this parameter "Aircraft" to match the regular expression ^[_a-z][a-z0-9_]*$.(†µçŞøÿÿÿÿ
+{python:S117+"_Rename this local variable "Aircraft_total" to match the regular expression ^[_a-z][a-z0-9_]*$.(¥Àâ–ıÿÿÿÿ
+opython:S1542)"RRename function "aircraftList" to match the regular expression ^[a-z_][a-z0-9_]*$.(†µçŞøÿÿÿÿ
+|python:S117Š"XRename this local variable "NN_size" to match the regular expression ^[_a-z][a-z0-9_]*$.(­Ñ‡úÿÿÿÿ8ŞåÚ1
+opython:S1173"YRename this local variable "V_f_list" to match the regular expression ^[_a-z][a-z0-9_]*$.(ïÔÓ,
+mpython:S15421"URename function "embedFlightData" to match the regular expression ^[a-z_][a-z0-9_]*$.(Ş°ÌÆ
+lpython:S37761"TRefactor this function to reduce its Cognitive Complexity from 22 to the 15 allowed.(Ş°ÌÆ
+Bpython:S1481}"%Remove the unused local variable "i".(ıÖØûÿÿÿÿ
+|python:S117â"XRename this local variable "NN_size" to match the regular expression ^[_a-z][a-z0-9_]*$.(­Ñ‡úÿÿÿÿ8ŞåÚ1
+ppython:S117š"YRename this local variable "V_f_list" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ç¦ØQ
+zpython:S1542"\Rename function "embedFlightData_Random" to match the regular expression ^[a-z_][a-z0-9_]*$.(¸ş¬Šûÿÿÿÿ
+rpython:S3776"TRefactor this function to reduce its Cognitive Complexity from 24 to the 15 allowed.(¸ş¬Šûÿÿÿÿ
+Cpython:S1481×"%Remove the unused local variable "i".(ıÖØûÿÿÿÿ
+|python:S117¾"XRename this local variable "NN_size" to match the regular expression ^[_a-z][a-z0-9_]*$.(­Ñ‡úÿÿÿÿ8ßåÚ1
+ppython:S117õ"YRename this local variable "V_f_list" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ç¦ØQ
+|python:S1542æ"^Rename function "embedFlightData_Interval" to match the regular expression ^[a-z_][a-z0-9_]*$.(âéô÷ÿÿÿÿÿ
+rpython:S3776æ"TRefactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed.(âéô÷ÿÿÿÿÿ
+Cpython:S1481²"%Remove the unused local variable "i".(ıÖØûÿÿÿÿ
+|python:S117Ÿ"XRename this local variable "NN_size" to match the regular expression ^[_a-z][a-z0-9_]*$.(­Ñ‡úÿÿÿÿ8ßåÚ1
+ppython:S117Ä"YRename this local variable "V_f_list" to match the regular expression ^[_a-z][a-z0-9_]*$.(ïÔÓ,
+~python:S1542Â"`Rename function "embedFlightData_Stratified" to match the regular expression ^[a-z_][a-z0-9_]*$.(Íß½ùÿÿÿÿ
+vpython:S1542£"XRename function "stratifiedSampling" to match the regular expression ^[a-z_][a-z0-9_]*$.(¹ì”‘úÿÿÿÿ
+mpython:S117×"ORename this parameter "V_f" to match the regular expression ^[_a-z][a-z0-9_]*$.(Çº€D8ßåÚ1
+mpython:S117×"ORename this parameter "V_p" to match the regular expression ^[_a-z][a-z0-9_]*$.(Çº€D8ßåÚ1
+tpython:S117Ø"URename this local variable "V_p3" to match the regular expression ^[_a-z][a-z0-9_]*$.(»Â»¹8ßåÚ1
+tpython:S117Ù"URename this local variable "V_p4" to match the regular expression ^[_a-z][a-z0-9_]*$.(“É²ã8ßåÚ1
+qpython:S1542ã"XRename function "systematicSampling" to match the regular expression ^[a-z_][a-z0-9_]*$.(®Ãñ¾

@@ -54,15 +54,17 @@ public class PairingApp extends CommonApp<PairingSolution> {
         PairingSolution solution = business.getSolution();
         System.out.println(solution);
 
-        // Output Excel File
-        business.saveSolution(null);
-
         // Check score detail
         SolutionManager<PairingSolution, HardSoftLongScore> scoreManager = SolutionManager.create(business.getSolverFactory());
         ScoreExplanation<PairingSolution, HardSoftLongScore> explain = scoreManager.explain(solution);
         Map<String, ConstraintMatchTotal<HardSoftLongScore>> constraintMatchTotalMap = explain.getConstraintMatchTotalMap();
         ViewAllConstraint.viewAll(constraintMatchTotalMap, solution);
 //        ViewAllConstraint.pairingScore(explain);
+
+        // Output Excel File
+        System.out.println("save...");
+        business.saveSolution(null);
+        System.out.println("done");
 
         System.exit(0);
     }
