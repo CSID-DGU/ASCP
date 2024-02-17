@@ -71,14 +71,14 @@ def embedFlightData(path): # flight 객체 생성 및 vector로 변환, flight_l
     
     flight_list=sorted(flight_list) # originTime 기준으로 정렬(originTime이 같다면 destTime 기준으로 정렬)
     
-    airport_total = airportList(fdf['ORIGIN'], fdf['DEST'])
+    # airport_total = airportList(fdf['ORIGIN'], fdf['DEST'])
     aircraft_total = aircraftList(fdf['AIRCRAFT_TYPE'])
     
     ddf=pd.read_csv(path+'/User_Deadhead.csv')
     ddf = ddf.drop(ddf.index[0])
     ddf.columns = ddf.iloc[0]
     ddf = ddf.drop(ddf.index[0])
-    
+    airport_total = airportList(ddf['출발 공항'], ddf['도착 공항'])
 
     for idx, row in ddf.iterrows():
         airport_origin_onehot = [0 for _ in range(len(airport_total))]
@@ -166,7 +166,7 @@ def embedFlightData_Stratified(path, interval=2):
     # Filter and stratify the flight data
     sampled_data = stratifiedSampling(fdf, interval)
 
-    airport_total = airportList(sampled_data['ORIGIN'], sampled_data['DEST'])
+    # airport_total = airportList(sampled_data['ORIGIN'], sampled_data['DEST'])
     aircraft_total = aircraftList(sampled_data['AIRCRAFT_TYPE'])
 
     # Read User_Deadhead.csv and create Airport edges
@@ -174,6 +174,8 @@ def embedFlightData_Stratified(path, interval=2):
     ddf = ddf.drop(ddf.index[0])
     ddf.columns = ddf.iloc[0]
     ddf = ddf.drop(ddf.index[0])
+    airport_total = airportList(ddf['출발 공항'], ddf['도착 공항'])
+    
     for idx, row in ddf.iterrows():
         airport_origin_onehot = [1 if airport == row['출발 공항'] else 0 for airport in airport_total]
         airport_dest_onehot = [1 if airport == row['도착 공항'] else 0 for airport in airport_total]
