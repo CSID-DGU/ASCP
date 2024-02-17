@@ -143,7 +143,7 @@ class CrewPairingEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
                 self.V_p_cnt = 0
             
-            elif checkConnection(self.V_p_list[self.V_p_cnt], V_f) == False :
+            elif checkConnection(self.V_p_list[self.V_p_cnt], V_f) == False : # or len(self.output[self.V_p_cnt])>=2 :
                 self.V_p_cnt += 1
 
             else : break

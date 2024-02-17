@@ -63,7 +63,7 @@ public abstract class CommonApp<Solution_> extends LoggingMain {
     private SolutionBusiness<Solution_, ?> createSolutionBusiness(Integer flightSize) {
         // SolverConfig.xml을 읽어서 SolverConfig 객체를 생성 및 종료 조건 설정
         SolverConfig solverConfig = SolverConfig.createFromXmlResource(solverConfigResource);
-        solverConfig.withMoveThreadCount("1");
+        //solverConfig.withMoveThreadCount("1");
         //solverConfig.withTerminationConfig(
         //        new TerminationConfig()
         //                .withSecondsSpentLimit(0L));

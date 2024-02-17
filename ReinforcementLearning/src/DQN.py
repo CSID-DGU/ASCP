@@ -86,7 +86,7 @@ def train(q, q_target, memory, optimizer):
 def main():
     current_directory = os.path.dirname(__file__)
     path = os.path.abspath(os.path.join(current_directory, '../dataset'))
-    readXlsx(path, '/input_2000.xlsx')
+    readXlsx(path, '/input_873.xlsx')
 
     flight_list, V_f_list, NN_size = embedFlightData(path)
 
@@ -94,6 +94,7 @@ def main():
     N_flight = len(flight_list)
     env = CrewPairingEnv(V_f_list, flight_list)
     q = Qnet(NN_size)
+
     q_target = Qnet(NN_size)
     q_target.load_state_dict(q.state_dict())
     memory = ReplayBuffer()
@@ -109,7 +110,7 @@ def main():
         file.write("---------------------------------\n")
         time = datetime.now()
     
-        for n_epi in range(100):
+        for n_epi in range(50):
             print("########################## n_epi: ", n_epi, " ############################  ", datetime.now()-time)
             epsilon = max(0.01, 0.08 - 0.01*(n_epi/200)) #Linear annealing from 8% to 1%
             s, _ = env.reset()  #V_p 출발공항, V_f 도착공항
@@ -133,6 +134,8 @@ def main():
             if bestScore < score:
                 bestScore = score
                 output = output_tmp
+                train(q, q_target, memory, optimizer)
+                torch.save(q.state_dict(), 'dqn_model.pth')
             
             file.write(f"{n_epi}\t{score:.2f}\t{bestScore:.2f}\t{datetime.now()-time}\n")
             print(f"current score : {score:.2f} best score : {bestScore:.2f}")

@@ -24,7 +24,7 @@ https://www.optaplanner.org/xsd/solver/solver.xsd">
     -->
 
     <localSearch>
-        <localSearchType>HILL_CLIMBING</localSearchType>
+        <localSearchType>GREAT_DELUGE</localSearchType>
     </localSearch>
 
 </solver>
