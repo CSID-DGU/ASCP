@@ -79,7 +79,7 @@ def train(q, q_target, memory, optimizer):
 def main():
     current_directory = os.path.dirname(__file__)
     path = os.path.abspath(os.path.join(current_directory, '../dataset'))
-    readXlsx(path, '/input_873.xlsx')
+    readXlsx(path, '/input_201801B6.xlsx')
 
     flight_list, V_f_list, NN_size = embedFlightData(path)
 
@@ -87,35 +87,30 @@ def main():
     N_flight = len(flight_list)
     env = CrewPairingEnv(V_f_list, flight_list)
     q = Qnet(NN_size)
-    loaded_model = torch.load('dqn_model.pth')
+    loaded_model = torch.load('dqn_modelB6.pth')
     q.load_state_dict(loaded_model)
     q.eval()
 
-    with open('episode_rewards.txt', 'w') as file:
-        file.write("Episode\tReward\n")
-        file.write("---------------------------------\n")
-        time = datetime.now()
+    time = datetime.now()
+    score = 0
+    output = []
 
-        score = 0
-        output = []
+    s, _ = env.reset()  #V_p 출발공항, V_f 도착공항
+    done = False
+    
+    while not done:
+        a = q.forward(s).argmax().item()
+        # a = random.randint(0,1) # rule-based 코드
 
-        s, _ = env.reset()  #V_p 출발공항, V_f 도착공항
-        done = False
-        
-        while not done:
-            a = q.forward(s).argmax().item()
-            # a = random.randint(0,1) # rule-based 코드
+        s_prime, r, done, truncated, info, output = env.step(action=a)
 
-            s_prime, r, done, truncated, info, output = env.step(action=a)
-
-            s = s_prime     #action에 의해 바뀐 flight
-            score += r
-        
-        file.write(f"{score:.2f}\t{datetime.now()-time}\n")
-        print(f"score : {score:.2f}")
+        s = s_prime     #action에 의해 바뀐 flight
+        score += r
+    
+    print(f"score : {score:.2f}")
 
     env.close()
-    print_xlsx(output)
+    #print_xlsx(output)
     
 if __name__ == '__main__':
     main()

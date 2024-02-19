@@ -46,6 +46,6 @@ def get_reward(V_p_list, V_f, idx) :
 
     if V_p[3] == V_f[4] :
         reward = 1
-    else : reward = 0
+    else : reward = -1
         
     return reward

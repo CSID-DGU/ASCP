@@ -86,10 +86,10 @@ def train(q, q_target, memory, optimizer):
 def main():
     current_directory = os.path.dirname(__file__)
     path = os.path.abspath(os.path.join(current_directory, '../dataset'))
-    readXlsx(path, '/input_10000.xlsx')
+    readXlsx(path, '/input_201801B6.xlsx')
 
-    # flight_list, V_f_list, NN_size = embedFlightData(path)
-    flight_list, V_f_list, NN_size = embedFlightData_Stratified(path)
+    flight_list, V_f_list, NN_size = embedFlightData(path)
+    #flight_list, V_f_list, NN_size = embedFlightData_Stratified(path)
 
     # Crew Pairing Environment 불러오기
     N_flight = len(flight_list)
@@ -111,7 +111,7 @@ def main():
         file.write("---------------------------------\n")
         time = datetime.now()
     
-        for n_epi in range(10):
+        for n_epi in range(1000):
             print("########################## n_epi: ", n_epi, " ############################  ", datetime.now()-time)
             epsilon = max(0.01, 0.08 - 0.01*(n_epi/200)) #Linear annealing from 8% to 1%
             s, _ = env.reset()  #V_p 출발공항, V_f 도착공항
@@ -136,7 +136,7 @@ def main():
                 bestScore = score
                 output = output_tmp
                 train(q, q_target, memory, optimizer)
-                # torch.save(q.state_dict(), 'dqn_model.pth')
+                torch.save(q.state_dict(), 'dqn_modelB6.pth')
             
             file.write(f"{n_epi}\t{score:.2f}\t{bestScore:.2f}\t{datetime.now()-time}\n")
             print(f"current score : {score:.2f} best score : {bestScore:.2f}")
