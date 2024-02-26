@@ -95,12 +95,53 @@ class OptaVisualization:
         plt.figure(figsize=(20, 10))
         # 여백 최대한 없애기
         plt.tight_layout()
+        # y축 값들 log scale로 만들기
+        plt.yscale('log')
         # pandas 표 만들기
         table = pd.DataFrame()
-        for dir_name, best_score_list in tqdm(self.dir_best_scores.items()):
-            plt.plot(range(len(best_score_list)), [score for _, score in best_score_list], label=dir_name)
-            # table column = dir_name, row = time, value = score
-            table[dir_name] = [score for _, score in best_score_list]
+        # 디렉토리 이름을 generator와 solver로 나누기 ex) RL_great -> RL, great
+        # generator와 solver 리스트 만들기
+        generator_list = []
+        solver_list = []
+        for dir_name in self.dir_best_scores.keys():
+            generator, solver = dir_name.split('_')
+            generator_list.append(generator)
+            solver_list.append(solver)
+            
+        # generator와 solver 중복 제거
+        generator_list = list(set(generator_list))
+        solver_list = list(set(solver_list))
+        
+        # generator : RL->'-', 1F1P->'--', KBRA->'-.', else->':'
+        generator_line_style = {}
+        for i, generator in enumerate(generator_list):
+            if generator == 'RL':
+                generator_line_style[generator] = '-'
+            elif generator == '1F1P':
+                generator_line_style[generator] = '--'
+            elif generator == 'KBRA':
+                generator_line_style[generator] = '-.'
+            else:
+                generator_line_style[generator] = ':'
+        
+        # solver : GD ->'r', HC->'g', Tabu->'b'
+        solver_color = {}
+        for i, solver in enumerate(solver_list):
+            if solver == 'GD':
+                solver_color[solver] = 'r'
+            elif solver == 'HC':
+                solver_color[solver] = 'g'
+            else:
+                solver_color[solver] = 'b'
+        
+        # 그래프 그리기
+        for i, (dir_name, best_score_list) in enumerate(self.dir_best_scores.items()):
+            generator, solver = dir_name.split('_')
+            line_style = generator_line_style[generator]
+            color = solver_color[solver]
+            plt.plot([score for time, score in best_score_list], label=dir_name, linestyle=line_style, color=color)
+            table[dir_name] = [score for time, score in best_score_list]
+        
         table.index = [time for time, _ in best_score_list]
         table.to_csv(f'{self.filename}.csv')
         # 글씨 겹치지 않게 크기 조절
