@@ -24,7 +24,7 @@ https://www.optaplanner.org/xsd/solver/solver.xsd">
     -->
 
     <localSearch>
-        <localSearchType>TABU_SEARCH</localSearchType>
+        <localSearchType>HILL_CLIMBING</localSearchType>
     </localSearch>
 
 </solver>
